@@ -1,0 +1,186 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<body id="category">
+  <!-- Start Banner Area -->
+  <section class="banner-area organic-breadcrumb">
+    <div class="container">
+      <div
+        class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
+      >
+        <div class="col-first">
+          <h1>Shop Category page</h1>
+          <nav class="d-flex align-items-center">
+            <a href="index.html"
+              >Home<span class="lnr lnr-arrow-right"></span
+            ></a>
+            <a href="#">Shop<span class="lnr lnr-arrow-right"></span></a>
+            <a href="category.html">Fashon Category</a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End Banner Area -->
+
+  <div class="container">
+    <div class="row">
+      <div class="col-xl-3 col-lg-4 col-md-5">
+        <div class="sidebar-categories">
+          <div class="head">Browse Categories</div>
+          <ul class="main-categories">
+<!-- Opsi: All Products -->
+           <li class="main-nav-list">
+                <a href="{% url 'product' %}">
+                   <span class="lnr lnr-arrow-right"></span>
+                        All Products
+                    <span class="number">({{ all_products_count }})</span>
+                </a>
+            </li>
+            {% for category in categories %}
+            <li class="main-nav-list">
+              <!-- Link Filter Kategori -->
+              <a href="{{ category.get_url }}">
+                <span class="lnr lnr-arrow-right"></span>
+                {{ category.category_name }}
+                <span class="number">({{ category.product_set.count }})</span>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="sidebar-filter mt-50">
+          <div class="top-filter-head">Product Filters</div>
+          <div class="common-filter">
+            <div class="head">Brands</div>
+            <form action="#">
+                <ul>
+                    <!-- Opsi: Semua Brand -->
+                    <li class="filter-list">
+                        <!-- Jika tidak ada parameter brand di URL, tandai ini sebagai checked -->
+                        <input class="pixel-radio" type="radio" id="all_brand" name="brand" value="" 
+                               {% if not request.GET.brand %}checked{% endif %} 
+                               onchange="this.form.submit()">
+                        <label for="all_brand">All Brands</label>
+                    </li>
+                    
+                    <!-- Looping Brand dari Database -->
+                    {% for brand in brands %}
+                    <li class="filter-list">
+                        <!-- 
+                            Logic Checked: Cek apakah ID brand di URL sama dengan ID brand saat ini 
+                            |stringformat:"s" digunakan karena request.GET berupa string sedangkan brand.id berupa integer
+                        -->
+                        <input class="pixel-radio" type="radio" id="brand{{ brand.id }}" name="brand" value="{{ brand.id }}" 
+                               {% if request.GET.brand == brand.id|stringformat:"s" %}checked{% endif %} 
+                               onchange="this.form.submit()">
+                        <label for="brand{{ brand.id }}">
+                            {{ brand.brand_name }}
+                            <!-- Menampilkan jumlah produk dalam brand ini -->
+                            <span class="number">({{ brand.product_set.count }})</span>
+                        </label>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </form>
+          </div>
+          <div class="common-filter">
+            <div class="head">Price</div>
+            <div class="price-range-area">
+              <div id="price-range"></div>
+              <div class="value-wrapper d-flex">
+                <div class="price">Price:</div>
+                <span>$</span>
+                <div id="lower-value"></div>
+                <div class="to">to</div>
+                <span>$</span>
+                <div id="upper-value"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-9 col-lg-8 col-md-7">
+        <!-- Start Filter Bar -->
+        <div class="filter-bar d-flex flex-wrap align-items-center">
+          <div class="sorting">
+            <select>
+              <option value="1">Default sorting</option>
+              <option value="1">Default sorting</option>
+              <option value="1">Default sorting</option>
+            </select>
+          </div>
+          <div class="sorting mr-auto">
+            <select>
+              <option value="1">Show 12</option>
+              <option value="1">Show 12</option>
+              <option value="1">Show 12</option>
+            </select>
+          </div>
+          <div class="pagination">
+            <a href="#" class="prev-arrow"
+              ><i class="fa fa-long-arrow-left" aria-hidden="true"></i
+            ></a>
+            <a href="#" class="active">1</a>
+            <a href="#">2</a>
+            <a href="#">3</a>
+            <a href="#" class="dot-dot"
+              ><i class="fa fa-ellipsis-h" aria-hidden="true"></i
+            ></a>
+            <a href="#">6</a>
+            <a href="#" class="next-arrow"
+              ><i class="fa fa-long-arrow-right" aria-hidden="true"></i
+            ></a>
+          </div>
+        </div>
+        <!-- End Filter Bar -->
+
+        <!-- Start Best Seller -->
+        <section class="lattest-product-area pb-40 category-list">
+          <div class="row">
+            <!-- single product -->
+            <!-- KITA BUNGKUS DENGAN FOR LOOP -->
+            {% for product in products %}
+            <div class="col-lg-4 col-md-6">
+              <div class="single-product">
+                <!-- 1. GAMBAR DINAMIS -->
+                <!-- Menggunakan {{ product.images.url }} -->
+                <a href="{{ product.get_url }}" style="display: block;">
+                    <img class="img-fluid w-100" src="{{ product.images.url }}" ...>
+                </a>
+
+                <div class="product-details">
+                  <!-- 2. NAMA PRODUK DINAMIS -->
+                  <h6>{{ product.product_name }}</h6>
+
+                  <div class="price">
+                    <!-- 3. HARGA DINAMIS -->
+                    <h6>Rp {{ product.price }}</h6>
+
+                    <!-- Saya menyembunyikan harga coret (diskon) karena di database belum ada field harga diskon -->
+                    <!-- <h6 class="l-through">$210.00</h6> -->
+                  </div>
+
+                  <div class="prd-bottom">
+                    <a href="" class="social-info">
+                      <span class="ti-bag"></span>
+                      <p class="hover-text">add to bag</p>
+                    </a>
+                    <a href="" class="social-info">
+                      <span class="lnr lnr-heart"></span>
+                      <p class="hover-text">Wishlist</p>
+                    </a>
+                    <a href="" class="social-info">
+                        <span class="lnr lnr-move"></span>
+                        <p class="hover-text">view more</p>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+        </section>
+        <!-- End Best Seller -->
+      </div>
+    </div>
+  </div>
+</body>
+{% endblock %}
