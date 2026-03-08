@@ -8,7 +8,7 @@ urlpatterns = [
     # Halaman Toko Utama
     path('product/', views.product, name='product'),
 
-    # Filter Kategori (INI YANG MENYEBABKAN ERROR ANDA)
+    # Filter Kategori
     # Nama 'products_by_category' harus ada di sini karena dipanggil oleh models.py
     path('product/category/<slug:category_slug>/', views.product, name='products_by_category'),
 

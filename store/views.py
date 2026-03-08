@@ -3,7 +3,13 @@ from .models import Product, Category, Brand
 from django.db.models import Q 
 
 def home(request):
-    return render(request, 'home.html')
+    # Mengambil semua produk yang tersedia
+    products = Product.objects.all().filter(is_available=True) 
+    
+    context = {
+        'products': products, # <-- Data ini yang akan kita looping
+    }
+    return render(request, 'home.html', context)
 
 def product(request, category_slug=None):
     categories = None
