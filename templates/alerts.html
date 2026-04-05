@@ -1,0 +1,29 @@
+{% if messages %} {% for message in messages %}
+
+<!-- JIKA PESAN ERROR -->
+{% if message.tags == 'error' %}
+<div
+  class="alert alert-danger alert-dismissible fade show"
+  role="alert"
+  style="margin-bottom: 20px"
+>
+  <strong>Oops! Gagal:</strong> {{ message }}
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+{% endif %}
+
+<!-- JIKA PESAN SUKSES -->
+{% if message.tags == 'success' %}
+<div
+  class="alert alert-success alert-dismissible fade show"
+  role="alert"
+  style="margin-bottom: 20px"
+>
+  <strong>Berhasil:</strong> {{ message }}
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+{% endif %} {% endfor %} {% endif %}

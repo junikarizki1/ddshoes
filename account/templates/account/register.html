@@ -1,0 +1,154 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+  <div class="container">
+    <div
+      class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
+    >
+      <div class="col-first">
+        <h1>Register</h1>
+        <nav class="d-flex align-items-center">
+          <a href="{% url 'home' %}"
+            >Home<span class="lnr lnr-arrow-right"></span
+          ></a>
+          <a href="#">Register</a>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End Banner Area -->
+
+<!--================Login Box Area =================-->
+<section class="login_box_area section_gap">
+  <div class="container">
+    <div class="row">
+      <!-- Kolom Gambar (Kiri) -->
+      <div class="col-lg-6">
+        <div class="login_box_img">
+          <!-- Kita gunakan gambar login yang sama untuk sementara -->
+          <img class="img-fluid" src="{% static 'img/login.jpg' %}" alt="" />
+          <div class="hover">
+            <h4>Sudah punya akun?</h4>
+            <p>
+              Jika Anda sudah memiliki akun di website kami, silakan langsung
+              masuk untuk melanjutkan proses belanja Anda.
+            </p>
+            <!-- Tombol ini mengarah kembali ke halaman Login -->
+            <a class="primary-btn" href="{% url 'login' %}">Log in Sekarang</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kolom Form Register (Kanan) -->
+      <div class="col-lg-6">
+        <div
+          class="login_form_inner"
+          style="padding-top: 50px; padding-bottom: 50px"
+        >
+          <h3>Buat Akun Baru</h3>
+
+          <!-- MEMANGGIL ALERT TEMPLATE UNTUK PESAN ERROR/SUKSES -->
+          {% include 'alerts.html' %}
+
+          <!-- ACTION DAN METHOD DIPERBAIKI -->
+          <form
+            class="row login_form"
+            action="{% url 'register' %}"
+            method="POST"
+            id="registerForm"
+          >
+            <!-- CSRF TOKEN WAJIB ADA DI DJANGO -->
+            {% csrf_token %}
+
+            <div class="col-md-6 form-group">
+              <input
+                type="text"
+                class="form-control"
+                id="first_name"
+                name="first_name"
+                placeholder="Nama Depan"
+                onfocus="this.placeholder = ''"
+                onblur="this.placeholder = 'Nama Depan'"
+                required
+              />
+            </div>
+            <div class="col-md-6 form-group">
+              <input
+                type="text"
+                class="form-control"
+                id="last_name"
+                name="last_name"
+                placeholder="Nama Belakang"
+                onfocus="this.placeholder = ''"
+                onblur="this.placeholder = 'Nama Belakang'"
+                required
+              />
+            </div>
+
+            <div class="col-md-12 form-group">
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                placeholder="Alamat Email"
+                onfocus="this.placeholder = ''"
+                onblur="this.placeholder = 'Alamat Email'"
+                required
+              />
+            </div>
+
+            <div class="col-md-12 form-group">
+              <input
+                type="text"
+                class="form-control"
+                id="phone_number"
+                name="phone_number"
+                placeholder="Nomor Telepon"
+                onfocus="this.placeholder = ''"
+                onblur="this.placeholder = 'Nomor Telepon'"
+                required
+              />
+            </div>
+
+            <div class="col-md-6 form-group">
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                placeholder="Password"
+                onfocus="this.placeholder = ''"
+                onblur="this.placeholder = 'Password'"
+                required
+              />
+            </div>
+            <div class="col-md-6 form-group">
+              <input
+                type="password"
+                class="form-control"
+                id="confirm_password"
+                name="confirm_password"
+                placeholder="Ulangi Password"
+                onfocus="this.placeholder = ''"
+                onblur="this.placeholder = 'Ulangi Password'"
+                required
+              />
+            </div>
+
+            <div class="col-md-12 form-group">
+              <button type="submit" value="submit" class="primary-btn">
+                Daftar Sekarang
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!--================End Login Box Area =================-->
+
+{% endblock %}

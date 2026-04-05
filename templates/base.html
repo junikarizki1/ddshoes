@@ -116,33 +116,98 @@
                   <a class="nav-link" href="contact.html">Contact</a>
                 </li>
                 <li class="nav-item submenu dropdown">
+                  <!-- CEK APAKAH USER SUDAH LOGIN -->
+                  {% if request.user.is_authenticated %}
+
+                  <!-- Tampilan JIKA SUDAH LOGIN: Logo User dan Nama -->
                   <a
                     href="#"
-                    class="nav-link dropdown-toggle"
+                    class="nav-link dropdown-toggle d-flex align-items-center"
                     data-toggle="dropdown"
                     role="button"
                     aria-haspopup="true"
                     aria-expanded="false"
-                    >Pages</a
                   >
+                    <!-- Ikon User (Gunakan lnr-user atau ti-user bawaan template) -->
+                    <span
+                      class="lnr lnr-user"
+                      style="font-size: 1.2em; margin-right: 5px"
+                    ></span>
+                    {{ request.user.first_name }}
+                    <!-- Bisa diganti request.user.username -->
+                  </a>
+
+                  <!-- Isi Dropdown JIKA SUDAH LOGIN -->
                   <ul class="dropdown-menu">
                     <li class="nav-item">
-                      <a class="nav-link" href="login.html">Login</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="tracking.html">Tracking</a>
+                      <a class="nav-link" href="{% url 'tracking' %}"
+                        >Tracking</a
+                      >
                     </li>
                     <li class="nav-item">
                       <a class="nav-link" href="elements.html">History</a>
                     </li>
+                    <!-- Tambahan: Tombol Logout -->
+                    <li class="nav-item">
+                      <!-- Nanti href ini diganti dengan URL logout Anda -->
+                      <a
+                        class="nav-link"
+                        href="{% url 'logout' %}"
+                        style="color: red"
+                        >Logout</a
+                      >
+                    </li>
                   </ul>
+
+                  {% else %}
+
+                  <!-- Tampilan JIKA BELUM LOGIN: Hanya Tulisan "Login" -->
+                  <!-- Menghilangkan dropdown-toggle agar tidak muncul panah bawah -->
+                  <a href="{% url 'login' %}" class="nav-link" role="button"
+                    >Login</a
+                  >
+
+                  {% endif %}
                 </li>
               </ul>
               <ul class="nav navbar-nav navbar-right">
                 <li class="nav-item">
-                  <a href="{% url 'cart' %}" class="cart"
-                    ><span class="ti-bag"></span
-                  ></a>
+                  <!-- Pastikan href mengarah ke url cart Anda -->
+                  <a
+                    href="{% url 'cart' %}"
+                    class="cart"
+                    style="
+                      position: relative;
+                      display: inline-flex;
+                      align-items: center;
+                    "
+                  >
+                    <span class="ti-bag" style="font-size: 16px"></span>
+
+                    <!-- JIKA ADA BARANG (>0), TAMPILKAN ANGKA -->
+                    {% if cart_count > 0 %}
+                    <span
+                      style="
+                        position: absolute;
+                        top: 17px;
+                        right: -12px;
+                        background-color: #ffba00;
+                        color: white;
+                        border-radius: 50%;
+                        font-size: 10px;
+                        font-weight: bold;
+                        width: 18px;
+                        height: 18px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        line-height: 1;
+                      "
+                    >
+                      {{ cart_count }}
+                    </span>
+                    {% endif %}
+                  </a>
                 </li>
                 <li class="nav-item">
                   <button class="search">
