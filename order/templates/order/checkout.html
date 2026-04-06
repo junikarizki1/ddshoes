@@ -1,4 +1,29 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
+
+<!-- ========================================================= -->
+<!-- CSS SAKTI UNTUK MEMATIKAN BUG DROPDOWN TEMPLATE -->
+<!-- ========================================================= -->
+<style>
+  .billing_details .nice-select {
+    display: none !important;
+  }
+
+  .billing_details select.form-control {
+    display: block !important;
+    width: 100%;
+    height: 40px;
+    padding: 0 15px;
+    border: 1px solid #eeeeee;
+    border-radius: 3px;
+    color: #777777;
+    background-color: #fff;
+    -webkit-appearance: menulist !important;
+    -moz-appearance: menulist !important;
+    appearance: menulist !important;
+    cursor: pointer;
+  }
+</style>
+
 <!-- Start Banner Area -->
 <section class="banner-area organic-breadcrumb">
   <div class="container">
@@ -8,8 +33,10 @@
       <div class="col-first">
         <h1>Checkout</h1>
         <nav class="d-flex align-items-center">
-          <a href="index.html">Home<span class="lnr lnr-arrow-right"></span></a>
-          <a href="single-product.html">Checkout</a>
+          <a href="{% url 'home' %}"
+            >Home<span class="lnr lnr-arrow-right"></span
+          ></a>
+          <a href="#">Checkout</a>
         </nav>
       </div>
     </div>
@@ -22,112 +49,208 @@
   <div class="container">
     <div class="billing_details">
       <div class="row">
+        <!-- KOLOM KIRI: FORM ALAMAT -->
         <div class="col-lg-8">
           <h3>Billing Details</h3>
           <form
             class="row contact_form"
-            action="#"
-            method="post"
-            novalidate="novalidate"
+            action="{% url 'place_order' %}"
+            method="POST"
+            id="checkoutForm"
           >
+            {% csrf_token %}
+
             <div class="col-md-6 form-group p_star">
-              <input type="text" class="form-control" id="first" name="name" />
-              <span class="placeholder" data-placeholder="First name"></span>
-            </div>
-            <div class="col-md-6 form-group p_star">
-              <input type="text" class="form-control" id="last" name="name" />
-              <span class="placeholder" data-placeholder="Last name"></span>
-            </div>
-            <div class="col-md-12 form-group">
+              <label>Nama Depan *</label>
               <input
                 type="text"
                 class="form-control"
-                id="company"
-                name="company"
-                placeholder="Company name"
+                name="first_name"
+                value="{{ request.user.first_name }}"
+                required
               />
             </div>
+
             <div class="col-md-6 form-group p_star">
+              <label>Nama Belakang *</label>
               <input
                 type="text"
                 class="form-control"
-                id="number"
-                name="number"
+                name="last_name"
+                value="{{ request.user.last_name }}"
+                required
               />
-              <span class="placeholder" data-placeholder="Phone number"></span>
             </div>
+
             <div class="col-md-6 form-group p_star">
+              <label>Nomor Telepon *</label>
               <input
                 type="text"
                 class="form-control"
-                id="email"
-                name="compemailany"
+                name="phone"
+                value="{{ request.user.phone_number }}"
+                required
               />
-              <span class="placeholder" data-placeholder="Email Address"></span>
             </div>
+
+            <div class="col-md-6 form-group p_star">
+              <label>Email Address *</label>
+              <input
+                type="email"
+                class="form-control"
+                name="email"
+                value="{{ request.user.email }}"
+                readonly
+              />
+            </div>
+
             <div class="col-md-12 form-group p_star">
-              <select class="country_select">
-                <option value="1">Country</option>
-                <option value="2">Country</option>
-                <option value="4">Country</option>
+              <label>Alamat Lengkap *</label>
+              <input
+                type="text"
+                class="form-control"
+                name="address"
+                placeholder="Nama Jalan, Gedung, No. Rumah, RT/RW"
+                required
+              />
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 1. DROPDOWN PROVINSI -->
+            <!-- ========================================== -->
+            <div class="col-md-6 form-group">
+              <label>Provinsi *</label>
+              <select
+                class="form-control"
+                name="province_id"
+                id="province_id"
+                required
+              >
+                <option value="">-- Pilih Provinsi --</option>
+                {% for prov in provinces|dictsort:"name" %}
+                <option value="{{ prov.id }}">{{ prov.name }}</option>
+                {% endfor %}
+              </select>
+
+              {% if not provinces %}
+              <small class="text-danger mt-1 d-block">
+                ⚠️ Gagal mengambil Provinsi. Cek API Key Komerce Anda.
+              </small>
+              {% endif %}
+
+              <input type="hidden" name="province" id="province_name" />
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 2. DROPDOWN KOTA -->
+            <!-- ========================================== -->
+            <div class="col-md-6 form-group">
+              <label>Kota / Kabupaten *</label>
+              <select
+                class="form-control"
+                name="city_id"
+                id="city_id"
+                required
+                disabled
+              >
+                <option value="">-- Pilih Provinsi Dahulu --</option>
+              </select>
+              <input type="hidden" name="city" id="city_name" />
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 3. DROPDOWN KECAMATAN -->
+            <!-- ========================================== -->
+            <div class="col-md-6 form-group">
+              <label>Kecamatan *</label>
+              <select
+                class="form-control"
+                name="district_id"
+                id="district_id"
+                required
+                disabled
+              >
+                <option value="">-- Pilih Kota Dahulu --</option>
+              </select>
+              <input type="hidden" name="district" id="district_name" />
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 4. DROPDOWN KELURAHAN -->
+            <!-- ========================================== -->
+            <div class="col-md-6 form-group">
+              <label>Kelurahan *</label>
+              <select
+                class="form-control"
+                name="subdistrict_id"
+                id="subdistrict_id"
+                required
+                disabled
+              >
+                <option value="">-- Pilih Kecamatan Dahulu --</option>
+              </select>
+              <input type="hidden" name="subdistrict" id="subdistrict_name" />
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 5. DROPDOWN KODE POS (Otomatis) -->
+            <!-- ========================================== -->
+            <div class="col-md-6 form-group">
+              <label>Kode Pos *</label>
+              <select
+                class="form-control"
+                name="postal_code"
+                id="postal_code"
+                required
+                disabled
+              >
+                <option value="">-- Pilih Kelurahan --</option>
               </select>
             </div>
-            <div class="col-md-12 form-group p_star">
-              <input type="text" class="form-control" id="add1" name="add1" />
-              <span
-                class="placeholder"
-                data-placeholder="Address line 01"
-              ></span>
-            </div>
-            <div class="col-md-12 form-group p_star">
-              <input type="text" class="form-control" id="add2" name="add2" />
-              <span
-                class="placeholder"
-                data-placeholder="Address line 02"
-              ></span>
-            </div>
-            <div class="col-md-12 form-group p_star">
-              <input type="text" class="form-control" id="city" name="city" />
-              <span class="placeholder" data-placeholder="Town/City"></span>
-            </div>
-            <div class="col-md-12 form-group p_star">
-              <select class="country_select">
-                <option value="1">District</option>
-                <option value="2">District</option>
-                <option value="4">District</option>
-              </select>
-            </div>
-            <div class="col-md-12 form-group">
-              <input
-                type="text"
+
+            <!-- ========================================== -->
+            <!-- 6. DROPDOWN JASA KIRIM (Baru & Dinamis) -->
+            <!-- ========================================== -->
+            <div class="col-md-6 form-group">
+              <label>Jasa Kirim *</label>
+              <select
                 class="form-control"
-                id="zip"
-                name="zip"
-                placeholder="Postcode/ZIP"
+                name="courier_selection"
+                id="courier_selection"
+                required
+                disabled
+              >
+                <option value="">-- Pilih Kecamatan Tujuan --</option>
+              </select>
+
+              <!-- Input tersembunyi untuk dikirim ke backend database -->
+              <input
+                type="hidden"
+                name="shipping_cost"
+                id="input_shipping_cost"
+                value="0"
+              />
+              <input
+                type="hidden"
+                name="courier_service"
+                id="input_courier_service"
+                value=""
               />
             </div>
-            <div class="col-md-12 form-group">
-              <div class="creat_account">
-                <input type="checkbox" id="f-option2" name="selector" />
-                <label for="f-option2">Create an account?</label>
-              </div>
-            </div>
-            <div class="col-md-12 form-group">
-              <div class="creat_account">
-                <h3>Shipping Details</h3>
-                <input type="checkbox" id="f-option3" name="selector" />
-                <label for="f-option3">Ship to a different address?</label>
-              </div>
+
+            <div class="col-md-12 form-group mb-5 mt-3">
+              <label>Catatan Pesanan (Opsional)</label>
               <textarea
                 class="form-control"
-                name="message"
-                id="message"
+                name="order_note"
+                id="order_note"
                 rows="1"
-                placeholder="Order Notes"
               ></textarea>
             </div>
           </form>
         </div>
+
+        <!-- KOLOM KANAN: RINGKASAN PESANAN -->
         <div class="col-lg-4">
           <div class="order_box">
             <h2>Your Order</h2>
@@ -135,72 +258,345 @@
               <li>
                 <a href="#">Product <span>Total</span></a>
               </li>
+              {% for cart_item in cart_items %}
+              <li>
+                <a href="#">
+                  {{ cart_item.product.product_name | truncatechars:20 }}
+                  <span class="middle">x {{ cart_item.quantity }}</span>
+                  <span class="last">Rp {{ cart_item.sub_total }}</span>
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+            <ul class="list list_2 mt-3">
+              <li>
+                <a href="#">Subtotal <span>Rp {{ total }}</span></a>
+              </li>
+              <!-- ONGKOS KIRIM DINAMIS -->
               <li>
                 <a href="#"
-                  >Fresh Blackberry <span class="middle">x 02</span>
-                  <span class="last">$720.00</span></a
+                  >Ongkos Kirim <span id="shipping_cost">Rp 0</span></a
                 >
               </li>
+              <!-- TOTAL DINAMIS -->
               <li>
                 <a href="#"
-                  >Fresh Tomatoes <span class="middle">x 02</span>
-                  <span class="last">$720.00</span></a
-                >
-              </li>
-              <li>
-                <a href="#"
-                  >Fresh Brocoli <span class="middle">x 02</span>
-                  <span class="last">$720.00</span></a
+                  >Total <span id="grand_total">Rp {{ total }}</span></a
                 >
               </li>
             </ul>
-            <ul class="list list_2">
-              <li>
-                <a href="#">Subtotal <span>$2160.00</span></a>
-              </li>
-              <li>
-                <a href="#">Shipping <span>Flat rate: $50.00</span></a>
-              </li>
-              <li>
-                <a href="#">Total <span>$2210.00</span></a>
-              </li>
-            </ul>
-            <div class="payment_item">
-              <div class="radion_btn">
-                <input type="radio" id="f-option5" name="selector" />
-                <label for="f-option5">Check payments</label>
-                <div class="check"></div>
-              </div>
-              <p>
-                Please send a check to Store Name, Store Street, Store Town,
-                Store State / County, Store Postcode.
-              </p>
-            </div>
-            <div class="payment_item active">
-              <div class="radion_btn">
-                <input type="radio" id="f-option6" name="selector" />
-                <label for="f-option6">Paypal </label>
-                <img src="img/product/card.jpg" alt="" />
-                <div class="check"></div>
-              </div>
-              <p>
-                Pay via PayPal; you can pay with your credit card if you don’t
-                have a PayPal account.
-              </p>
-            </div>
-            <div class="creat_account">
-              <input type="checkbox" id="f-option4" name="selector" />
-              <label for="f-option4">I’ve read and accept the </label>
-              <a href="#">terms & conditions*</a>
-            </div>
-            <a class="primary-btn" href="{% url 'confirmation' %}"
-              >Proceed to Paypal</a
+            <button
+              type="submit"
+              form="checkoutForm"
+              class="primary-btn w-100 mt-4"
+              style="border: none; cursor: pointer"
             >
+              Lanjutkan ke Pembayaran
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
-<!--================End Checkout Area =================-->
+
+<!-- ========================================================= -->
+<!-- JAVASCRIPT UNTUK AJAX 5 TINGKAT -->
+<!-- ========================================================= -->
+<script>
+  // FUNGSI RESET DROPDOWN BAWAH
+  function resetDropdowns(level) {
+    if (level <= 1) {
+      // Reset Kota
+      var citySelect = document.getElementById("city_id");
+      citySelect.innerHTML =
+        '<option value="">-- Pilih Provinsi Dahulu --</option>';
+      citySelect.disabled = true;
+    }
+    if (level <= 2) {
+      // Reset Kecamatan
+      var districtSelect = document.getElementById("district_id");
+      districtSelect.innerHTML =
+        '<option value="">-- Pilih Kota Dahulu --</option>';
+      districtSelect.disabled = true;
+    }
+    if (level <= 3) {
+      // Reset Kelurahan & Jasa Kirim
+      var subdistrictSelect = document.getElementById("subdistrict_id");
+      subdistrictSelect.innerHTML =
+        '<option value="">-- Pilih Kecamatan Dahulu --</option>';
+      subdistrictSelect.disabled = true;
+
+      var courierSelect = document.getElementById("courier_selection");
+      courierSelect.innerHTML =
+        '<option value="">-- Pilih Kecamatan Tujuan --</option>';
+      courierSelect.disabled = true;
+      resetOngkir();
+    }
+    if (level <= 4) {
+      // Reset Kode Pos
+      var postalCodeSelect = document.getElementById("postal_code");
+      postalCodeSelect.innerHTML =
+        '<option value="">-- Pilih Kelurahan Dahulu --</option>';
+      postalCodeSelect.disabled = true;
+    }
+  }
+
+  // FUNGSI RESET HARGA ONGKIR
+  function resetOngkir() {
+    document.getElementById("shipping_cost").innerText = "Rp 0";
+    var subtotal = parseInt("{{ total }}");
+    document.getElementById("grand_total").innerText =
+      "Rp " + subtotal.toLocaleString("id-ID");
+    document.getElementById("input_shipping_cost").value = "0";
+    document.getElementById("input_courier_service").value = "";
+  }
+
+  // 1. EVENT KETIKA PROVINSI DIPILIH
+  document
+    .getElementById("province_id")
+    .addEventListener("change", function () {
+      var provinceId = this.value;
+      var citySelect = document.getElementById("city_id");
+
+      resetDropdowns(2);
+
+      if (provinceId) {
+        document.getElementById("province_name").value =
+          this.options[this.selectedIndex].text;
+        citySelect.innerHTML =
+          '<option value="">Sedang memuat kota...</option>';
+        citySelect.disabled = true;
+
+        fetch(`/order/get_cities/?province_id=${provinceId}`)
+          .then((response) => response.json())
+          .then((data) => {
+            citySelect.innerHTML = '<option value="">-- Pilih Kota --</option>';
+            data.cities.sort((a, b) => a.name.localeCompare(b.name));
+
+            data.cities.forEach((city) => {
+              var option = document.createElement("option");
+              option.value = city.id;
+              var tipe = city.type ? city.type + " " : "";
+              option.text = tipe + city.name;
+              citySelect.appendChild(option);
+            });
+            citySelect.disabled = false;
+          })
+          .catch((error) => {
+            console.error("Error Kota:", error);
+          });
+      } else {
+        document.getElementById("province_name").value = "";
+        resetDropdowns(1);
+      }
+    });
+
+  // 2. EVENT KETIKA KOTA DIPILIH
+  document.getElementById("city_id").addEventListener("change", function () {
+    var cityId = this.value;
+    var districtSelect = document.getElementById("district_id");
+
+    resetDropdowns(3);
+
+    if (cityId) {
+      document.getElementById("city_name").value =
+        this.options[this.selectedIndex].text;
+      districtSelect.innerHTML =
+        '<option value="">Sedang memuat kecamatan...</option>';
+      districtSelect.disabled = true;
+
+      fetch(`/order/get_districts/?city_id=${cityId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          districtSelect.innerHTML =
+            '<option value="">-- Pilih Kecamatan --</option>';
+          data.districts.sort((a, b) => a.name.localeCompare(b.name));
+
+          data.districts.forEach((district) => {
+            var option = document.createElement("option");
+            option.value = district.id;
+            option.text = district.name;
+            districtSelect.appendChild(option);
+          });
+          districtSelect.disabled = false;
+        })
+        .catch((error) => {
+          console.error("Error Kecamatan:", error);
+        });
+    } else {
+      document.getElementById("city_name").value = "";
+      resetDropdowns(2);
+    }
+  });
+
+  // 3. EVENT KETIKA KECAMATAN DIPILIH
+  document
+    .getElementById("district_id")
+    .addEventListener("change", function () {
+      var districtId = this.value;
+      var subdistrictSelect = document.getElementById("subdistrict_id");
+      var courierSelect = document.getElementById("courier_selection");
+
+      resetDropdowns(4);
+
+      if (districtId) {
+        document.getElementById("district_name").value =
+          this.options[this.selectedIndex].text;
+
+        // A. FETCH KELURAHAN
+        subdistrictSelect.innerHTML =
+          '<option value="">Sedang memuat kelurahan...</option>';
+        subdistrictSelect.disabled = true;
+
+        fetch(`/order/get_subdistricts/?district_id=${districtId}`)
+          .then((response) => response.json())
+          .then((data) => {
+            subdistrictSelect.innerHTML =
+              '<option value="">-- Pilih Kelurahan --</option>';
+            data.subdistricts.sort((a, b) => a.name.localeCompare(b.name));
+
+            data.subdistricts.forEach((subdistrict) => {
+              var option = document.createElement("option");
+              option.value = subdistrict.id;
+              option.text = subdistrict.name;
+              option.dataset.zip = subdistrict.zip_code || "";
+              subdistrictSelect.appendChild(option);
+            });
+            subdistrictSelect.disabled = false;
+          })
+          .catch((error) => {
+            console.error("Error Kelurahan:", error);
+          });
+
+        // B. FETCH JASA KIRIM (ONGKIR) - Asumsi berat: kuantitas * 1000 gram (1kg)
+        var totalWeight = parseInt("{{ quantity|default:1 }}") * 1000;
+        courierSelect.innerHTML =
+          '<option value="">Sedang mengecek ongkir...</option>';
+        courierSelect.disabled = true;
+        resetOngkir();
+
+        fetch(
+          `/order/get_shipping_cost/?destination=${districtId}&weight=${totalWeight}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            courierSelect.innerHTML =
+              '<option value="">-- Pilih Jasa Kirim --</option>';
+
+            if (data.results && data.results.length > 0) {
+              data.results.forEach((courier) => {
+                if (courier.costs && courier.costs.length > 0) {
+                  courier.costs.forEach((cost) => {
+                    var option = document.createElement("option");
+                    option.value =
+                      cost.cost +
+                      "|" +
+                      courier.code.toUpperCase() +
+                      " " +
+                      cost.service;
+                    option.text =
+                      courier.code.toUpperCase() +
+                      " " +
+                      cost.service +
+                      " (Rp " +
+                      parseInt(cost.cost).toLocaleString("id-ID") +
+                      ") - Estim. " +
+                      cost.etd +
+                      " hari";
+                    courierSelect.appendChild(option);
+                  });
+                } else if (courier.cost) {
+                  var option = document.createElement("option");
+                  var code = (
+                    courier.code ||
+                    courier.courier_code ||
+                    "KURIR"
+                  ).toUpperCase();
+                  var service = courier.service || "REG";
+                  option.value = courier.cost + "|" + code + " " + service;
+                  option.text =
+                    code +
+                    " " +
+                    service +
+                    " (Rp " +
+                    parseInt(courier.cost).toLocaleString("id-ID") +
+                    ")";
+                  courierSelect.appendChild(option);
+                }
+              });
+              courierSelect.disabled = false;
+            } else {
+              courierSelect.innerHTML =
+                '<option value="">Kurir tidak tersedia</option>';
+            }
+          })
+          .catch((error) => {
+            console.error("Error Ongkir:", error);
+            courierSelect.innerHTML =
+              '<option value="">Gagal memuat ongkir</option>';
+          });
+      } else {
+        document.getElementById("district_name").value = "";
+        resetDropdowns(3);
+      }
+    });
+
+  // 4. EVENT KETIKA KELURAHAN DIPILIH (SET KODE POS)
+  document
+    .getElementById("subdistrict_id")
+    .addEventListener("change", function () {
+      var postalCodeSelect = document.getElementById("postal_code");
+
+      if (this.value) {
+        document.getElementById("subdistrict_name").value =
+          this.options[this.selectedIndex].text;
+
+        var zipCode = this.options[this.selectedIndex].dataset.zip;
+        postalCodeSelect.innerHTML = "";
+
+        if (zipCode && zipCode !== "0") {
+          var option = document.createElement("option");
+          option.value = zipCode;
+          option.text = zipCode;
+          postalCodeSelect.appendChild(option);
+          postalCodeSelect.disabled = false;
+        } else {
+          postalCodeSelect.innerHTML =
+            '<option value="">Kode pos tidak tersedia</option>';
+          postalCodeSelect.disabled = false;
+        }
+      } else {
+        document.getElementById("subdistrict_name").value = "";
+        resetDropdowns(4);
+      }
+    });
+
+  // 5. EVENT KETIKA JASA KIRIM DIPILIH (MENGHITUNG TOTAL HARGA)
+  document
+    .getElementById("courier_selection")
+    .addEventListener("change", function () {
+      var selectedVal = this.value;
+
+      if (selectedVal) {
+        var parts = selectedVal.split("|");
+        var cost = parseInt(parts[0]);
+        var serviceName = parts[1];
+
+        document.getElementById("shipping_cost").innerText =
+          "Rp " + cost.toLocaleString("id-ID");
+
+        var subtotal = parseInt("{{ total }}");
+        var grandTotal = subtotal + cost;
+        document.getElementById("grand_total").innerText =
+          "Rp " + grandTotal.toLocaleString("id-ID");
+
+        document.getElementById("input_shipping_cost").value = cost;
+        document.getElementById("input_courier_service").value = serviceName;
+      } else {
+        resetOngkir();
+      }
+    });
+</script>
+
 {% endblock %}
