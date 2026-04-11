@@ -1,0 +1,113 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+  <div class="container">
+    <div
+      class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
+    >
+      <div class="col-first">
+        <h1>Pesanan Saya</h1>
+        <nav class="d-flex align-items-center">
+          <a href="{% url 'home' %}"
+            >Home<span class="lnr lnr-arrow-right"></span
+          ></a>
+          <a href="#">Riwayat Pesanan</a>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End Banner Area -->
+
+<section class="cart_area">
+  <div class="container">
+    <div class="cart_inner">
+      {% if orders %}
+      <div class="table-responsive">
+        <table class="table text-center">
+          <thead>
+            <tr>
+              <th scope="col">No. Pesanan</th>
+              <th scope="col">Tanggal</th>
+              <th scope="col">Total Tagihan</th>
+              <th scope="col">Status</th>
+              <th scope="col">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+            <tr>
+              <td>
+                <h5>#{{ order.order_number }}</h5>
+              </td>
+              <td>
+                <p>{{ order.created_at|date:"d M Y" }}</p>
+              </td>
+              <td>
+                <h5>Rp {{ order.grand_total }}</h5>
+              </td>
+              <td>
+                <!-- LOGIKA STATUS -->
+                {% if not order.is_ordered %}
+                <span
+                  class="badge badge-warning"
+                  style="
+                    background-color: #ffba00;
+                    color: white;
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                  "
+                  >Menunggu Pembayaran</span
+                >
+                {% else %}
+                <span
+                  class="badge badge-success"
+                  style="
+                    background-color: #28a745;
+                    color: white;
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                  "
+                  >Lunas / Diproses</span
+                >
+                {% endif %}
+              </td>
+              <td>
+                <!-- LOGIKA TOMBOL -->
+                {% if not order.is_ordered %}
+                <!-- Jika belum bayar, arahkan kembali ke halaman Midtrans -->
+                <a
+                  href="{% url 'payments' order.order_number %}"
+                  class="genric-btn primary small"
+                  >Bayar Sekarang</a
+                >
+                {% else %}
+                <!-- Jika sudah bayar, arahkan ke rincian invoice -->
+                <a
+                  href="{% url 'confirmation' %}?order_number={{ order.order_number }}"
+                  class="genric-btn info small"
+                  >Lihat Detail</a
+                >
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <!-- JIKA USER BELUM PERNAH BELANJA -->
+      <div class="text-center mt-5 mb-5">
+        <h3>Anda belum memiliki riwayat pesanan.</h3>
+        <br />
+        <a class="primary-btn" href="{% url 'store' %}"
+          >Mulai Belanja Sekarang</a
+        >
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

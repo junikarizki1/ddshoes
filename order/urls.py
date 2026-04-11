@@ -5,14 +5,24 @@ urlpatterns = [
     # Jalur untuk halaman form checkout
     path('checkout/', views.checkout, name='checkout'),
     
-    # Jalur rahasia (AJAX) untuk mengambil data kota berdasarkan provinsi
+    # Rangkaian AJAX untuk mengambil wilayah dari Komerce
     path('get_cities/', views.get_cities, name='get_cities'),
-    
     path('get_districts/', views.get_districts, name='get_districts'),
     path('get_subdistricts/', views.get_subdistricts, name='get_subdistricts'),
+    
+    # Jalur AJAX untuk menghitung ongkos kirim dinamis
     path('get_shipping_cost/', views.get_shipping_cost, name='get_shipping_cost'),
+    
+    # Jalur untuk menyimpan pesanan
     path('place_order/', views.place_order, name='place_order'),
     
-    # Jalur untuk halaman konfirmasi nanti
+    # ==========================================
+    # INI JALUR YANG HILANG (HALAMAN PEMBAYARAN)
+    # ==========================================
+    path('payments/<str:order_number>/', views.payments, name='payments'),
+    
+    # Jalur untuk halaman konfirmasi
     path('confirmation/', views.confirmation, name='confirmation'),
+    
+    path('my_orders/', views.my_orders, name='my_orders'),
 ]

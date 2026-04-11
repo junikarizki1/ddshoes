@@ -5,40 +5,47 @@ from store.models import Product
 class Order(models.Model):
     STATUS = (
         ('New', 'New'),
-        ('Pending', 'Pending'), # Untuk menunggu pembayaran Midtrans
-        ('Accepted', 'Accepted'), # Pembayaran berhasil
-        ('Completed', 'Completed'), # Barang sudah sampai
+        ('Pending', 'Pending'), 
+        ('Accepted', 'Accepted'), 
+        ('Completed', 'Completed'), 
         ('Cancelled', 'Cancelled'),
     )
 
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
     order_number = models.CharField(max_length=20)
     
-    # 1. Info Kontak (Sesuai Standar Midtrans)
+    # 1. Info Kontak
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15)
     email = models.EmailField(max_length=50)
     
-    # 2. Info Alamat & RajaOngkir (Disederhanakan menjadi 1 baris)
+    # 2. Info Alamat & RajaOngkir
     address = models.CharField(max_length=200)
     
-    # Kita simpan ID-nya untuk API RajaOngkir, dan Nama-nya untuk ditampilkan di web agar tidak perlu request API terus-menerus
     province_id = models.CharField(max_length=10, blank=True)
     province = models.CharField(max_length=50)
     city_id = models.CharField(max_length=10, blank=True)
     city = models.CharField(max_length=50)
+    
+    # === INI YANG HILANG SEBELUMNYA (KECAMATAN & KELURAHAN) ===
+    district_id = models.CharField(max_length=10, blank=True, null=True)
+    district = models.CharField(max_length=50, blank=True, null=True)
+    subdistrict_id = models.CharField(max_length=10, blank=True, null=True)
+    subdistrict = models.CharField(max_length=50, blank=True, null=True)
+    # ==========================================================
+    
     postal_code = models.CharField(max_length=10)
     
     # 3. Info Finansial
     order_note = models.CharField(max_length=100, blank=True)
-    order_total = models.FloatField() # Total harga sepatu
-    shipping_cost = models.FloatField() # Ongkos kirim dari RajaOngkir
-    grand_total = models.FloatField() # Total keseluruhan yang ditagihkan Midtrans
+    order_total = models.FloatField() 
+    shipping_cost = models.FloatField() 
+    grand_total = models.FloatField() 
     
     # 4. Status Tracking
     status = models.CharField(max_length=10, choices=STATUS, default='New')
-    tracking_number = models.CharField(max_length=50, blank=True) # Resi JNE/J&T
+    tracking_number = models.CharField(max_length=50, blank=True) 
     ip = models.CharField(blank=True, max_length=20)
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -55,7 +62,6 @@ class Order(models.Model):
 
 
 class OrderProduct(models.Model):
-    # Tabel ini menyimpan rincian SEPATU APA SAJA yang ada di dalam satu nomor pesanan
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)

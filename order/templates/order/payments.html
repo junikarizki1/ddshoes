@@ -1,0 +1,102 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<section class="banner-area organic-breadcrumb">
+  <div class="container">
+    <div
+      class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
+    >
+      <div class="col-first">
+        <h1>Pembayaran</h1>
+        <nav class="d-flex align-items-center">
+          <a href="{% url 'home' %}"
+            >Home<span class="lnr lnr-arrow-right"></span
+          ></a>
+          <a href="#">Pembayaran</a>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="checkout_area section_gap">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="order_box text-center">
+          <h2>Selesaikan Pembayaran Anda</h2>
+
+          <div class="mt-4 mb-4">
+            <img
+              src="{% static 'img/midtrans-logo.png' %}"
+              alt="Midtrans Secure Payment"
+              style="max-height: 40px; margin-bottom: 20px"
+            />
+          </div>
+
+          <ul class="list list_2 text-left">
+            <li>
+              <a href="#"
+                >Nomor Pesanan <span>#{{ order.order_number }}</span></a
+              >
+            </li>
+            <li>
+              <a href="#"
+                >Nama Penerima
+                <span>{{ order.first_name }} {{ order.last_name }}</span></a
+              >
+            </li>
+            <li>
+              <a href="#"
+                >Total Tagihan
+                <span style="font-size: 20px; font-weight: bold; color: #ff6c00"
+                  >Rp {{ order.grand_total }}</span
+                ></a
+              >
+            </li>
+          </ul>
+
+          <p class="mt-4 text-left" style="font-size: 14px">
+            Silakan klik tombol di bawah ini untuk memilih metode pembayaran.
+            Anda bisa membayar menggunakan Transfer Bank (Virtual Account),
+            GoPay, ShopeePay, Indomaret, Alfamart, atau Kartu Kredit.
+          </p>
+
+          <button
+            id="pay-button"
+            class="primary-btn w-100 mt-3"
+            style="border: none; cursor: pointer; border-radius: 5px"
+          >
+            Bayar Sekarang
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script
+  type="text/javascript"
+  src="https://app.sandbox.midtrans.com/snap/snap.js"
+  data-client-key="{{ client_key }}"
+></script>
+
+<script type="text/javascript">
+  document.getElementById("pay-button").onclick = function () {
+    snap.pay("{{ transaction_token }}", {
+      // Arahkan ke halaman konfirmasi dengan membawa nomor pesanan
+      onSuccess: function (result) {
+        window.location.href =
+          "{% url 'confirmation' %}?order_number={{ order.order_number }}";
+      },
+      onPending: function (result) {
+        window.location.href =
+          "{% url 'confirmation' %}?order_number={{ order.order_number }}";
+      },
+      onError: function (result) {
+        alert("Pembayaran Gagal! Silakan coba lagi.");
+      },
+      onClose: function () {
+        alert("Anda menutup layar pembayaran tanpa menyelesaikannya.");
+      },
+    });
+  };
+</script>
+
+{% endblock %}

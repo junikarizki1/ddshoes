@@ -128,3 +128,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'account.Account'
 
+
+
+#MIDTRANS
+MIDTRANS_CLIENT_KEY = 'Mid-client-vWPcASXDMnfQq180'
+MIDTRANS_SERVER_KEY = 'Mid-server-gaoPXRvg5eN3D9zid5oNEJbk'

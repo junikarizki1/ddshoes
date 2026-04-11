@@ -1,4 +1,5 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
+
 <!-- Start Banner Area -->
 <section class="banner-area organic-breadcrumb">
   <div class="container">
@@ -6,10 +7,12 @@
       class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
     >
       <div class="col-first">
-        <h1>Confirmation</h1>
+        <h1>Konfirmasi Pesanan</h1>
         <nav class="d-flex align-items-center">
-          <a href="index.html">Home<span class="lnr lnr-arrow-right"></span></a>
-          <a href="category.html">Confirmation</a>
+          <a href="{% url 'home' %}"
+            >Home<span class="lnr lnr-arrow-right"></span
+          ></a>
+          <a href="#">Konfirmasi</a>
         </nav>
       </div>
     </div>
@@ -17,114 +20,163 @@
 </section>
 <!-- End Banner Area -->
 
-<!--================Order Details Area =================-->
 <section class="order_details section_gap">
   <div class="container">
-    <h3 class="title_confirmation">Thank you. Your order has been received.</h3>
+    <!-- PESAN SUKSES -->
+    <h3 class="title_confirmation text-center mb-5" style="color: #28a745">
+      Terima kasih! Pesanan Anda telah kami terima.<br />
+      <span style="font-size: 16px; color: #777; text-transform: none"
+        >Pesanan Anda akan segera diproses setelah pembayaran
+        terverifikasi.</span
+      >
+    </h3>
+
     <div class="row order_d_inner">
+      <!-- KOTAK KIRI: INFO ORDER -->
       <div class="col-lg-4">
         <div class="details_item">
-          <h4>Order Info</h4>
+          <h4>Info Pesanan</h4>
           <ul class="list">
             <li>
-              <a href="#"><span>Order number</span> : 60235</a>
+              <a href="javascript:void(0);"
+                ><span>Nomor Pesanan</span> : {{ order.order_number }}</a
+              >
             </li>
             <li>
-              <a href="#"><span>Date</span> : Los Angeles</a>
+              <a href="javascript:void(0);"
+                ><span>Tanggal</span> : {{ order.created_at }}</a
+              >
             </li>
             <li>
-              <a href="#"><span>Total</span> : USD 2210</a>
+              <a href="javascript:void(0);"
+                ><span>Ongkos Kirim</span> : Rp {{ order.shipping_cost }}</a
+              >
             </li>
             <li>
-              <a href="#"><span>Payment method</span> : Check payments</a>
+              <a href="javascript:void(0);"
+                ><span>Total Tagihan</span> : Rp {{ order.grand_total }}</a
+              >
             </li>
           </ul>
         </div>
       </div>
+
+      <!-- KOTAK TENGAH: INFO PEMESAN -->
       <div class="col-lg-4">
         <div class="details_item">
-          <h4>Billing Address</h4>
+          <h4>Info Pemesan</h4>
           <ul class="list">
             <li>
-              <a href="#"><span>Street</span> : 56/8</a>
+              <a href="javascript:void(0);"
+                ><span>Nama</span> : {{ order.first_name }}
+              </a>
             </li>
             <li>
-              <a href="#"><span>City</span> : Los Angeles</a>
+              <a href="javascript:void(0);"
+                ><span>Telepon</span> : {{ order.phone }}</a
+              >
             </li>
             <li>
-              <a href="#"><span>Country</span> : United States</a>
-            </li>
-            <li>
-              <a href="#"><span>Postcode </span> : 36952</a>
+              <a href="javascript:void(0);"
+                ><span>Email</span> : {{ order.email }}</a
+              >
             </li>
           </ul>
         </div>
       </div>
+
+      <!-- KOTAK KANAN: INFO PENGIRIMAN -->
       <div class="col-lg-4">
         <div class="details_item">
-          <h4>Shipping Address</h4>
+          <h4>Info Pengiriman</h4>
           <ul class="list">
             <li>
-              <a href="#"><span>Street</span> : 56/8</a>
+              <a href="javascript:void(0);"
+                ><span>Alamat</span> : {{ order.address }}</a
+              >
             </li>
             <li>
-              <a href="#"><span>City</span> : Los Angeles</a>
+              <a href="javascript:void(0);"
+                ><span>Kelurahan</span> : {{ order.subdistrict }}</a
+              >
             </li>
             <li>
-              <a href="#"><span>Country</span> : United States</a>
+              <a href="javascript:void(0);"
+                ><span>Kecamatan</span> : {{ order.district }}</a
+              >
             </li>
             <li>
-              <a href="#"><span>Postcode </span> : 36952</a>
+              <a href="javascript:void(0);"
+                ><span>Kabupaten</span> : {{ order.city }}</a
+              >
+            </li>
+            <li>
+              <a href="javascript:void(0);"
+                ><span>Kota & Prov</span> : {{ order.province }}</a
+              >
+            </li>
+            <li>
+              <a href="javascript:void(0);"
+                ><span>Kode Pos</span> : {{ order.postal_code }}</a
+              >
             </li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="order_details_table">
-      <h2>Order Details</h2>
+
+    <!-- CATATAN TAMBAHAN (KURIR / USER NOTE) -->
+    {% if order.order_note %}
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="details_item" style="background: #f9f9f9; padding: 20px">
+          <h4>Catatan Pengiriman / Kurir</h4>
+          <p style="margin: 0; color: #555">{{ order.order_note }}</p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="order_details_table mt-5">
+      <h2>Rincian Pesanan</h2>
       <div class="table-responsive">
         <table class="table">
           <thead>
             <tr>
-              <th scope="col">Product</th>
-              <th scope="col">Quantity</th>
+              <th scope="col">Produk</th>
+              <th scope="col">Kuantitas</th>
               <th scope="col">Total</th>
             </tr>
           </thead>
           <tbody>
+            <!-- Loop untuk menampilkan produk yang dipesan -->
+            <!-- Catatan: Ini akan muncul jika fungsi views.py Anda sudah menyimpan item ke tabel OrderProduct -->
+            {% for item in order.orderproduct_set.all %}
             <tr>
               <td>
-                <p>Pixelstore fresh Blackberry</p>
+                <p>{{ item.product.product_name }}</p>
               </td>
               <td>
-                <h5>x 02</h5>
+                <h5>x {{ item.quantity }}</h5>
               </td>
               <td>
-                <p>$720.00</p>
+                <!-- Kita menggunakan widthratio untuk mengalikan harga dengan kuantitas -->
+                <p>Rp {% widthratio item.product_price 1 item.quantity %}</p>
               </td>
             </tr>
+            {% empty %}
+            <!-- Pesan sementara jika OrderProduct belum disalin di views.py -->
             <tr>
-              <td>
-                <p>Pixelstore fresh Blackberry</p>
-              </td>
-              <td>
-                <h5>x 02</h5>
-              </td>
-              <td>
-                <p>$720.00</p>
+              <td colspan="3" class="text-center">
+                <i
+                  >(Daftar barang akan muncul setelah fitur simpan OrderProduct
+                  diaktifkan)</i
+                >
               </td>
             </tr>
-            <tr>
-              <td>
-                <p>Pixelstore fresh Blackberry</p>
-              </td>
-              <td>
-                <h5>x 02</h5>
-              </td>
-              <td>
-                <p>$720.00</p>
-              </td>
-            </tr>
+            {% endfor %}
+
+            <!-- Baris Subtotal -->
             <tr>
               <td>
                 <h4>Subtotal</h4>
@@ -133,20 +185,24 @@
                 <h5></h5>
               </td>
               <td>
-                <p>$2160.00</p>
+                <p>Rp {{ order.order_total }}</p>
               </td>
             </tr>
+
+            <!-- Baris Ongkos Kirim -->
             <tr>
               <td>
-                <h4>Shipping</h4>
+                <h4>Ongkos Kirim</h4>
               </td>
               <td>
                 <h5></h5>
               </td>
               <td>
-                <p>Flat rate: $50.00</p>
+                <p>Rp {{ order.shipping_cost }}</p>
               </td>
             </tr>
+
+            <!-- Baris Total Keseluruhan -->
             <tr>
               <td>
                 <h4>Total</h4>
@@ -155,14 +211,19 @@
                 <h5></h5>
               </td>
               <td>
-                <p>$2210.00</p>
+                <h4 style="color: #ffba00">Rp {{ order.grand_total }}</h4>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- TOMBOL LANJUT BELANJA -->
+    <div class="text-center mt-5">
+      <a href="{% url 'home' %}" class="primary-btn">Lanjutkan Belanja</a>
+    </div>
   </div>
 </section>
-<!--================End Order Details Area =================-->
+
 {% endblock %}
