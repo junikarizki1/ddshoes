@@ -50,6 +50,7 @@ class Order(models.Model):
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    snap_token = models.CharField(max_length=100, blank=True, null=True)
 
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
@@ -59,6 +60,21 @@ class Order(models.Model):
 
     def __str__(self):
         return self.first_name
+    
+    def save(self, *args, **kwargs):
+        # Jika pesanan ini sudah ada di database (bukan pesanan baru)
+        if self.pk:
+            old_order = Order.objects.get(pk=self.pk)
+            # Jika status berubah dari apapun MENJADI 'Cancelled'
+            if old_order.status != 'Cancelled' and self.status == 'Cancelled':
+                # Ambil semua produk di dalam pesanan ini
+                order_products = OrderProduct.objects.filter(order=self)
+                for item in order_products:
+                    product = item.product
+                    product.stock += item.quantity # Kembalikan stok
+                    product.save()
+                    
+        super(Order, self).save(*args, **kwargs)
 
 
 class OrderProduct(models.Model):

@@ -1,36 +1,32 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
 
-<!-- Start Banner Area -->
 <section class="banner-area organic-breadcrumb">
   <div class="container">
     <div
       class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
     >
       <div class="col-first">
-        <h1>Pesanan Saya</h1>
+        <h1>Riwayat Pesanan</h1>
         <nav class="d-flex align-items-center">
           <a href="{% url 'home' %}"
             >Home<span class="lnr lnr-arrow-right"></span
           ></a>
-          <a href="#">Riwayat Pesanan</a>
+          <a href="#">Riwayat</a>
         </nav>
       </div>
     </div>
   </div>
 </section>
-<!-- End Banner Area -->
-
 <section class="cart_area">
   <div class="container">
     <div class="cart_inner">
-      {% if orders %}
       <div class="table-responsive">
-        <table class="table text-center">
+        <table class="table">
           <thead>
             <tr>
               <th scope="col">No. Pesanan</th>
               <th scope="col">Tanggal</th>
-              <th scope="col">Total Tagihan</th>
+              <th scope="col">Total</th>
               <th scope="col">Status</th>
               <th scope="col">Aksi</th>
             </tr>
@@ -39,75 +35,112 @@
             {% for order in orders %}
             <tr>
               <td>
-                <h5>#{{ order.order_number }}</h5>
+                <p style="font-weight: bold; color: #222">
+                  #{{ order.order_number }}
+                </p>
               </td>
               <td>
-                <p>{{ order.created_at|date:"d M Y" }}</p>
+                <h5>{{ order.created_at|date:"d M Y" }}</h5>
               </td>
               <td>
                 <h5>Rp {{ order.grand_total }}</h5>
               </td>
               <td>
-                <!-- LOGIKA STATUS -->
-                {% if not order.is_ordered %}
+                {% if order.status == 'Cancelled' %}
                 <span
-                  class="badge badge-warning"
+                  class="badge"
+                  style="
+                    background-color: #dc3545;
+                    color: white;
+                    padding: 5px 12px;
+                    border-radius: 4px;
+                  "
+                  >Dibatalkan</span
+                >
+
+                {% elif order.status == 'Completed' %}
+                <span
+                  class="badge"
+                  style="
+                    background-color: #343a40;
+                    color: white;
+                    padding: 5px 12px;
+                    border-radius: 4px;
+                  "
+                  >Selesai</span
+                >
+
+                {% elif not order.is_ordered %}
+                <span
+                  class="badge"
                   style="
                     background-color: #ffba00;
                     color: white;
-                    padding: 5px 10px;
-                    border-radius: 5px;
+                    padding: 5px 12px;
+                    border-radius: 4px;
                   "
                   >Menunggu Pembayaran</span
                 >
+
+                {% else %} {% if order.tracking_number %}
+                <span
+                  class="badge"
+                  style="
+                    background-color: #17a2b8;
+                    color: white;
+                    padding: 5px 12px;
+                    border-radius: 4px;
+                  "
+                  >Sedang Dikirim</span
+                >
+                <div class="mt-1">
+                  <small>Resi: {{ order.tracking_number }}</small>
+                </div>
                 {% else %}
                 <span
-                  class="badge badge-success"
+                  class="badge"
                   style="
                     background-color: #28a745;
                     color: white;
-                    padding: 5px 10px;
-                    border-radius: 5px;
+                    padding: 5px 12px;
+                    border-radius: 4px;
                   "
                   >Lunas / Diproses</span
                 >
-                {% endif %}
+                {% endif %} {% endif %}
               </td>
               <td>
-                <!-- LOGIKA TOMBOL -->
-                {% if not order.is_ordered %}
-                <!-- Jika belum bayar, arahkan kembali ke halaman Midtrans -->
+                <div class="d-flex flex-column">
+                  <a
+                    href="{% url 'confirmation' %}?order_number={{ order.order_number }}"
+                    class="genric-btn info circle small"
+                    >Detail</a
+                  >
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center" style="padding: 50px 0">
+                <img
+                  src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png"
+                  width="80"
+                  class="mb-3 opacity-50"
+                />
+                <h3>Belum ada riwayat pesanan.</h3>
                 <a
-                  href="{% url 'payments' order.order_number %}"
-                  class="genric-btn primary small"
-                  >Bayar Sekarang</a
+                  href="{% url 'home' %}"
+                  class="primary-btn mt-3"
+                  style="line-height: 30px; padding: 0 20px"
+                  >Belanja Sekarang</a
                 >
-                {% else %}
-                <!-- Jika sudah bayar, arahkan ke rincian invoice -->
-                <a
-                  href="{% url 'confirmation' %}?order_number={{ order.order_number }}"
-                  class="genric-btn info small"
-                  >Lihat Detail</a
-                >
-                {% endif %}
               </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-      {% else %}
-      <!-- JIKA USER BELUM PERNAH BELANJA -->
-      <div class="text-center mt-5 mb-5">
-        <h3>Anda belum memiliki riwayat pesanan.</h3>
-        <br />
-        <a class="primary-btn" href="{% url 'store' %}"
-          >Mulai Belanja Sekarang</a
-        >
-      </div>
-      {% endif %}
     </div>
   </div>
 </section>
-
 {% endblock %}

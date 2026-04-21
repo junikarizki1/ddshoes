@@ -3,14 +3,15 @@ import datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from cart.models import CartItem 
-
-# PASTIKAN OrderProduct DI-IMPORT DI SINI
 from .models import Order, OrderProduct 
-
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse 
 import midtransclient
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+import json
+
 
 # =========================================================
 # API KEY KOMERCE ANDA
@@ -133,7 +134,7 @@ def place_order(request, total=0, quantity=0):
     
     cart_items = CartItem.objects.filter(user=current_user)
     if cart_items.count() <= 0:
-        return redirect('store')
+        return redirect('home')
 
     for cart_item in cart_items:
         total += (cart_item.product.price * cart_item.quantity)
@@ -193,107 +194,261 @@ def place_order(request, total=0, quantity=0):
         # ===========================================================
         # INI DIA SOLUSINYA: PINDAHKAN KERANJANG KE RINCIAN PESANAN
         # ===========================================================
+# 1. Pindahkan isi keranjang ke rincian pesanan (OrderProduct)
         for item in cart_items:
             orderproduct = OrderProduct()
-            orderproduct.order_id = data.id           # Hubungkan ke nota Order
-            orderproduct.user_id = request.user.id    # Hubungkan ke pembeli
-            orderproduct.product_id = item.product_id # Sepatu yang dibeli
-            orderproduct.quantity = item.quantity     # Jumlah sepatu
-            orderproduct.product_price = item.product.price # Harga saat dibeli
+            orderproduct.order_id = data.id
+            orderproduct.user_id = request.user.id
+            orderproduct.product_id = item.product_id
+            orderproduct.quantity = item.quantity
+            orderproduct.product_price = item.product.price
             orderproduct.ordered = True
             orderproduct.save()
 
-            # Opsional: Kurangi stok produk secara otomatis
+            # -------------------------------------------------------
+            # LOGIKA PENGURANGAN STOK (WAJIB ADA DI SINI)
+            # -------------------------------------------------------
             product = item.product
-            product.stock -= item.quantity
+            product.stock -= item.quantity # Kurangi stok fisik sepatu
             product.save()
-        # ===========================================================
+            # -------------------------------------------------------
 
+        # 2. HAPUS KERANJANG (DI LUAR FOR LOOP)
+        # Kita hapus keranjang SETELAH semua barang dipindahkan ke OrderProduct
+        CartItem.objects.filter(user=request.user).delete()
+
+        # 3. Arahkan ke halaman pembayaran
         return redirect('payments', order_number=order_number) 
         
     else:
         return redirect('checkout')
 
 # =========================================================
-# FUNGSI MIDTRANS
+# FUNGSI HALAMAN PEMBAYARAN MIDTRANS
 # =========================================================
 @login_required(login_url='login')
 def payments(request, order_number):
     try:
+        # Mengambil data order berdasarkan nomor pesanan
         order = Order.objects.get(user=request.user, is_ordered=False, order_number=order_number)
+        # Mengambil rincian produk yang dibeli
+        order_products = OrderProduct.objects.filter(order=order)
     except ObjectDoesNotExist:
         return redirect('home')
 
-    snap = midtransclient.Snap(
-        is_production=False, 
-        server_key=settings.MIDTRANS_SERVER_KEY,
-        client_key=settings.MIDTRANS_CLIENT_KEY
-    )
+    if order.snap_token:
+        snap_token = order.snap_token
+    else:
+        snap = midtransclient.Snap(
+            is_production=False,
+            server_key=settings.MIDTRANS_SERVER_KEY,
+            client_key=settings.MIDTRANS_CLIENT_KEY
+        )
 
-    param = {
-        "transaction_details": {
-            "order_id": order.order_number,
-            "gross_amount": int(order.grand_total) 
-        },
-        "customer_details": {
-            "first_name": order.first_name,
-            "last_name": order.last_name,
-            "email": order.email,
-            "phone": order.phone
+        # 1. Siapkan daftar item untuk Midtrans (Item Details)
+        item_list = []
+        for item in order_products:
+            item_list.append({
+                "id": item.product.id,
+                "price": int(item.product_price),
+                "quantity": item.quantity,
+                "name": item.product.product_name[:30] # Batasi nama produk agar tidak terlalu panjang
+            })
+
+        # 2. Tambahkan Ongkos Kirim sebagai item tambahan
+        item_list.append({
+            "id": "shipping_fee",
+            "price": int(order.shipping_cost),
+            "quantity": 1,
+            "name": "Ongkos Kirim"
+        })
+
+        # 3. Masukkan ke Parameter
+        param = {
+            "transaction_details": {
+                "order_id": order.order_number,
+                "gross_amount": int(order.grand_total) # MENGGUNAKAN GRAND TOTAL (Barang + Ongkir)
+            },
+            "item_details": item_list, # Mengirim rincian agar muncul di layar Midtrans
+            "customer_details": {
+                "first_name": order.first_name,
+                "last_name": order.last_name,
+                "email": request.user.email,
+                "phone": order.phone
+            }
         }
-    }
-
-    try:
-        transaction = snap.create_transaction(param)
-        transaction_token = transaction['token']
-    except Exception as e:
-        print(f"Error Midtrans: {e}")
-        transaction_token = ""
+        
+        try:
+            snap_transaction = snap.create_transaction(param)
+            snap_token = snap_transaction['token']
+            
+            order.snap_token = snap_token
+            order.save()
+            
+        except Exception as e:
+            print(f"Error Midtrans: {e}")
+            snap_token = None
 
     context = {
         'order': order,
-        'transaction_token': transaction_token,
-        'client_key': settings.MIDTRANS_CLIENT_KEY,
+        'snap_token': snap_token,
+        'client_key': settings.MIDTRANS_CLIENT_KEY, # Pastikan ini dikirim untuk JS di template
     }
-    
     return render(request, 'order/payments.html', context)
 
 
 
+# =========================================================
+# FUNGSI KONFIRMASI PESANAN (DIPERBARUI)
+# =========================================================
 @login_required(login_url='login')
 def confirmation(request):
     order_number = request.GET.get('order_number')
-    
     try:
         order = Order.objects.get(order_number=order_number, user=request.user)
         
-        # Ubah status pesanan menjadi lunas/dibayar HANYA JIKA statusnya masih New
-        if order.status == 'New':
-            order.status = 'Accepted'
-            order.is_ordered = True
-            order.save()
+        # --- PERBAIKAN DI SINI ---
+        # Jika status sudah 'Cancelled' atau 'Completed', BERHENTI DI SINI.
+        # Jangan tanya Midtrans, jangan jalankan kode di bawahnya. 
+        # Ini menghormati keputusan Admin.
+        if order.status in ['Cancelled', 'Completed']:
+            context = {'order': order}
+            return render(request, 'order/confirmation.html', context)
+        # -------------------------
+
+        # Jika lolos dari cek di atas (berarti status masih New/Pending/Accepted),
+        # baru kita sinkronkan dengan Midtrans.
+        core_api = midtransclient.CoreApi(
+            is_production=False,
+            server_key=settings.MIDTRANS_SERVER_KEY,
+            client_key=settings.MIDTRANS_CLIENT_KEY
+        )
+
+        try:
+            response = core_api.transactions.status(order.order_number)
+            transaction_status = response.get('transaction_status')
             
-            # Kosongkan keranjang pembeli HANYA SAAT PERTAMA KALI LUNAS
-            CartItem.objects.filter(user=request.user).delete()
-        
+            # Update database berdasarkan Midtrans
+            if transaction_status in ['capture', 'settlement']:
+                order.status = 'Accepted'
+                order.is_ordered = True
+            elif transaction_status in ['cancel', 'expire', 'deny']:
+                # Jika Midtrans bilang batal, kita ikuti
+                order.status = 'Cancelled'
+                order.is_ordered = False
+            
+            order.save()
+        except Exception as e:
+            print(f"Midtrans Sync Error: {e}")
+
     except ObjectDoesNotExist:
         return redirect('home')
 
-    context = {
-        'order': order,
-    }
-    
+    context = {'order': order}
     return render(request, 'order/confirmation.html', context)
 
 # =========================================================
-# FUNGSI RIWAYAT PESANAN (BARU)
+# FUNGSI RIWAYAT PESANAN (DENGAN AUTO-SYNC STOK MIDTRANS)
 # =========================================================
 @login_required(login_url='login')
 def my_orders(request):
-    # Ambil semua pesanan milik user ini, urutkan dari yang paling baru
+    # Ambil semua pesanan milik user ini
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     
+    # Siapkan alat untuk bertanya ke server Midtrans
+    core_api = midtransclient.CoreApi(
+        is_production=False,
+        server_key=settings.MIDTRANS_SERVER_KEY,
+        client_key=settings.MIDTRANS_CLIENT_KEY
+    )
+
+    # Lakukan pengecekan untuk setiap pesanan yang statusnya belum lunas
+    for order in orders:
+        if order.status in ['New', 'Pending'] and not order.is_ordered:
+            try:
+                # Tanya status terbarunya ke Midtrans
+                response = core_api.transactions.status(order.order_number)
+                transaction_status = response.get('transaction_status')
+
+                # Jika Midtrans bilang pesanan ini dibatalkan atau sudah kadaluarsa
+                if transaction_status in ['cancel', 'expire', 'deny']:
+                    
+                    # 1. Batalkan pesanan di database kita
+                    order.status = 'Cancelled'
+                    order.is_ordered = False
+                    order.save()
+                    
+                    # 2. KEMBALIKAN STOK SEPATU KE ETALASE!
+                    order_products = OrderProduct.objects.filter(order=order)
+                    for item in order_products:
+                        product = item.product
+                        product.stock += item.quantity
+                        product.save()
+                        
+            except Exception as e:
+                # Jika error (misalnya pesanan belum sempat terekam di Midtrans), lewati saja
+                pass
+
     context = {
         'orders': orders,
     }
     return render(request, 'order/my_orders.html', context)
+
+
+# =========================================================
+# FUNGSI WEBHOOK MIDTRANS (OTOMATISASI STATUS PEMBAYARAN)
+# =========================================================
+@csrf_exempt
+def midtrans_webhook(request):
+    if request.method == 'POST':
+        try:
+            # 1. Tangkap surat/data JSON yang dikirim oleh Midtrans
+            data = json.loads(request.body)
+            order_id = data.get('order_id')
+            transaction_status = data.get('transaction_status')
+            fraud_status = data.get('fraud_status')
+
+            # 2. Cari pesanan tersebut di database kita
+            try:
+                order = Order.objects.get(order_number=order_id)
+            except ObjectDoesNotExist:
+                return HttpResponse('Pesanan tidak ditemukan', status=404)
+
+            # 3. Ubah status pesanan berdasarkan laporan Midtrans
+            if transaction_status == 'capture':
+                if fraud_status == 'challenge':
+                    order.status = 'Pending'
+                elif fraud_status == 'accept':
+                    order.status = 'Accepted'
+                    order.is_ordered = True
+            elif transaction_status == 'settlement':
+                # Settlement = Lunas (Contoh: Uang sudah masuk dari Indomaret/Bank)
+                order.status = 'Accepted'
+                order.is_ordered = True
+            elif transaction_status in ['cancel', 'deny', 'expire']:
+                # Jika pembeli batal/kadaluarsa, ubah status jadi Cancelled
+                order.status = 'Cancelled'
+                order.is_ordered = False
+                
+                # (BONUS) KEMBALIKAN STOK SEPATU KARENA BATAL BELI
+                order_products = OrderProduct.objects.filter(order=order)
+                for item in order_products:
+                    product = item.product
+                    product.stock += item.quantity
+                    product.save()
+                    
+            elif transaction_status == 'pending':
+                order.status = 'Pending'
+
+            # 4. Simpan perubahan ke database
+            order.save()
+            
+            # Beritahu Midtrans bahwa pesanannya sudah kita terima dengan sukses (Kode 200)
+            return HttpResponse('Sukses', status=200)
+
+        except Exception as e:
+            print(f"Error Webhook: {e}")
+            return HttpResponse('Server Error', status=500)
+            
+    # Jika ada yang iseng mengakses URL ini lewat browser biasa (Metode GET)
+    return HttpResponse('Metode tidak diizinkan', status=405)

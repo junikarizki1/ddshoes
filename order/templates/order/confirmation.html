@@ -1,6 +1,5 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
 
-<!-- Start Banner Area -->
 <section class="banner-area organic-breadcrumb">
   <div class="container">
     <div
@@ -18,21 +17,94 @@
     </div>
   </div>
 </section>
-<!-- End Banner Area -->
-
 <section class="order_details section_gap">
   <div class="container">
-    <!-- PESAN SUKSES -->
-    <h3 class="title_confirmation text-center mb-5" style="color: #28a745">
-      Terima kasih! Pesanan Anda telah kami terima.<br />
-      <span style="font-size: 16px; color: #777; text-transform: none"
-        >Pesanan Anda akan segera diproses setelah pembayaran
-        terverifikasi.</span
-      >
-    </h3>
+    <div class="row justify-content-center mb-5">
+      <div class="col-md-8 text-center">
+        {% if order.status == 'Accepted' %} {% if order.tracking_number %}
+        <div class="status-icon mb-4">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/758/758461.png"
+            width="100"
+            alt="Shipping"
+          />
+        </div>
+        <h2 style="color: #17a2b8">Pesanan Sedang Dikirim!</h2>
+        <p>
+          Pesanan <strong>#{{ order.order_number }}</strong> sedang dalam
+          perjalanan menuju alamat Anda.<br />
+          No. Resi: <strong>{{ order.tracking_number }}</strong>
+        </p>
+        {% else %}
+        <div class="status-icon mb-4">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/148/148767.png"
+            width="100"
+            alt="Success"
+          />
+        </div>
+        <h2 style="color: #28a745">Pembayaran Berhasil!</h2>
+        <p>
+          Terima kasih! Pesanan <strong>#{{ order.order_number }}</strong> telah
+          kami terima dan sedang disiapkan untuk dikirim.
+        </p>
+        {% endif %} {% elif order.status == 'Completed' %}
+        <div class="status-icon mb-4">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/148/148767.png"
+            width="100"
+            alt="Completed"
+          />
+        </div>
+        <h2 style="color: #343a40">Pesanan Selesai</h2>
+        <p>
+          Terima kasih! Pesanan <strong>#{{ order.order_number }}</strong> telah
+          selesai diterima. <br />
+          Sampai jumpa di orderan berikutnya!
+        </p>
+
+        {% elif order.status == 'Cancelled' %}
+        <div class="status-icon mb-4">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/6659/6659895.png"
+            width="100"
+            alt="Cancelled"
+          />
+        </div>
+        <h2 style="color: #dc3545">Pesanan Dibatalkan</h2>
+        <p>
+          Mohon maaf, pesanan <strong>#{{ order.order_number }}</strong> telah
+          dibatalkan karena waktu pembayaran berakhir atau kesalahan sistem.
+        </p>
+
+        {% else %}
+        <div class="status-icon mb-4">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/4831/4831732.png"
+            width="100"
+            alt="Pending"
+          />
+        </div>
+        <h2 style="color: #ffba00">Menunggu Pembayaran</h2>
+        <p>
+          Pesanan <strong>#{{ order.order_number }}</strong> telah kami
+          terima.<br />
+          Segera selesaikan pembayaran agar sepatu pilihan Anda tidak kehabisan
+          stok!
+        </p>
+        <div class="mt-4">
+          <a
+            href="{% url 'payments' order.order_number %}"
+            class="primary-btn"
+            style="padding: 10px 30px; text-decoration: none"
+            >Bayar Sekarang</a
+          >
+        </div>
+        {% endif %}
+      </div>
+    </div>
 
     <div class="row order_d_inner">
-      <!-- KOTAK KIRI: INFO ORDER -->
       <div class="col-lg-4">
         <div class="details_item">
           <h4>Info Pesanan</h4>
@@ -44,7 +116,7 @@
             </li>
             <li>
               <a href="javascript:void(0);"
-                ><span>Tanggal</span> : {{ order.created_at }}</a
+                ><span>Tanggal</span> : {{ order.created_at|date:"d M Y" }}</a
               >
             </li>
             <li>
@@ -61,7 +133,6 @@
         </div>
       </div>
 
-      <!-- KOTAK TENGAH: INFO PEMESAN -->
       <div class="col-lg-4">
         <div class="details_item">
           <h4>Info Pemesan</h4>
@@ -85,7 +156,6 @@
         </div>
       </div>
 
-      <!-- KOTAK KANAN: INFO PENGIRIMAN -->
       <div class="col-lg-4">
         <div class="details_item">
           <h4>Info Pengiriman</h4>
@@ -93,11 +163,6 @@
             <li>
               <a href="javascript:void(0);"
                 ><span>Alamat</span> : {{ order.address }}</a
-              >
-            </li>
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Kelurahan</span> : {{ order.subdistrict }}</a
               >
             </li>
             <li>
@@ -112,7 +177,7 @@
             </li>
             <li>
               <a href="javascript:void(0);"
-                ><span>Kota & Prov</span> : {{ order.province }}</a
+                ><span>Provinsi</span> : {{ order.province }}</a
               >
             </li>
             <li>
@@ -124,18 +189,6 @@
         </div>
       </div>
     </div>
-
-    <!-- CATATAN TAMBAHAN (KURIR / USER NOTE) -->
-    {% if order.order_note %}
-    <div class="row mt-4">
-      <div class="col-md-12">
-        <div class="details_item" style="background: #f9f9f9; padding: 20px">
-          <h4>Catatan Pengiriman / Kurir</h4>
-          <p style="margin: 0; color: #555">{{ order.order_note }}</p>
-        </div>
-      </div>
-    </div>
-    {% endif %}
 
     <div class="order_details_table mt-5">
       <h2>Rincian Pesanan</h2>
@@ -149,67 +202,29 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Loop untuk menampilkan produk yang dipesan -->
-            <!-- Catatan: Ini akan muncul jika fungsi views.py Anda sudah menyimpan item ke tabel OrderProduct -->
             {% for item in order.orderproduct_set.all %}
             <tr>
+              <td><p>{{ item.product.product_name }}</p></td>
+              <td><h5>x {{ item.quantity }}</h5></td>
               <td>
-                <p>{{ item.product.product_name }}</p>
-              </td>
-              <td>
-                <h5>x {{ item.quantity }}</h5>
-              </td>
-              <td>
-                <!-- Kita menggunakan widthratio untuk mengalikan harga dengan kuantitas -->
                 <p>Rp {% widthratio item.product_price 1 item.quantity %}</p>
-              </td>
-            </tr>
-            {% empty %}
-            <!-- Pesan sementara jika OrderProduct belum disalin di views.py -->
-            <tr>
-              <td colspan="3" class="text-center">
-                <i
-                  >(Daftar barang akan muncul setelah fitur simpan OrderProduct
-                  diaktifkan)</i
-                >
               </td>
             </tr>
             {% endfor %}
 
-            <!-- Baris Subtotal -->
             <tr>
-              <td>
-                <h4>Subtotal</h4>
-              </td>
-              <td>
-                <h5></h5>
-              </td>
-              <td>
-                <p>Rp {{ order.order_total }}</p>
-              </td>
+              <td><h4>Subtotal</h4></td>
+              <td><h5></h5></td>
+              <td><p>Rp {{ order.order_total }}</p></td>
             </tr>
-
-            <!-- Baris Ongkos Kirim -->
             <tr>
-              <td>
-                <h4>Ongkos Kirim</h4>
-              </td>
-              <td>
-                <h5></h5>
-              </td>
-              <td>
-                <p>Rp {{ order.shipping_cost }}</p>
-              </td>
+              <td><h4>Ongkos Kirim</h4></td>
+              <td><h5></h5></td>
+              <td><p>Rp {{ order.shipping_cost }}</p></td>
             </tr>
-
-            <!-- Baris Total Keseluruhan -->
             <tr>
-              <td>
-                <h4>Total</h4>
-              </td>
-              <td>
-                <h5></h5>
-              </td>
+              <td><h4>Total</h4></td>
+              <td><h5></h5></td>
               <td>
                 <h4 style="color: #ffba00">Rp {{ order.grand_total }}</h4>
               </td>
@@ -219,7 +234,6 @@
       </div>
     </div>
 
-    <!-- TOMBOL LANJUT BELANJA -->
     <div class="text-center mt-5">
       <a href="{% url 'home' %}" class="primary-btn">Lanjutkan Belanja</a>
     </div>

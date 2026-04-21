@@ -71,6 +71,7 @@
     </div>
   </div>
 </section>
+
 <script
   type="text/javascript"
   src="https://app.sandbox.midtrans.com/snap/snap.js"
@@ -79,8 +80,19 @@
 
 <script type="text/javascript">
   document.getElementById("pay-button").onclick = function () {
-    snap.pay("{{ transaction_token }}", {
-      // Arahkan ke halaman konfirmasi dengan membawa nomor pesanan
+    // 1. Ambil token dari backend (Ingat: di views.py kita menamainya 'snap_token')
+    var snapToken = "{{ snap_token }}";
+
+    // 2. CEK PENGAMAN: Mencegah tombol diam saja jika error/token kosong
+    if (!snapToken || snapToken === "None" || snapToken === "") {
+      alert(
+        "Mohon maaf, sesi pembayaran ini sudah tidak valid. Silakan buat pesanan baru dari keranjang."
+      );
+      return; // Hentikan proses, jangan panggil Midtrans
+    }
+
+    // 3. Panggil Pop-up Midtrans menggunakan token yang sudah divalidasi
+    window.snap.pay(snapToken, {
       onSuccess: function (result) {
         window.location.href =
           "{% url 'confirmation' %}?order_number={{ order.order_number }}";
@@ -90,10 +102,16 @@
           "{% url 'confirmation' %}?order_number={{ order.order_number }}";
       },
       onError: function (result) {
-        alert("Pembayaran Gagal! Silakan coba lagi.");
+        // Lebih baik tetap diarahkan ke confirmation agar sistem Django Anda bisa
+        // mengecek langsung ke Midtrans dan mengubah statusnya menjadi 'Cancelled'
+        window.location.href =
+          "{% url 'confirmation' %}?order_number={{ order.order_number }}";
       },
       onClose: function () {
-        alert("Anda menutup layar pembayaran tanpa menyelesaikannya.");
+        // Pesan jika user menutup layar (klik X)
+        console.log(
+          "Customer menutup layar pembayaran tanpa menyelesaikannya."
+        );
       },
     });
   };
