@@ -68,6 +68,15 @@
           selesai diterima. <br />
           Sampai jumpa di orderan berikutnya!
         </p>
+        <div class="text-center mt-4">
+          <a
+            href="{% url 'admin_order_pdf' order.id %}"
+            target="_blank"
+            class="btn btn-success"
+          >
+            Cetak Invoice
+          </a>
+        </div>
 
         {% elif order.status == 'Cancelled' %}
         <div class="status-icon mb-4">

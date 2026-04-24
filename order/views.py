@@ -3,7 +3,7 @@ import datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from cart.models import CartItem 
-from .models import Order, OrderProduct 
+from .models import Order, OrderProduct
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse 
 import midtransclient
@@ -11,6 +11,9 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 import json
+from django.shortcuts import render, get_object_or_404
+from django.template.loader import get_template
+from xhtml2pdf import pisa # Library untuk convert HTML ke PDF
 
 
 # =========================================================
@@ -516,3 +519,52 @@ def track_order(request):
         'resi': resi, # Kirim balik agar tampil di input box
         'kurir': kurir
     })
+    
+
+# =========================================================
+# FUNGSI CETAK INVOICE PDF
+# =========================================================    
+def admin_order_pdf(request, order_id):
+    if request.user.is_staff:
+        order = get_object_or_404(Order, id=order_id)
+    else:
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    order_products = OrderProduct.objects.filter(order=order)
+    st = order.status
+    if st == 'New':
+        friendly_status = "Menunggu Pembayaran"
+    elif st == 'Pending':
+        friendly_status = "Pembayaran Berhasil"
+    elif st == 'Accepted':
+        if order.tracking_number: # Jika resi sudah diisi
+            friendly_status = "Sedang Dikirim"
+        else:
+            friendly_status = "Sedang Diproses"
+    elif st == 'Completed':
+        friendly_status = "Pesanan Selesai"
+    elif st == 'Cancelled':
+        friendly_status = "Pesanan Dibatalkan"
+    else:
+        friendly_status = st # Jaga-jaga jika ada status lain
+    template_path = 'order/invoice_pdf.html'
+    context = {
+        'order': order,
+        'order_products': order_products,
+        'friendly_status': friendly_status,
+    }
+    
+    # Buat response PDF
+    response = HttpResponse(content_type='application/pdf')
+    # inline untuk buka di browser, attachment untuk langsung download
+    response['Content-Disposition'] = f'filename="invoice_{order.order_number}.pdf"'
+    
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # Convert HTML ke PDF
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    
+    if pisa_status.err:
+        return HttpResponse('Terjadi kesalahan saat mencetak PDF')
+    return response

@@ -6,6 +6,8 @@ from .models import Order, OrderProduct
 from store.models import Product
 from account.models import Account
 from django.contrib.admin import SimpleListFilter
+from django.utils.html import format_html
+from django.urls import reverse
 
 # --- 1. FILTER CUSTOM UNTUK TABEL ORDER ---
 class TrackingFilter(SimpleListFilter):
@@ -103,12 +105,33 @@ class OrderProductInline(admin.TabularInline):
     extra = 0
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['order_number', 'full_name', 'phone', 'city', 'order_total', 'status', 'is_ordered', 'created_at']
-    list_filter = ['status', 'is_ordered', TrackingFilter]
-    search_fields = ['order_number', 'first_name', 'last_name', 'phone', 'email']
-    list_per_page = 20
-    inlines = [OrderProductInline]
-    list_editable = ['status', 'is_ordered']
+    # Ganti 'status' menjadi 'status_display' di list_display
+    list_display = ['order_number', 'full_name', 'grand_total', 'status_display', 'cetak_invoice', 'created_at']
+
+    def status_display(self, obj):
+        if obj.status == 'New':
+            return format_html('<span style="color: #ffc107; font-weight: bold;">⏳ Menunggu Pembayaran</span>')
+        elif obj.status == 'Pending':
+            return format_html('<span style="color: #17a2b8; font-weight: bold;">💳 Pembayaran Berhasil</span>')
+        elif obj.status == 'Accepted':
+            if obj.tracking_number:
+                return format_html('<span style="color: #fd7e14; font-weight: bold;">🚚 Sedang Dikirim</span>')
+            return format_html('<span style="color: #007bff; font-weight: bold;">📦 Sedang Diproses</span>')
+        elif obj.status == 'Completed':
+            return format_html('<span style="color: #28a745; font-weight: bold;">✅ Selesai</span>')
+        elif obj.status == 'Cancelled':
+            return format_html('<span style="color: #dc3545; font-weight: bold;">❌ Dibatalkan</span>')
+        return obj.status
+
+    status_display.short_description = 'Status Pesanan'
+    
+#INVOICE PDF    
+    def cetak_invoice(self, obj):
+        # Membuat tombol hijau kecil di tabel admin
+        url = reverse('admin_order_pdf', args=[obj.id])
+        return format_html('<a class="button" href="{}" target="_blank" style="background-color: #28a745; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none;">Cetak PDF</a>', url)
+    
+    cetak_invoice.short_description = 'Invoice'
 
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderProduct)
