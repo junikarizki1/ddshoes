@@ -1,0 +1,273 @@
+{% extends "admin/index.html" %} {% load i18n static %} {% block content %}
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div
+        class="card shadow-lg border-0"
+        style="background: #343a40; border-radius: 10px"
+      >
+        <div class="card-body p-3">
+          <div
+            class="d-flex justify-content-between align-items-center flex-wrap"
+          >
+            <div class="d-flex align-items-center mb-2 mb-md-0">
+              <div class="bg-primary p-2 rounded-circle mr-3 shadow">
+                <i class="fas fa-chart-line text-white"></i>
+              </div>
+              <h5 class="m-0 font-weight-bold text-white">Statistik Toko</h5>
+            </div>
+
+            <form method="get" class="form-inline">
+              <div
+                class="d-flex flex-wrap align-items-center justify-content-end"
+              >
+                <div class="input-group input-group-sm mr-2 mb-1 shadow-sm">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text border-0"
+                      style="background: #495057; color: #adb5bd"
+                      >Dari</span
+                    >
+                  </div>
+                  <input
+                    type="date"
+                    name="start_date"
+                    class="form-control border-0"
+                    style="background: #495057; color: white"
+                    value="{{ start_custom }}"
+                  />
+                </div>
+
+                <div class="input-group input-group-sm mr-2 mb-1 shadow-sm">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text border-0"
+                      style="background: #495057; color: #adb5bd"
+                      >Sampai</span
+                    >
+                  </div>
+                  <input
+                    type="date"
+                    name="end_date"
+                    class="form-control border-0"
+                    style="background: #495057; color: white"
+                    value="{{ end_custom }}"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  class="btn btn-sm btn-primary shadow-sm mr-3 mb-1 px-3"
+                >
+                  <i class="fas fa-search mr-1"></i>
+                </button>
+
+                <div class="btn-group mb-1 shadow-sm">
+                  <a
+                    href="/admin/"
+                    class="btn btn-sm {% if not period and not start_custom %}btn-primary{% else %}btn-secondary{% endif %}"
+                    style="border: none"
+                    >Semua</a
+                  >
+                  <a
+                    href="/admin/?period=today"
+                    class="btn btn-sm {% if period == 'today' %}btn-primary{% else %}btn-secondary{% endif %}"
+                    style="border: none"
+                    >Hari Ini</a
+                  >
+                  <a
+                    href="/admin/?period=week"
+                    class="btn btn-sm {% if period == 'week' %}btn-primary{% else %}btn-secondary{% endif %}"
+                    style="border: none"
+                    >7 Hari</a
+                  >
+                  <a
+                    href="/admin/?period=month"
+                    class="btn btn-sm {% if period == 'month' %}btn-primary{% else %}btn-secondary{% endif %}"
+                    style="border: none"
+                    >Bulan Ini</a
+                  >
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Agar kalender di input date berwarna putih teksnya saat diklik */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
+  </style>
+
+  <div class="row">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info shadow">
+        <div class="inner">
+          <h3>{{ unpaid_orders }}</h3>
+          <p>Pesanan Baru (Unpaid)</p>
+        </div>
+        <div class="icon"><i class="fas fa-shopping-cart"></i></div>
+        <a href="/admin/order/order/?status__exact=New" class="small-box-footer"
+          >Lihat Detail <i class="fas fa-arrow-circle-right"></i
+        ></a>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning shadow">
+        <div class="inner">
+          <h3 style="color: white">{{ to_ship }}</h3>
+          <p style="color: white">Siap Pack (Belum Resi)</p>
+        </div>
+        <div class="icon"><i class="fas fa-box"></i></div>
+        <a
+          href="/admin/order/order/?status__exact=Accepted&resi=empty"
+          class="small-box-footer"
+          style="color: white !important"
+          >Proses Sekarang
+          <i class="fas fa-arrow-circle-right" style="color: white"></i
+        ></a>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-primary shadow">
+        <div class="inner">
+          <h3>{{ shipping }}</h3>
+          <p>Sedang Dikirim (Ada Resi)</p>
+        </div>
+        <div class="icon"><i class="fas fa-truck"></i></div>
+        <a
+          href="/admin/order/order/?status__exact=Accepted&resi=filled"
+          class="small-box-footer"
+          >Pantau Kurir <i class="fas fa-arrow-circle-right"></i
+        ></a>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success shadow">
+        <div class="inner">
+          <h3>{{ completed }}</h3>
+          <p>Transaksi Selesai</p>
+        </div>
+        <div class="icon"><i class="fas fa-check-double"></i></div>
+        <a
+          href="/admin/order/order/?status__exact=Completed"
+          class="small-box-footer"
+          >Riwayat Sukses <i class="fas fa-arrow-circle-right"></i
+        ></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-dark shadow">
+        <div class="inner">
+          <h3>Rp {{ total_revenue|floatformat:0 }}</h3>
+          <p>Total Omzet (Selesai)</p>
+        </div>
+        <div class="icon"><i class="fas fa-wallet"></i></div>
+        <div class="small-box-footer">Pendapatan Bersih</div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div
+        class="small-box bg-teal shadow"
+        style="background-color: #20c997 !important"
+      >
+        <div class="inner">
+          <h3 style="color: white">{{ total_orders }}</h3>
+          <p style="color: white">Total Seluruh Order</p>
+        </div>
+        <div class="icon"><i class="fas fa-list-ul"></i></div>
+        <a
+          href="/admin/order/order/"
+          class="small-box-footer"
+          style="color: white !important"
+          >Semua Data
+          <i class="fas fa-arrow-circle-right" style="color: white"></i
+        ></a>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-secondary shadow">
+        <div class="inner">
+          <h3>{{ cancelled }}</h3>
+          <p>Pesanan Dibatalkan</p>
+        </div>
+        <div class="icon"><i class="fas fa-times-circle"></i></div>
+        <a
+          href="/admin/order/order/?status__exact=Cancelled"
+          class="small-box-footer"
+          >Lihat Pembatalan <i class="fas fa-arrow-circle-right"></i
+        ></a>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger shadow">
+        <div class="inner">
+          <h3>{{ out_of_stock }} | {{ low_stock }}</h3>
+          <p>Stok Habis | Menipis</p>
+        </div>
+        <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <a href="/admin/store/product/" class="small-box-footer"
+          >Cek Gudang <i class="fas fa-arrow-circle-right"></i
+        ></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-md-12">
+      <div class="card card-outline card-primary shadow">
+        <div class="card-header border-0">
+          <h3 class="card-title text-bold">
+            <i class="fas fa-chart-area mr-1"></i> Grafik Penjualan DD Shoes
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="salesChart" style="height: 280px"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById("salesChart").getContext("2d");
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: [
+          "Senin",
+          "Selasa",
+          "Rabu",
+          "Kamis",
+          "Jumat",
+          "Sabtu",
+          "Minggu",
+        ],
+        datasets: [
+          {
+            label: "Order Selesai",
+            data: [5, 12, 7, 18, 15, 25, 20],
+            borderColor: "#28a745",
+            backgroundColor: "rgba(40, 167, 69, 0.1)",
+            fill: true,
+            tension: 0.4,
+          },
+        ],
+      },
+      options: { responsive: true, maintainAspectRatio: false },
+    });
+  });
+</script>
+
+<hr />
+<div class="px-2">{{ block.super }}</div>
+{% endblock %}

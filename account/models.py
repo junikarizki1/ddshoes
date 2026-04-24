@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 # 1. Class Manager: Mengatur cara membuat User biasa dan Superadmin
 class MyAccountManager(BaseUserManager):
@@ -31,11 +31,14 @@ class MyAccountManager(BaseUserManager):
         user.is_active = True
         user.is_staff = True
         user.is_superadmin = True
+        # Wajib set True agar bisa masuk Django Admin jika menggunakan PermissionsMixin
+        user.is_superuser = True 
         user.save(using=self._db)
         return user
 
 # 2. Class Account: Struktur tabel User di Database
-class Account(AbstractBaseUser):
+# Tambahkan PermissionsMixin di dalam kurung setelah AbstractBaseUser
+class Account(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     username = models.CharField(max_length=50, unique=True)
@@ -44,10 +47,9 @@ class Account(AbstractBaseUser):
 
     # Field wajib Django
     date_joined = models.DateTimeField(auto_now_add=True)
-    last_login = models.DateTimeField(auto_now_add=True)
+    last_login = models.DateTimeField(auto_now=True) # Gunakan auto_now agar update tiap login
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
-    # is_active default-nya True agar user bisa langsung login setelah register
     is_active = models.BooleanField(default=True) 
     is_superadmin = models.BooleanField(default=False)
 
@@ -63,6 +65,8 @@ class Account(AbstractBaseUser):
     def __str__(self):
         return self.email
 
+    # Jika pakai PermissionsMixin, fungsi has_perm dan has_module_perms 
+    # di bawah ini opsional, tapi boleh tetap ada untuk custom logic.
     def has_perm(self, perm, obj=None):
         return self.is_admin
 

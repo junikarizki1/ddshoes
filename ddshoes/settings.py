@@ -20,6 +20,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',  
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -32,6 +33,86 @@ INSTALLED_APPS = [
     'order',
     'account',
 ]
+
+JAZZMIN_SETTINGS = {
+    # -- Judul & Logo --
+    "site_title": "DD Shoes Admin",
+    "site_header": "DD Shoes",
+    "site_brand": "DD Shoes Store", # Ini yang akan menggantikan tulisan 'Administrasi Django'
+    # "site_logo": "img/logodd.png",
+    # "login_logo": "images/logodd.png",
+    "site_logo_classes": "img-circle",
+    "site_icon": None, # Favicon di tab browser
+    "welcome_sign": "Selamat Datang di Dashboard DD Shoes",
+    "copyright": "DD Shoes Store Pontianak",
+    "user_avatar": None, # Bisa diisi 'image' jika model Account punya field foto
+
+    # -- Pencarian --
+    "search_model": "my_account.Account",
+
+    # -- Menu Atas --
+    "topmenu_links": [
+        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Lihat Toko", "url": "/", "new_window": True},
+    ],
+
+    # -- Sidebar (Menu Kiri) --
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": ["store", "order", "my_account", "auth"],
+
+    # -- Ikon (Sangat penting agar dashboard tidak 'jelek') --
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.Group": "fas fa-users",
+        "my_account.Account": "fas fa-user-shield",
+        "store.Brand": "fas fa-tag",
+        "store.Category": "fas fa-list-ul",
+        "store.Product": "fas fa-shoe-prints",
+        "store.ProductGallery": "fas fa-images",
+        "order.Order": "fas fa-shopping-cart",
+        "order.OrderProduct": "fas fa-box-open",
+    },
+    
+    # -- Gaya Form --
+    "changeform_format": "horizontal_tabs",
+}
+
+# Pengaturan Warna (UI Tweaks) agar dashboard terlihat 'sangar' dan bersih
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-primary", # Warna brand di sidebar
+    "accent": "accent-primary",
+    "navbar": "navbar-white navbar-light", # Navbar atas putih bersih
+    "no_navbar_border": False,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary", # Sidebar gelap biar kontras dan pro
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "flatly", # Tema profesional untuk skripsi
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
