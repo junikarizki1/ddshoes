@@ -452,3 +452,67 @@ def midtrans_webhook(request):
             
     # Jika ada yang iseng mengakses URL ini lewat browser biasa (Metode GET)
     return HttpResponse('Metode tidak diizinkan', status=405)
+
+
+#Notifikasi Gmail
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+
+@csrf_exempt
+def midtrans_webhook(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        order_number = data.get('order_id')
+        transaction_status = data.get('transaction_status')
+
+        try:
+            order = Order.objects.get(order_number=order_number)
+            
+            if transaction_status in ['capture', 'settlement']:
+                if not order.is_ordered:
+                    # 1. Update Status Pesanan
+                    order.status = 'Accepted'
+                    order.is_ordered = True
+                    order.save()
+
+                    # 2. Kirim Email Notifikasi
+                    mail_subject = f'Pembayaran Berhasil - Pesanan #{order.order_number}'
+                    message = f"Halo {order.first_name},\n\nPembayaran Anda untuk pesanan #{order.order_number} telah kami terima. Kami akan segera memproses pengiriman sepatu Anda.\n\nTerima kasih telah berbelanja di DD Shoes Store!"
+                    to_email = order.email
+                    
+                    send_mail(mail_subject, message, settings.EMAIL_HOST_USER, [to_email])
+
+            return HttpResponse(status=200)
+        except Order.DoesNotExist:
+            return HttpResponse(status=404)
+        
+
+#Tracking Pesanan
+def track_order(request):
+    tracking_result = None
+    error_message = None
+    
+    # Ambil data baik dari POST (form) maupun GET (link otomatis)
+    resi = request.POST.get('no_resi') or request.GET.get('no_resi')
+    kurir = request.POST.get('kurir') or request.GET.get('kurir')
+    
+    if resi and kurir:
+        api_key = '9b016bd8ee7f7dadb64abc91f2fcead58f54abc72bf212f9f18de93f721522d1'
+        url = f"https://api.binderbyte.com/v1/track?api_key={api_key}&courier={kurir}&awb={resi}"
+        
+        try:
+            response = requests.get(url)
+            data = response.json()
+            if data['status'] == 200:
+                tracking_result = data['data']
+            else:
+                error_message = data['message']
+        except Exception as e:
+            error_message = "Terjadi gangguan koneksi."
+
+    return render(request, 'order/track.html', {
+        'tracking_result': tracking_result, 
+        'error_message': error_message,
+        'resi': resi, # Kirim balik agar tampil di input box
+        'kurir': kurir
+    })

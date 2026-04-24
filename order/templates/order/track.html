@@ -1,0 +1,112 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<section class="banner-area organic-breadcrumb">
+  <div class="container">
+    <div
+      class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
+    >
+      <div class="col-first">
+        <h1>Lacak Pesanan</h1>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tracking_box_area section_gap">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="tracking_box_inner">
+          <p>
+            Masukkan nomor resi Anda untuk mengetahui status pengiriman sepatu
+            Anda secara real-time.
+          </p>
+          <form
+            class="row tracking_form"
+            action="{% url 'track_order' %}"
+            method="post"
+          >
+            {% csrf_token %}
+            <div class="col-md-8 form-group">
+              <input
+                type="text"
+                class="form-control"
+                name="no_resi"
+                placeholder="Masukkan Nomor Resi (AWB)"
+                required
+              />
+            </div>
+            <div class="col-md-4 form-group">
+              <select
+                name="kurir"
+                class="form-control"
+                style="height: 40px; border-radius: 0"
+              >
+                <option value="jne">JNE</option>
+                <option value="jnt">J&T</option>
+                <option value="sicepat">SiCepat</option>
+                <option value="pos">POS Indonesia</option>
+                <option value="tiki">TIKI</option>
+              </select>
+            </div>
+            <div class="col-md-12 form-group">
+              <button type="submit" value="submit" class="primary-btn">
+                Lacak Sekarang
+              </button>
+            </div>
+          </form>
+
+          {% if error_message %}
+          <div class="alert alert-danger mt-4">{{ error_message }}</div>
+          {% endif %} {% if tracking_result %}
+          <div class="tracking_results mt-5">
+            <hr />
+            <h3>
+              Status:
+              <span class="text-primary"
+                >{{ tracking_result.summary.status }}</span
+              >
+            </h3>
+            <p>
+              Kurir: {{ tracking_result.summary.courier }} | Layanan: {{
+              tracking_result.summary.service }}
+            </p>
+
+            <div
+              class="main-timeline mt-4"
+              style="
+                border-left: 2px solid #ffba00;
+                padding-left: 20px;
+                position: relative;
+              "
+            >
+              {% for history in tracking_result.history %}
+              <div class="timeline-item mb-4" style="position: relative">
+                <div
+                  style="
+                    position: absolute;
+                    width: 12px;
+                    height: 12px;
+                    background: #ffba00;
+                    border-radius: 50%;
+                    left: -27px;
+                    top: 5px;
+                  "
+                ></div>
+                <p class="mb-0" style="font-weight: bold; color: #222">
+                  {{ history.date }}
+                </p>
+                <p class="mb-0" style="color: #555">{{ history.desc }}</p>
+                <small class="text-muted"
+                  >{{ history.location|default:"" }}</small
+                >
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

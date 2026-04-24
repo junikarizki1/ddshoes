@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %} {% load static %} {% load humanize %}{% block content %}
 <!-- start banner Area -->
 <section class="banner-area">
     <div class="container">
@@ -195,24 +195,11 @@
                     <a href="{{ product.get_url }}" style="display: block;">
                         <img class="img-fluid w-100" src="{{ product.images.url }}">
                     </a>
-
+                    <div class="price">
+                        <h6>Rp {{ product.price |intcomma}}</h6>
+                    </div>
                     <div class="product-details">
                         <h6>{{ product.product_name }}</h6>
-
-                        <div class="price">
-                            <h6>Rp {{ product.price }}</h6>
-                        </div>
-
-                        <div class="prd-bottom">
-                            <a href="" class="social-info">
-                                <span class="lnr lnr-heart"></span>
-                                <p class="hover-text">Wishlist</p>
-                            </a>
-                            <a href="{{ product.get_url }}" class="social-info">
-                                <span class="lnr lnr-move"></span>
-                                <p class="hover-text">view more</p>
-                            </a>
-                        </div>
                     </div>
                 </div>
             </div>

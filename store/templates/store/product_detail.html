@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %} {% load static %}{% load humanize %} {% block content %}
 	<!-- Start Banner Area -->
 	<section class="banner-area organic-breadcrumb">
 		<div class="container">
@@ -46,7 +46,7 @@
                         <h3>{{ single_product.product_name }}</h3>
                         
                         <!-- Harga Dinamis -->
-                        <h2>Rp {{ single_product.price }}</h2>
+                        <h2>Rp {{ single_product.price | intcomma }}</h2>
                         <ul class="list">
                             <!-- Kategori Dinamis -->
                             <li>

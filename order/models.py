@@ -1,6 +1,11 @@
 from django.db import models
 from account.models import Account
 from store.models import Product
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.conf import settings
 
 class Order(models.Model):
     STATUS = (
@@ -90,3 +95,25 @@ class OrderProduct(models.Model):
 
     def __str__(self):
         return self.product.product_name
+    
+    
+#Shipping email notif
+@receiver(post_save, sender=Order)
+def send_shipping_notification(sender, instance, created, **kwargs):
+    # Cek jika ini bukan data baru (update) dan tracking_number baru saja diisi
+    if not created and instance.tracking_number:
+        # Gunakan pengecekan sederhana agar email tidak terkirim berulang kali saat save ulang
+        # (Idealnya Anda punya field boolean 'is_shipping_email_sent' tapi ini cukup untuk demo)
+        
+        try:
+            mail_subject = f'Pesanan #{instance.order_number} Sedang Dalam Perjalanan!'
+            message = render_to_string('order/shipping_email.html', {
+                'order': instance,
+            })
+            to_email = instance.email
+            send_email = EmailMessage(mail_subject, message, settings.EMAIL_HOST_USER, [to_email])
+            send_email.content_subtype = "html" # Set agar bisa baca tag HTML
+            send_email.send()
+            print(f"Email resi berhasil dikirim ke {to_email}")
+        except Exception as e:
+            print(f"Gagal mengirim email resi: {e}")

@@ -27,4 +27,5 @@ urlpatterns = [
     path('my_orders/', views.my_orders, name='my_orders'),
     
     path('midtrans-webhook/', views.midtrans_webhook, name='midtrans_webhook'),
+    path('track/', views.track_order, name='track_order'),
 ]

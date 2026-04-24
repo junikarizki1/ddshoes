@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'store',
     'cart',
     'order',
@@ -100,9 +101,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'id'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Jakarta'
 
 USE_I18N = True
 
@@ -133,3 +134,24 @@ AUTH_USER_MODEL = 'account.Account'
 #MIDTRANS
 MIDTRANS_CLIENT_KEY = 'Mid-client-vWPcASXDMnfQq180'
 MIDTRANS_SERVER_KEY = 'Mid-server-gaoPXRvg5eN3D9zid5oNEJbk'
+
+
+#Ngrok
+ALLOWED_HOSTS = [
+    'localhost', 
+    '127.0.0.1', 
+    'subsonic-calm-throwaway.ngrok-free.dev', # Alamat Ngrok kamu sekarang
+    '.ngrok-free.dev', # Menambahkan titik di depan agar semua sub-domain Ngrok dev diizinkan
+    '.ngrok-free.app', # Berjaga-jaga jika kamu dapat domain .app
+]
+
+
+#Notifikasi Gmail
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'tguys894@gmail.com' # Ganti dengan email Anda
+EMAIL_HOST_PASSWORD = 'hnxj ysny kdfj dhdw' # Ganti dengan App Password Gmail

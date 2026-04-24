@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>Pesanan Anda Sedang Dikirim!</h2>
+    <p>Halo {{ order.first_name }},</p>
+    <p>
+      Kabar gembira! Pesanan Anda
+      <strong>#{{ order.order_number }}</strong> telah kami serahkan ke kurir.
+    </p>
+    <p><strong>Nomor Resi:</strong> {{ order.tracking_number }}</p>
+    <p>
+      Anda dapat memantau status pengiriman melalui halaman tracking di website
+      kami.
+    </p>
+    <br />
+    <p>Terima kasih telah berbelanja di <strong>DD Shoes Store</strong>!</p>
+  </body>
+</html>

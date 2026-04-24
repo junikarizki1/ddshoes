@@ -35,6 +35,12 @@
           perjalanan menuju alamat Anda.<br />
           No. Resi: <strong>{{ order.tracking_number }}</strong>
         </p>
+        <a
+          href="{% url 'track_order' %}?no_resi={{ order.tracking_number }}&kurir=jnt"
+          class="genric-btn primary-border circle small"
+        >
+          Lacak Paket
+        </a>
         {% else %}
         <div class="status-icon mb-4">
           <img
@@ -96,7 +102,7 @@
           <a
             href="{% url 'payments' order.order_number %}"
             class="primary-btn"
-            style="padding: 10px 30px; text-decoration: none"
+            style="text-decoration: none"
             >Bayar Sekarang</a
           >
         </div>

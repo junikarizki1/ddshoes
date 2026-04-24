@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %} {% load static %} {% load humanize %}{% block content %}
 <body id="category">
   <!-- Start Banner Area -->
   <section class="banner-area organic-breadcrumb">
@@ -146,29 +146,15 @@
                 <a href="{{ product.get_url }}" style="display: block;">
                     <img class="img-fluid w-100" src="{{ product.images.url }}" ...>
                 </a>
-
                 <div class="product-details">
-                  <!-- 2. NAMA PRODUK DINAMIS -->
-                  <h6>{{ product.product_name }}</h6>
-
                   <div class="price">
                     <!-- 3. HARGA DINAMIS -->
-                    <h6>Rp {{ product.price }}</h6>
-
+                    <h6>Rp {{ product.price | intcomma }}</h6>
                     <!-- Saya menyembunyikan harga coret (diskon) karena di database belum ada field harga diskon -->
                     <!-- <h6 class="l-through">$210.00</h6> -->
                   </div>
-
-                  <div class="prd-bottom">
-                    <a href="" class="social-info">
-                      <span class="lnr lnr-heart"></span>
-                      <p class="hover-text">Wishlist</p>
-                    </a>
-                    <a href="{{ product.get_url }}" class="social-info">
-                        <span class="lnr lnr-move"></span>
-                        <p class="hover-text">view more</p>
-                    </a>
-                  </div>
+                  <!-- 2. NAMA PRODUK DINAMIS -->
+                  <h6>{{ product.product_name }}</h6>
                 </div>
               </div>
             </div>
