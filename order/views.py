@@ -1,9 +1,9 @@
 import requests
 import datetime
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from cart.models import CartItem 
-from .models import Order, OrderProduct
+from .models import Order, OrderProduct, ReturnRequest
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse 
 import midtransclient
@@ -11,9 +11,11 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 import json
-from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
 from xhtml2pdf import pisa # Library untuk convert HTML ke PDF
+from django.contrib import messages
+from .forms import ReturnRequestForm
+
 
 
 # =========================================================
@@ -314,7 +316,7 @@ def confirmation(request):
         # Jika status sudah 'Cancelled' atau 'Completed', BERHENTI DI SINI.
         # Jangan tanya Midtrans, jangan jalankan kode di bawahnya. 
         # Ini menghormati keputusan Admin.
-        if order.status in ['Cancelled', 'Completed']:
+        if order.status in ['Cancelled', 'Completed', 'Returned']:
             context = {'order': order}
             return render(request, 'order/confirmation.html', context)
         # -------------------------
@@ -458,36 +460,36 @@ def midtrans_webhook(request):
 
 
 #Notifikasi Gmail
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
+# from django.core.mail import send_mail
+# from django.template.loader import render_to_string
 
-@csrf_exempt
-def midtrans_webhook(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        order_number = data.get('order_id')
-        transaction_status = data.get('transaction_status')
+# @csrf_exempt
+# def midtrans_webhook(request):
+#     if request.method == 'POST':
+#         data = json.loads(request.body)
+#         order_number = data.get('order_id')
+#         transaction_status = data.get('transaction_status')
 
-        try:
-            order = Order.objects.get(order_number=order_number)
+#         try:
+#             order = Order.objects.get(order_number=order_number)
             
-            if transaction_status in ['capture', 'settlement']:
-                if not order.is_ordered:
-                    # 1. Update Status Pesanan
-                    order.status = 'Accepted'
-                    order.is_ordered = True
-                    order.save()
+#             if transaction_status in ['capture', 'settlement']:
+#                 if not order.is_ordered:
+#                     # 1. Update Status Pesanan
+#                     order.status = 'Accepted'
+#                     order.is_ordered = True
+#                     order.save()
 
-                    # 2. Kirim Email Notifikasi
-                    mail_subject = f'Pembayaran Berhasil - Pesanan #{order.order_number}'
-                    message = f"Halo {order.first_name},\n\nPembayaran Anda untuk pesanan #{order.order_number} telah kami terima. Kami akan segera memproses pengiriman sepatu Anda.\n\nTerima kasih telah berbelanja di DD Shoes Store!"
-                    to_email = order.email
+#                     # 2. Kirim Email Notifikasi
+#                     mail_subject = f'Pembayaran Berhasil - Pesanan #{order.order_number}'
+#                     message = f"Halo {order.first_name},\n\nPembayaran Anda untuk pesanan #{order.order_number} telah kami terima. Kami akan segera memproses pengiriman sepatu Anda.\n\nTerima kasih telah berbelanja di DD Shoes Store!"
+#                     to_email = order.email
                     
-                    send_mail(mail_subject, message, settings.EMAIL_HOST_USER, [to_email])
+#                     send_mail(mail_subject, message, settings.EMAIL_HOST_USER, [to_email])
 
-            return HttpResponse(status=200)
-        except Order.DoesNotExist:
-            return HttpResponse(status=404)
+#             return HttpResponse(status=200)
+#         except Order.DoesNotExist:
+#             return HttpResponse(status=404)
         
 
 #Tracking Pesanan
@@ -568,3 +570,36 @@ def admin_order_pdf(request, order_id):
     if pisa_status.err:
         return HttpResponse('Terjadi kesalahan saat mencetak PDF')
     return response
+
+
+
+#FUNGSI RETUR PRODUK
+def submit_return(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    # Keamanan: Pastikan status sudah Completed
+    if order.status != 'Completed':
+        messages.error(request, 'Retur hanya bisa diajukan untuk pesanan yang sudah selesai.')
+        return redirect('my_orders') # Sesuaikan dengan nama URL riwayat order kamu
+
+    # Cek apakah sudah pernah mengajukan retur sebelumnya
+    if hasattr(order, 'return_request'):
+        messages.warning(request, 'Anda sudah mengajukan retur untuk pesanan ini.')
+        return redirect('my_orders')
+
+    if request.method == 'POST':
+        form = ReturnRequestForm(request.POST, request.FILES)
+        if form.is_valid():
+            data = form.save(commit=False)
+            data.order = order
+            data.save()
+            messages.success(request, 'Permintaan retur berhasil dikirim. Mohon tunggu konfirmasi admin.')
+            return redirect('my_orders')
+    else:
+        form = ReturnRequestForm()
+
+    context = {
+        'form': form,
+        'order': order,
+    }
+    return render(request, 'order/submit_return.html', context)

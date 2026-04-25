@@ -61,6 +61,13 @@
                   >❌ Dibatalkan</span
                 >
 
+                {% elif order.status == 'Returned' %}
+                <span
+                  class="badge"
+                  style="color: black; padding: 5px 12px; border-radius: 4px"
+                  >✅ Retur</span
+                >
+
                 {% elif order.status == 'Completed' %}
                 <span
                   class="badge"

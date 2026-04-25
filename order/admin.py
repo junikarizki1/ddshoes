@@ -8,6 +8,7 @@ from account.models import Account
 from django.contrib.admin import SimpleListFilter
 from django.utils.html import format_html
 from django.urls import reverse
+from .models import ReturnRequest
 
 # --- 1. FILTER CUSTOM UNTUK TABEL ORDER ---
 class TrackingFilter(SimpleListFilter):
@@ -29,6 +30,7 @@ class TrackingFilter(SimpleListFilter):
 # --- 2. FUNGSI HITUNG STATISTIK DASHBOARD ---
 def get_dashboard_data(period=None, start_custom=None, end_custom=None):
     orders = Order.objects.all()
+    returns = ReturnRequest.objects.all()
     now = timezone.now()
 
     # Logika Filter Tanggal (Bebas / Shortcut)
@@ -66,6 +68,12 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
     # Stok Menipis: Hanya jika sisa tepat 1 (Sesuai request kamu)
     low_stock = Product.objects.filter(stock=1).count()
     
+    # --- HITUNG STATISTIK RETUR (BARU) ---
+    retur_pending = returns.filter(status='Pending').count()
+    retur_proses  = returns.filter(status='Approved').count()
+    retur_selesai = returns.filter(status='Refunded').count()
+    retur_ditolak = returns.filter(status='Rejected').count()
+    
     return {
         'total_revenue': revenue,
         'unpaid_orders': unpaid_orders,
@@ -79,6 +87,10 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
         'period': period,
         'start_custom': start_custom,
         'end_custom': end_custom,
+        'retur_pending': retur_pending,
+        'retur_proses': retur_proses,
+        'retur_selesai': retur_selesai,
+        'retur_ditolak': retur_ditolak,
     }
 
 # --- 3. PROSES OVERRIDE INDEX ADMIN ---
@@ -135,3 +147,19 @@ class OrderAdmin(admin.ModelAdmin):
 
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderProduct)
+
+
+#RETUR PRODUK
+@admin.register(ReturnRequest)
+class ReturnRequestAdmin(admin.ModelAdmin):
+    list_display = ['order', 'status', 'bank_name', 'created_at']
+    list_filter = ['status', 'created_at']
+    readonly_fields = ['order', 'reason', 'image_proof', 'bank_name', 'bank_account_number', 'bank_account_name', 'created_at']
+    
+    # Supaya Admin bisa kasih catatan dan update status saja
+    fields = ['order', 'status', 'admin_note', 'reason', 'image_proof', 'refund_proof', 'bank_name', 'bank_account_number', 'bank_account_name']
+
+    # Fungsi opsional: Agar foto bukti bisa langsung intip di admin
+    def view_proof(self, obj):
+        from django.utils.html import format_html
+        return format_html('<img src="{}" width="150" />'.format(obj.image_proof.url))

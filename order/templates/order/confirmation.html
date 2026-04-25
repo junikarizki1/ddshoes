@@ -1,5 +1,4 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
-
 <section class="banner-area organic-breadcrumb">
   <div class="container">
     <div
@@ -21,103 +20,104 @@
   <div class="container">
     <div class="row justify-content-center mb-5">
       <div class="col-md-8 text-center">
-        {% if order.status == 'Accepted' %} {% if order.tracking_number %}
-        <div class="status-icon mb-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/758/758461.png"
-            width="100"
-            alt="Shipping"
-          />
-        </div>
-        <h2 style="color: #17a2b8">Pesanan Sedang Dikirim!</h2>
-        <p>
-          Pesanan <strong>#{{ order.order_number }}</strong> sedang dalam
-          perjalanan menuju alamat Anda.<br />
-          No. Resi: <strong>{{ order.tracking_number }}</strong>
-        </p>
-        <a
-          href="{% url 'track_order' %}?no_resi={{ order.tracking_number }}&kurir=jnt"
-          class="genric-btn primary-border circle small"
-        >
-          Lacak Paket
-        </a>
-        {% else %}
-        <div class="status-icon mb-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/148/148767.png"
-            width="100"
-            alt="Success"
-          />
-        </div>
-        <h2 style="color: #28a745">Pembayaran Berhasil!</h2>
-        <p>
-          Terima kasih! Pesanan <strong>#{{ order.order_number }}</strong> telah
-          kami terima dan sedang disiapkan untuk dikirim.
-        </p>
-        {% endif %} {% elif order.status == 'Completed' %}
-        <div class="status-icon mb-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/148/148767.png"
-            width="100"
-            alt="Completed"
-          />
-        </div>
-        <h2 style="color: #343a40">Pesanan Selesai</h2>
-        <p>
-          Terima kasih! Pesanan <strong>#{{ order.order_number }}</strong> telah
-          selesai diterima. <br />
-          Sampai jumpa di orderan berikutnya!
-        </p>
-        <div class="text-center mt-4">
-          <a
-            href="{% url 'admin_order_pdf' order.id %}"
-            target="_blank"
-            class="btn btn-success"
-          >
-            Cetak Invoice
-          </a>
-        </div>
+        
+        {# 1. STATUS: RETURNED (Ditempatkan di atas agar tidak tertimpa status Accepted) #}
+        {% if order.status == 'Returned' %}
+          <div class="status-icon mb-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/3502/3502601.png" width="100" alt="Returned" />
+          </div>
+          <h2 style="color: #6f42c1">Dana Dikembalikan</h2>
+          <p>
+            Pesanan <strong>#{{ order.order_number }}</strong> telah berhasil diretur.<br />
+            Dana telah dikembalikan ke rekening Anda.
+          </p>
+          
+          {% if order.return_request.refund_proof %}
+            <div class="mt-3">
+              <p class="small text-muted">Bukti Transfer Refund:</p>
+              <a href="{{ order.return_request.refund_proof.url }}" target="_blank">
+                <img src="{{ order.return_request.refund_proof.url }}" width="150" class="img-thumbnail" alt="Bukti Transfer">
+              </a>
+            </div>
+          {% endif %}
+          
+        {# 2. STATUS: ACCEPTED & SEDANG DIKIRIM #}
+        {% elif order.status == 'Accepted' %}
+          {% if order.tracking_number %}
+            <div class="status-icon mb-4">
+              <img src="https://cdn-icons-png.flaticon.com/512/758/758461.png" width="100" alt="Shipping" />
+            </div>
+            <h2 style="color: #17a2b8">Pesanan Sedang Dikirim!</h2>
+            <p>
+              Pesanan <strong>#{{ order.order_number }}</strong> sedang dalam perjalanan menuju alamat Anda.<br />
+              No. Resi: <strong>{{ order.tracking_number }}</strong>
+            </p>
+            <a href="{% url 'track_order' %}?no_resi={{ order.tracking_number }}&kurir=jnt" class="genric-btn primary-border circle small">
+              Lacak Paket
+            </a>
+          {% else %}
+            <div class="status-icon mb-4">
+              <img src="https://cdn-icons-png.flaticon.com/512/148/148767.png" width="100" alt="Success" />
+            </div>
+            <h2 style="color: #28a745">Pembayaran Berhasil!</h2>
+            <p>
+              Terima kasih! Pesanan <strong>#{{ order.order_number }}</strong> telah kami terima dan sedang disiapkan untuk dikirim.
+            </p>
+          {% endif %}
 
+        {# 3. STATUS: COMPLETED (SELESAI) #}
+        {% elif order.status == 'Completed' %}
+          <div class="status-icon mb-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/148/148767.png" width="100" alt="Completed" />
+          </div>
+          <h2 style="color: #343a40">Pesanan Selesai</h2>
+          <p>
+            Terima kasih! Pesanan <strong>#{{ order.order_number }}</strong> telah selesai diterima. <br />
+            Sampai jumpa di orderan berikutnya!
+          </p>
+          <div class="mt-4">
+            {% if order.return_request %}
+              <div class="alert alert-info">
+                Status Retur: <strong>{{ order.return_request.get_status_display }}</strong>
+              </div>
+            {% else %}
+              <p class="text-muted small">Barang tidak sesuai? Anda dapat mengajukan pengembalian dana.</p>
+              <a href="{% url 'submit_return' order.id %}" class="btn btn-outline-danger">
+                <i class="fas fa-undo"></i> Ajukan Retur & Refund
+              </a>
+            {% endif %}
+          </div>
+
+        {# 4. STATUS: CANCELLED #}
         {% elif order.status == 'Cancelled' %}
-        <div class="status-icon mb-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/6659/6659895.png"
-            width="100"
-            alt="Cancelled"
-          />
-        </div>
-        <h2 style="color: #dc3545">Pesanan Dibatalkan</h2>
-        <p>
-          Mohon maaf, pesanan <strong>#{{ order.order_number }}</strong> telah
-          dibatalkan karena waktu pembayaran berakhir atau kesalahan sistem.
-        </p>
+          <div class="status-icon mb-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/6659/6659895.png" width="100" alt="Cancelled" />
+          </div>
+          <h2 style="color: #dc3545">Pesanan Dibatalkan</h2>
+          <p>
+            Mohon maaf, pesanan <strong>#{{ order.order_number }}</strong> telah dibatalkan karena waktu pembayaran berakhir atau alasan lainnya.
+          </p>
 
+        {# 5. STATUS: PENDING/NEW (MENUNGGU PEMBAYARAN) #}
         {% else %}
-        <div class="status-icon mb-4">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/4831/4831732.png"
-            width="100"
-            alt="Pending"
-          />
-        </div>
-        <h2 style="color: #ffba00">Menunggu Pembayaran</h2>
-        <p>
-          Pesanan <strong>#{{ order.order_number }}</strong> telah kami
-          terima.<br />
-          Segera selesaikan pembayaran agar sepatu pilihan Anda tidak kehabisan
-          stok!
-        </p>
-        <div class="mt-4">
-          <a
-            href="{% url 'payments' order.order_number %}"
-            class="primary-btn"
-            style="text-decoration: none"
-            >Bayar Sekarang</a
-          >
-        </div>
+          <div class="status-icon mb-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/4831/4831732.png" width="100" alt="Pending" />
+          </div>
+          <h2 style="color: #ffba00">Menunggu Pembayaran</h2>
+          <p>
+            Pesanan <strong>#{{ order.order_number }}</strong> telah kami terima.<br />
+            Segera selesaikan pembayaran agar sepatu pilihan Anda tidak kehabisan stok!
+          </p>
+          <div class="mt-4">
+            <a href="{% url 'payments' order.order_number %}" class="primary-btn" style="text-decoration: none">
+              Bayar Sekarang
+            </a>
+          </div>
         {% endif %}
+
       </div>
     </div>
+  </div>
 
     <div class="row order_d_inner">
       <div class="col-lg-4">
