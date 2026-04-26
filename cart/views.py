@@ -57,36 +57,44 @@ def remove_cart_item(request, product_id):
 # 4. Halaman Cart (Dilindungi wajib login)
 @login_required(login_url='login')
 def cart(request, total=0, quantity=0, cart_items=None):
-    # Inisialisasi awal agar tidak error jika try gagal
-    discount = 0
-    grand_total = 0
+    # 1. Ambil data dari session
+    coupon_id = request.session.get('coupon_id')
+    
+    # 2. VALIDASI OTOMATIS (Tanpa menghapus paksa)
+    if coupon_id:
+        try:
+            from .models import Coupon
+            # Cek apakah kupon ID di session ini memang masih ada di database dan belum dipakai
+            coupon = Coupon.objects.filter(id=coupon_id, is_used=False).first()
+            
+            if not coupon:
+                # Jika kupon sudah dihapus dari admin atau sudah dipakai, baru kita bersihkan session
+                request.session.pop('coupon_id', None)
+                request.session.pop('discount_amount', None)
+                request.session.modified = True
+        except:
+            pass
+
+    # 3. Ambil nilai diskon terbaru dari session setelah divalidasi
+    discount = request.session.get('discount_amount', 0)
     
     try:
-        # 1. Ambil item keranjang milik user
         cart_items = CartItem.objects.filter(user=request.user, is_active=True)
-        
-        # 2. Hitung total harga barang
         for cart_item in cart_items:
             total += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
         
-        # 3. LOGIKA DISKON KUPON
-        # Ambil nilai diskon dari session (hasil dari fungsi apply_coupon)
-        discount = request.session.get('discount_amount', 0)
-        
-        # 4. HITUNG GRAND TOTAL
-        # Harga barang dikurangi diskon (jika ada)
+        # 4. Hitung Grand Total
         grand_total = total - discount
         
     except ObjectDoesNotExist:
-        pass
+        grand_total = 0
 
     context = {
         'total': total,
         'quantity': quantity,
         'cart_items': cart_items,
-        'discount': discount,       # Tambahkan ini agar bisa dipanggil di HTML
-        'grand_total': grand_total, # Sekarang variabel ini sudah aman didefinisikan
+        'discount': discount,
+        'grand_total': grand_total,
     }
-    
     return render(request, 'cart/cart.html', context)
