@@ -3,7 +3,7 @@ import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from cart.models import CartItem 
-from .models import Order, OrderProduct, ReturnRequest
+from .models import Order, OrderProduct, Coupon
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse 
 import midtransclient
@@ -13,6 +13,7 @@ from django.http import HttpResponse
 import json
 from django.template.loader import get_template
 from xhtml2pdf import pisa # Library untuk convert HTML ke PDF
+from django.shortcuts import redirect
 from django.contrib import messages
 from .forms import ReturnRequestForm
 
@@ -151,7 +152,10 @@ def place_order(request, total=0, quantity=0):
         except ValueError:
             shipping_cost = 0
             
-        grand_total = total + shipping_cost
+        # --- LOGIKA KUPON: Ambil diskon dari session jika ada ---
+        discount = request.session.get('discount_amount', 0)
+        grand_total = total + shipping_cost - discount
+        # -------------------------------------------------------
         
         data = Order()
         data.user = current_user
@@ -186,6 +190,7 @@ def place_order(request, total=0, quantity=0):
         
         data.save()
 
+        # Buat Order Number
         yr = int(datetime.date.today().strftime('%Y'))
         dt = int(datetime.date.today().strftime('%d'))
         mt = int(datetime.date.today().strftime('%m'))
@@ -195,6 +200,25 @@ def place_order(request, total=0, quantity=0):
         order_number = current_date + str(data.id)
         data.order_number = order_number
         data.save()
+
+        # --- LOGIKA KUPON: Selesaikan penggunaan kupon ---
+        coupon_id = request.session.get('coupon_id')
+        if coupon_id:
+            try:
+                from .models import Coupon # Import lokal jika perlu
+                coupon = Coupon.objects.get(id=coupon_id)
+                coupon.is_used = True
+                coupon.save()
+                
+                # Bersihkan session setelah kupon resmi terpakai
+                del request.session['coupon_id']
+                del request.session['discount_amount']
+            except Coupon.DoesNotExist:
+                pass
+        # --------------------------------------------------
+
+        # Lanjut ke proses pembayaran (misal Midtrans atau Review Page)
+        # return redirect('payments') # Sesuaikan dengan return kamu        
 
         # ===========================================================
         # INI DIA SOLUSINYA: PINDAHKAN KERANJANG KE RINCIAN PESANAN
@@ -402,61 +426,61 @@ def my_orders(request):
 
 # =========================================================
 # FUNGSI WEBHOOK MIDTRANS (OTOMATISASI STATUS PEMBAYARAN)
-# =========================================================
-@csrf_exempt
-def midtrans_webhook(request):
-    if request.method == 'POST':
-        try:
-            # 1. Tangkap surat/data JSON yang dikirim oleh Midtrans
-            data = json.loads(request.body)
-            order_id = data.get('order_id')
-            transaction_status = data.get('transaction_status')
-            fraud_status = data.get('fraud_status')
+# # =========================================================
+# @csrf_exempt
+# def midtrans_webhook(request):
+#     if request.method == 'POST':
+#         try:
+#             # 1. Tangkap surat/data JSON yang dikirim oleh Midtrans
+#             data = json.loads(request.body)
+#             order_id = data.get('order_id')
+#             transaction_status = data.get('transaction_status')
+#             fraud_status = data.get('fraud_status')
 
-            # 2. Cari pesanan tersebut di database kita
-            try:
-                order = Order.objects.get(order_number=order_id)
-            except ObjectDoesNotExist:
-                return HttpResponse('Pesanan tidak ditemukan', status=404)
+#             # 2. Cari pesanan tersebut di database kita
+#             try:
+#                 order = Order.objects.get(order_number=order_id)
+#             except ObjectDoesNotExist:
+#                 return HttpResponse('Pesanan tidak ditemukan', status=404)
 
-            # 3. Ubah status pesanan berdasarkan laporan Midtrans
-            if transaction_status == 'capture':
-                if fraud_status == 'challenge':
-                    order.status = 'Pending'
-                elif fraud_status == 'accept':
-                    order.status = 'Accepted'
-                    order.is_ordered = True
-            elif transaction_status == 'settlement':
-                # Settlement = Lunas (Contoh: Uang sudah masuk dari Indomaret/Bank)
-                order.status = 'Accepted'
-                order.is_ordered = True
-            elif transaction_status in ['cancel', 'deny', 'expire']:
-                # Jika pembeli batal/kadaluarsa, ubah status jadi Cancelled
-                order.status = 'Cancelled'
-                order.is_ordered = False
+#             # 3. Ubah status pesanan berdasarkan laporan Midtrans
+#             if transaction_status == 'capture':
+#                 if fraud_status == 'challenge':
+#                     order.status = 'Pending'
+#                 elif fraud_status == 'accept':
+#                     order.status = 'Accepted'
+#                     order.is_ordered = True
+#             elif transaction_status == 'settlement':
+#                 # Settlement = Lunas (Contoh: Uang sudah masuk dari Indomaret/Bank)
+#                 order.status = 'Accepted'
+#                 order.is_ordered = True
+#             elif transaction_status in ['cancel', 'deny', 'expire']:
+#                 # Jika pembeli batal/kadaluarsa, ubah status jadi Cancelled
+#                 order.status = 'Cancelled'
+#                 order.is_ordered = False
                 
-                # (BONUS) KEMBALIKAN STOK SEPATU KARENA BATAL BELI
-                order_products = OrderProduct.objects.filter(order=order)
-                for item in order_products:
-                    product = item.product
-                    product.stock += item.quantity
-                    product.save()
+#                 # (BONUS) KEMBALIKAN STOK SEPATU KARENA BATAL BELI
+#                 order_products = OrderProduct.objects.filter(order=order)
+#                 for item in order_products:
+#                     product = item.product
+#                     product.stock += item.quantity
+#                     product.save()
                     
-            elif transaction_status == 'pending':
-                order.status = 'Pending'
+#             elif transaction_status == 'pending':
+#                 order.status = 'Pending'
 
-            # 4. Simpan perubahan ke database
-            order.save()
+#             # 4. Simpan perubahan ke database
+#             order.save()
             
-            # Beritahu Midtrans bahwa pesanannya sudah kita terima dengan sukses (Kode 200)
-            return HttpResponse('Sukses', status=200)
+#             # Beritahu Midtrans bahwa pesanannya sudah kita terima dengan sukses (Kode 200)
+#             return HttpResponse('Sukses', status=200)
 
-        except Exception as e:
-            print(f"Error Webhook: {e}")
-            return HttpResponse('Server Error', status=500)
+#         except Exception as e:
+#             print(f"Error Webhook: {e}")
+#             return HttpResponse('Server Error', status=500)
             
-    # Jika ada yang iseng mengakses URL ini lewat browser biasa (Metode GET)
-    return HttpResponse('Metode tidak diizinkan', status=405)
+#     # Jika ada yang iseng mengakses URL ini lewat browser biasa (Metode GET)
+#     return HttpResponse('Metode tidak diizinkan', status=405)
 
 
 #Notifikasi Gmail
@@ -603,3 +627,38 @@ def submit_return(request, order_id):
         'order': order,
     }
     return render(request, 'order/submit_return.html', context)
+
+
+#Voucher
+def apply_coupon(request):
+    if request.method == 'POST':
+        code = request.POST.get('coupon_code')
+        
+        # --- PERBAIKAN: Hapus diskon lama sebelum cek yang baru ---
+        if 'coupon_id' in request.session:
+            del request.session['coupon_id']
+        if 'discount_amount' in request.session:
+            del request.session['discount_amount']
+            
+        try:
+            # Cek kupon baru
+            coupon = Coupon.objects.get(code=code, user=request.user, is_used=False)
+            
+            request.session['coupon_id'] = coupon.id
+            request.session['discount_amount'] = coupon.discount_value
+            messages.success(request, f"Kupon {code} berhasil digunakan!")
+            
+        except Coupon.DoesNotExist:
+            messages.error(request, "Kupon tidak valid, sudah dipakai, atau salah ketik.")
+            # Karena sudah dihapus di atas, maka jika salah, diskon otomatis jadi 0
+            
+    return redirect('cart')
+
+def reset_coupon(request):
+    if 'coupon_id' in request.session:
+        del request.session['coupon_id']
+    if 'discount_amount' in request.session:
+        del request.session['discount_amount']
+    
+    messages.info(request, "Kupon telah dilepas.")
+    return redirect('cart')

@@ -57,12 +57,27 @@ def remove_cart_item(request, product_id):
 # 4. Halaman Cart (Dilindungi wajib login)
 @login_required(login_url='login')
 def cart(request, total=0, quantity=0, cart_items=None):
+    # Inisialisasi awal agar tidak error jika try gagal
+    discount = 0
+    grand_total = 0
+    
     try:
-        # PENTING: Hanya ambil barang milik user yang sedang login
+        # 1. Ambil item keranjang milik user
         cart_items = CartItem.objects.filter(user=request.user, is_active=True)
+        
+        # 2. Hitung total harga barang
         for cart_item in cart_items:
             total += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
+        
+        # 3. LOGIKA DISKON KUPON
+        # Ambil nilai diskon dari session (hasil dari fungsi apply_coupon)
+        discount = request.session.get('discount_amount', 0)
+        
+        # 4. HITUNG GRAND TOTAL
+        # Harga barang dikurangi diskon (jika ada)
+        grand_total = total - discount
+        
     except ObjectDoesNotExist:
         pass
 
@@ -70,7 +85,8 @@ def cart(request, total=0, quantity=0, cart_items=None):
         'total': total,
         'quantity': quantity,
         'cart_items': cart_items,
+        'discount': discount,       # Tambahkan ini agar bisa dipanggil di HTML
+        'grand_total': grand_total, # Sekarang variabel ini sudah aman didefinisikan
     }
     
-    # Sesuaikan dengan nama folder template cart Anda (carts/cart.html atau cart/cart.html)
     return render(request, 'cart/cart.html', context)

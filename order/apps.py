@@ -1,6 +1,8 @@
 from django.apps import AppConfig
 
-
 class OrderConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'order'
+    name = 'order' # sesuaikan dengan nama folder app kamu
+
+    def ready(self):
+        import order.signals 

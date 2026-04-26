@@ -2,9 +2,8 @@ from django.contrib import admin
 from django.db.models import Sum, Q
 from django.utils import timezone
 from datetime import timedelta
-from .models import Order, OrderProduct
+from .models import Order, OrderProduct, Coupon, Account
 from store.models import Product
-from account.models import Account
 from django.contrib.admin import SimpleListFilter
 from django.utils.html import format_html
 from django.urls import reverse
@@ -163,3 +162,19 @@ class ReturnRequestAdmin(admin.ModelAdmin):
     def view_proof(self, obj):
         from django.utils.html import format_html
         return format_html('<img src="{}" width="150" />'.format(obj.image_proof.url))
+    
+    
+#Voucher
+# Cara sederhana untuk menampilkan tabel Kupon
+@admin.register(Coupon)
+class CouponAdmin(admin.ModelAdmin):
+    # Kolom apa saja yang mau ditampilkan di daftar tabel
+    list_display = ('code', 'user', 'discount_value', 'is_used', 'created_at')
+    
+    # Fitur filter di samping kanan
+    list_filter = ('is_used', 'created_at')
+    
+    # Fitur pencarian berdasarkan kode atau email user
+    search_fields = ('code', 'user__email')
+    
+    

@@ -7,7 +7,9 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
 
+
 class Order(models.Model):
+    snap_token = models.CharField(max_length=100, blank=True, null=True)
     STATUS = (
         ('New', 'New'),
         ('Pending', 'Pending'), 
@@ -121,3 +123,15 @@ def send_shipping_notification(sender, instance, created, **kwargs):
                 instance._email_already_sent = True
             except Exception as e:
                 print(f"Gagal mengirim email: {e}")
+                
+#Model Voucher
+class Coupon(models.Model):
+    user = models.ForeignKey('account.Account', on_delete=models.CASCADE)
+    code = models.CharField(max_length=20, unique=True)
+    discount_value = models.IntegerField(default=5000) # Potongan 5rb
+    is_used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.code} - {self.user.email}"
+    
