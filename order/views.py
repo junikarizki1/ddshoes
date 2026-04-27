@@ -3,7 +3,7 @@ import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from cart.models import CartItem 
-from .models import Order, OrderProduct, ReturnRequest
+from .models import Order, OrderProduct, Coupon
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse 
 import midtransclient
@@ -13,6 +13,7 @@ from django.http import HttpResponse
 import json
 from django.template.loader import get_template
 from xhtml2pdf import pisa # Library untuk convert HTML ke PDF
+from django.shortcuts import redirect
 from django.contrib import messages
 from .forms import ReturnRequestForm
 
@@ -136,8 +137,8 @@ def get_shipping_cost(request):
 @login_required(login_url='login')
 def place_order(request, total=0, quantity=0):
     current_user = request.user
-    
     cart_items = CartItem.objects.filter(user=current_user)
+    
     if cart_items.count() <= 0:
         return redirect('home')
 
@@ -151,7 +152,9 @@ def place_order(request, total=0, quantity=0):
         except ValueError:
             shipping_cost = 0
             
-        grand_total = total + shipping_cost
+        # Ambil diskon dari session
+        discount = request.session.get('discount_amount', 0)
+        grand_total = total + shipping_cost - discount
         
         data = Order()
         data.user = current_user
@@ -160,46 +163,28 @@ def place_order(request, total=0, quantity=0):
         data.phone = request.POST.get('phone')
         data.email = request.POST.get('email')
         data.address = request.POST.get('address')
-        
-        data.province_id = request.POST.get('province_id')
         data.province = request.POST.get('province')
-        data.city_id = request.POST.get('city_id')
         data.city = request.POST.get('city')
-        data.district_id = request.POST.get('district_id')
         data.district = request.POST.get('district')
-        data.subdistrict_id = request.POST.get('subdistrict_id')
         data.subdistrict = request.POST.get('subdistrict')
         data.postal_code = request.POST.get('postal_code')
-        
-        courier_service = request.POST.get('courier_service', '')
-        user_note = request.POST.get('order_note', '')
-        
-        if courier_service:
-            data.order_note = f"[Kurir: {courier_service}] {user_note}"
-        else:
-            data.order_note = user_note
         
         data.order_total = total
         data.shipping_cost = shipping_cost
         data.grand_total = grand_total
         data.ip = request.META.get('REMOTE_ADDR')
-        
         data.save()
 
+        # Generate Order Number
         yr = int(datetime.date.today().strftime('%Y'))
-        dt = int(datetime.date.today().strftime('%d'))
         mt = int(datetime.date.today().strftime('%m'))
-        d = datetime.date(yr, mt, dt)
-        current_date = d.strftime("%Y%m%d") 
-        
+        dt = int(datetime.date.today().strftime('%d'))
+        current_date = datetime.date(yr, mt, dt).strftime("%Y%m%d") 
         order_number = current_date + str(data.id)
         data.order_number = order_number
         data.save()
 
-        # ===========================================================
-        # INI DIA SOLUSINYA: PINDAHKAN KERANJANG KE RINCIAN PESANAN
-        # ===========================================================
-# 1. Pindahkan isi keranjang ke rincian pesanan (OrderProduct)
+        # Pindahkan cart ke OrderProduct
         for item in cart_items:
             orderproduct = OrderProduct()
             orderproduct.order_id = data.id
@@ -210,23 +195,18 @@ def place_order(request, total=0, quantity=0):
             orderproduct.ordered = True
             orderproduct.save()
 
-            # -------------------------------------------------------
-            # LOGIKA PENGURANGAN STOK (WAJIB ADA DI SINI)
-            # -------------------------------------------------------
+            # Stok dikurangi di sini
             product = item.product
-            product.stock -= item.quantity # Kurangi stok fisik sepatu
+            product.stock -= item.quantity
             product.save()
-            # -------------------------------------------------------
 
-        # 2. HAPUS KERANJANG (DI LUAR FOR LOOP)
-        # Kita hapus keranjang SETELAH semua barang dipindahkan ke OrderProduct
+        # Hapus keranjang
         CartItem.objects.filter(user=request.user).delete()
 
-        # 3. Arahkan ke halaman pembayaran
+        # LANGSUNG REDIRECT KE PAYMENTS
         return redirect('payments', order_number=order_number) 
-        
-    else:
-        return redirect('checkout')
+    
+    return redirect('checkout')
 
 # =========================================================
 # FUNGSI HALAMAN PEMBAYARAN MIDTRANS
@@ -234,70 +214,76 @@ def place_order(request, total=0, quantity=0):
 @login_required(login_url='login')
 def payments(request, order_number):
     try:
-        # Mengambil data order berdasarkan nomor pesanan
         order = Order.objects.get(user=request.user, is_ordered=False, order_number=order_number)
-        # Mengambil rincian produk yang dibeli
         order_products = OrderProduct.objects.filter(order=order)
-    except ObjectDoesNotExist:
+    except Order.DoesNotExist:
         return redirect('home')
 
-    if order.snap_token:
-        snap_token = order.snap_token
-    else:
-        snap = midtransclient.Snap(
-            is_production=False,
-            server_key=settings.MIDTRANS_SERVER_KEY,
-            client_key=settings.MIDTRANS_CLIENT_KEY
-        )
+    # Buat transaksi baru ke Midtrans agar data selalu update
+    snap = midtransclient.Snap(
+        is_production=False,
+        server_key=settings.MIDTRANS_SERVER_KEY,
+        client_key=settings.MIDTRANS_CLIENT_KEY
+    )
 
-        # 1. Siapkan daftar item untuk Midtrans (Item Details)
-        item_list = []
-        for item in order_products:
-            item_list.append({
-                "id": item.product.id,
-                "price": int(item.product_price),
-                "quantity": item.quantity,
-                "name": item.product.product_name[:30] # Batasi nama produk agar tidak terlalu panjang
-            })
-
-        # 2. Tambahkan Ongkos Kirim sebagai item tambahan
+    item_list = []
+    # 1. Tambahkan Produk
+    for item in order_products:
         item_list.append({
-            "id": "shipping_fee",
-            "price": int(order.shipping_cost),
-            "quantity": 1,
-            "name": "Ongkos Kirim"
+            "id": f"PROD-{item.product.id}",
+            "price": int(item.product_price),
+            "quantity": item.quantity,
+            "name": item.product.product_name[:30]
         })
 
-        # 3. Masukkan ke Parameter
-        param = {
-            "transaction_details": {
-                "order_id": order.order_number,
-                "gross_amount": int(order.grand_total) # MENGGUNAKAN GRAND TOTAL (Barang + Ongkir)
-            },
-            "item_details": item_list, # Mengirim rincian agar muncul di layar Midtrans
-            "customer_details": {
-                "first_name": order.first_name,
-                "last_name": order.last_name,
-                "email": request.user.email,
-                "phone": order.phone
-            }
+    # 2. Tambahkan Ongkir
+    item_list.append({
+        "id": "SHIPPING",
+        "price": int(order.shipping_cost),
+        "quantity": 1,
+        "name": "Ongkos Kirim"
+    })
+
+    # 3. TAMBAHKAN DISKON SEBAGAI HARGA MINUS (PENTING!)
+    # Hitung selisih antara Grand Total dan (Total Barang + Ongkir)
+    total_normal = sum(item.product_price * item.quantity for item in order_products) + order.shipping_cost
+    discount_amount = total_normal - order.grand_total
+
+    if discount_amount > 0:
+        item_list.append({
+            "id": "DISCOUNT-LOYALTY",
+            "price": -int(discount_amount), # PAKE TANDA MINUS
+            "quantity": 1,
+            "name": "Potongan Voucher"
+        })
+
+    param = {
+        "transaction_details": {
+            "order_id": order.order_number,
+            "gross_amount": int(order.grand_total) 
+        },
+        "item_details": item_list,
+        "customer_details": {
+            "first_name": order.first_name,
+            "last_name": order.last_name,
+            "email": request.user.email,
+            "phone": order.phone
         }
-        
-        try:
-            snap_transaction = snap.create_transaction(param)
-            snap_token = snap_transaction['token']
-            
-            order.snap_token = snap_token
-            order.save()
-            
-        except Exception as e:
-            print(f"Error Midtrans: {e}")
-            snap_token = None
+    }
+    
+    try:
+        snap_transaction = snap.create_transaction(param)
+        snap_token = snap_transaction['token']
+        order.snap_token = snap_token
+        order.save()
+    except Exception as e:
+        print(f"Error Midtrans: {e}")
+        snap_token = None
 
     context = {
         'order': order,
         'snap_token': snap_token,
-        'client_key': settings.MIDTRANS_CLIENT_KEY, # Pastikan ini dikirim untuk JS di template
+        'client_key': settings.MIDTRANS_CLIENT_KEY,
     }
     return render(request, 'order/payments.html', context)
 
@@ -402,61 +388,61 @@ def my_orders(request):
 
 # =========================================================
 # FUNGSI WEBHOOK MIDTRANS (OTOMATISASI STATUS PEMBAYARAN)
-# =========================================================
-@csrf_exempt
-def midtrans_webhook(request):
-    if request.method == 'POST':
-        try:
-            # 1. Tangkap surat/data JSON yang dikirim oleh Midtrans
-            data = json.loads(request.body)
-            order_id = data.get('order_id')
-            transaction_status = data.get('transaction_status')
-            fraud_status = data.get('fraud_status')
+# # =========================================================
+# @csrf_exempt
+# def midtrans_webhook(request):
+#     if request.method == 'POST':
+#         try:
+#             # 1. Tangkap surat/data JSON yang dikirim oleh Midtrans
+#             data = json.loads(request.body)
+#             order_id = data.get('order_id')
+#             transaction_status = data.get('transaction_status')
+#             fraud_status = data.get('fraud_status')
 
-            # 2. Cari pesanan tersebut di database kita
-            try:
-                order = Order.objects.get(order_number=order_id)
-            except ObjectDoesNotExist:
-                return HttpResponse('Pesanan tidak ditemukan', status=404)
+#             # 2. Cari pesanan tersebut di database kita
+#             try:
+#                 order = Order.objects.get(order_number=order_id)
+#             except ObjectDoesNotExist:
+#                 return HttpResponse('Pesanan tidak ditemukan', status=404)
 
-            # 3. Ubah status pesanan berdasarkan laporan Midtrans
-            if transaction_status == 'capture':
-                if fraud_status == 'challenge':
-                    order.status = 'Pending'
-                elif fraud_status == 'accept':
-                    order.status = 'Accepted'
-                    order.is_ordered = True
-            elif transaction_status == 'settlement':
-                # Settlement = Lunas (Contoh: Uang sudah masuk dari Indomaret/Bank)
-                order.status = 'Accepted'
-                order.is_ordered = True
-            elif transaction_status in ['cancel', 'deny', 'expire']:
-                # Jika pembeli batal/kadaluarsa, ubah status jadi Cancelled
-                order.status = 'Cancelled'
-                order.is_ordered = False
+#             # 3. Ubah status pesanan berdasarkan laporan Midtrans
+#             if transaction_status == 'capture':
+#                 if fraud_status == 'challenge':
+#                     order.status = 'Pending'
+#                 elif fraud_status == 'accept':
+#                     order.status = 'Accepted'
+#                     order.is_ordered = True
+#             elif transaction_status == 'settlement':
+#                 # Settlement = Lunas (Contoh: Uang sudah masuk dari Indomaret/Bank)
+#                 order.status = 'Accepted'
+#                 order.is_ordered = True
+#             elif transaction_status in ['cancel', 'deny', 'expire']:
+#                 # Jika pembeli batal/kadaluarsa, ubah status jadi Cancelled
+#                 order.status = 'Cancelled'
+#                 order.is_ordered = False
                 
-                # (BONUS) KEMBALIKAN STOK SEPATU KARENA BATAL BELI
-                order_products = OrderProduct.objects.filter(order=order)
-                for item in order_products:
-                    product = item.product
-                    product.stock += item.quantity
-                    product.save()
+#                 # (BONUS) KEMBALIKAN STOK SEPATU KARENA BATAL BELI
+#                 order_products = OrderProduct.objects.filter(order=order)
+#                 for item in order_products:
+#                     product = item.product
+#                     product.stock += item.quantity
+#                     product.save()
                     
-            elif transaction_status == 'pending':
-                order.status = 'Pending'
+#             elif transaction_status == 'pending':
+#                 order.status = 'Pending'
 
-            # 4. Simpan perubahan ke database
-            order.save()
+#             # 4. Simpan perubahan ke database
+#             order.save()
             
-            # Beritahu Midtrans bahwa pesanannya sudah kita terima dengan sukses (Kode 200)
-            return HttpResponse('Sukses', status=200)
+#             # Beritahu Midtrans bahwa pesanannya sudah kita terima dengan sukses (Kode 200)
+#             return HttpResponse('Sukses', status=200)
 
-        except Exception as e:
-            print(f"Error Webhook: {e}")
-            return HttpResponse('Server Error', status=500)
+#         except Exception as e:
+#             print(f"Error Webhook: {e}")
+#             return HttpResponse('Server Error', status=500)
             
-    # Jika ada yang iseng mengakses URL ini lewat browser biasa (Metode GET)
-    return HttpResponse('Metode tidak diizinkan', status=405)
+#     # Jika ada yang iseng mengakses URL ini lewat browser biasa (Metode GET)
+#     return HttpResponse('Metode tidak diizinkan', status=405)
 
 
 #Notifikasi Gmail
@@ -639,3 +625,36 @@ def submit_return(request, order_id):
         'order': order,
     }
     return render(request, 'order/submit_return.html', context)
+
+
+#Voucher
+def apply_coupon(request):
+    if request.method == 'POST':
+        code = request.POST.get('coupon_code')
+        
+        # --- PERBAIKAN: Hapus diskon lama sebelum cek yang baru ---
+        if 'coupon_id' in request.session:
+            del request.session['coupon_id']
+        if 'discount_amount' in request.session:
+            del request.session['discount_amount']
+            
+        try:
+            # Cek kupon baru
+            coupon = Coupon.objects.get(code=code, user=request.user, is_used=False)
+            
+            request.session['coupon_id'] = coupon.id
+            request.session['discount_amount'] = coupon.discount_value
+            messages.success(request, f"Kupon {code} berhasil digunakan!")
+            
+        except Coupon.DoesNotExist:
+            messages.error(request, "Kupon tidak valid, sudah dipakai, atau salah ketik.")
+            # Karena sudah dihapus di atas, maka jika salah, diskon otomatis jadi 0
+            
+    return redirect('cart')
+
+def reset_coupon(request):
+    if 'coupon_id' in request.session:
+        del request.session['coupon_id']
+    if 'discount_amount' in request.session:
+        del request.session['discount_amount']
+    return redirect('cart')

@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'store',
     'cart',
-    'order',
+    'order.apps.OrderConfig',
     'account',
 ]
 

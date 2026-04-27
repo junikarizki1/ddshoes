@@ -44,6 +44,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=100, unique=True)
     phone_number = models.CharField(max_length=50)
+#Field Voucher    
+    loyalty_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
 
     # Field wajib Django
     date_joined = models.DateTimeField(auto_now_add=True)

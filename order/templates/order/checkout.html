@@ -272,17 +272,29 @@
               <li>
                 <a href="#">Subtotal <span>Rp {{ total }}</span></a>
               </li>
-              <!-- ONGKOS KIRIM DINAMIS -->
+
               <li>
                 <a href="#"
                   >Ongkos Kirim <span id="shipping_cost">Rp 0</span></a
                 >
               </li>
-              <!-- TOTAL DINAMIS -->
+
+              {% if request.session.discount_amount %}
               <li>
-                <a href="#"
-                  >Total <span id="grand_total">Rp {{ total }}</span></a
-                >
+                <a href="#">
+                  Voucher Diskon
+                  <span>- Rp {{ request.session.discount_amount }}</span>
+                </a>
+              </li>
+              {% endif %}
+
+              <li>
+                <a href="#">
+                  TOTAL
+                  <span id="grand_total"
+                    >Rp {{ grand_total|floatformat:0 }}</span
+                  >
+                </a>
               </li>
             </ul>
             <button
@@ -344,12 +356,21 @@
 
   // FUNGSI RESET HARGA ONGKIR
   function resetOngkir() {
-    document.getElementById("shipping_cost").innerText = "Rp 0";
     var subtotal = parseInt("{{ total }}");
+    var discount = parseInt("{{ request.session.discount_amount|default:0 }}");
+    var initialTotal = subtotal - discount;
+
+    if (initialTotal < 0) initialTotal = 0;
+
+    document.getElementById("shipping_cost").innerText = "Rp 0";
     document.getElementById("grand_total").innerText =
-      "Rp " + subtotal.toLocaleString("id-ID");
-    document.getElementById("input_shipping_cost").value = "0";
-    document.getElementById("input_courier_service").value = "";
+      "Rp " + initialTotal.toLocaleString("id-ID");
+
+    var inputShipping = document.getElementById("input_shipping_cost");
+    var inputCourier = document.getElementById("input_courier_service");
+
+    if (inputShipping) inputShipping.value = 0;
+    if (inputCourier) inputCourier.value = "";
   }
 
   // 1. EVENT KETIKA PROVINSI DIPILIH
@@ -583,11 +604,16 @@
         var cost = parseInt(parts[0]);
         var serviceName = parts[1];
 
+        var subtotal = parseInt("{{ total }}");
+        var discount = parseInt(
+          "{{ request.session.discount_amount|default:0 }}"
+        );
+        var grandTotal = subtotal + cost - discount;
+
+        if (grandTotal < 0) grandTotal = 0;
+
         document.getElementById("shipping_cost").innerText =
           "Rp " + cost.toLocaleString("id-ID");
-
-        var subtotal = parseInt("{{ total }}");
-        var grandTotal = subtotal + cost;
         document.getElementById("grand_total").innerText =
           "Rp " + grandTotal.toLocaleString("id-ID");
 

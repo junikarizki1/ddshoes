@@ -57,20 +57,44 @@ def remove_cart_item(request, product_id):
 # 4. Halaman Cart (Dilindungi wajib login)
 @login_required(login_url='login')
 def cart(request, total=0, quantity=0, cart_items=None):
+    # 1. Ambil data dari session
+    coupon_id = request.session.get('coupon_id')
+    
+    # 2. VALIDASI OTOMATIS (Tanpa menghapus paksa)
+    if coupon_id:
+        try:
+            from .models import Coupon
+            # Cek apakah kupon ID di session ini memang masih ada di database dan belum dipakai
+            coupon = Coupon.objects.filter(id=coupon_id, is_used=False).first()
+            
+            if not coupon:
+                # Jika kupon sudah dihapus dari admin atau sudah dipakai, baru kita bersihkan session
+                request.session.pop('coupon_id', None)
+                request.session.pop('discount_amount', None)
+                request.session.modified = True
+        except:
+            pass
+
+    # 3. Ambil nilai diskon terbaru dari session setelah divalidasi
+    discount = request.session.get('discount_amount', 0)
+    
     try:
-        # PENTING: Hanya ambil barang milik user yang sedang login
         cart_items = CartItem.objects.filter(user=request.user, is_active=True)
         for cart_item in cart_items:
             total += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
+        
+        # 4. Hitung Grand Total
+        grand_total = total - discount
+        
     except ObjectDoesNotExist:
-        pass
+        grand_total = 0
 
     context = {
         'total': total,
         'quantity': quantity,
         'cart_items': cart_items,
+        'discount': discount,
+        'grand_total': grand_total,
     }
-    
-    # Sesuaikan dengan nama folder template cart Anda (carts/cart.html atau cart/cart.html)
     return render(request, 'cart/cart.html', context)
