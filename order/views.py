@@ -572,17 +572,49 @@ def admin_order_pdf(request, order_id):
     return response
 
 
+#Fungsi Order Selesai
+def order_complete(request, order_number):
+    try:
+        # 1. Ambil data order
+        order = Order.objects.get(order_number=order_number, user=request.user)
+        
+        # 2. Update status jika masih 'Accepted'
+        if order.status == 'Accepted':
+            order.status = 'Completed'
+            order.save()
+            
+            # --- LOGIKA VOUCHER BISA DI EKSEKUSI DI SINI ---
+            
+            messages.success(request, "Terima kasih! Pesanan Anda telah selesai.")
+        
+        # 3. Ambil detail produk untuk ditampilkan di confirmation.html (opsional)
+        from .models import OrderProduct
+        ordered_products = OrderProduct.objects.filter(order_id=order.id)
+
+        context = {
+            'order': order,
+            'ordered_products': ordered_products,
+        }
+
+        # 4. Langsung render ke file confirmation.html
+        return render(request, 'order/confirmation.html', context)
+
+    except Order.DoesNotExist:
+        messages.error(request, "Pesanan tidak ditemukan.")
+        return redirect('my_orders')
+    
+    
 
 #FUNGSI RETUR PRODUK
 def submit_return(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     
-    # Keamanan: Pastikan status sudah Completed
-    if order.status != 'Completed':
-        messages.error(request, 'Retur hanya bisa diajukan untuk pesanan yang sudah selesai.')
-        return redirect('my_orders') # Sesuaikan dengan nama URL riwayat order kamu
+    # --- LOGIKA BARU: Cek apakah status sudah 'Accepted' dan Resi sudah ada ---
+    if order.status != 'Accepted' or not order.tracking_number:
+        messages.error(request, 'Retur hanya bisa diajukan saat pesanan sedang dalam proses pengiriman.')
+        return redirect('my_orders')
 
-    # Cek apakah sudah pernah mengajukan retur sebelumnya
+    # Cek apakah sudah pernah mengajukan retur sebelumnya (untuk menghindari double submit)
     if hasattr(order, 'return_request'):
         messages.warning(request, 'Anda sudah mengajukan retur untuk pesanan ini.')
         return redirect('my_orders')
@@ -592,6 +624,10 @@ def submit_return(request, order_id):
         if form.is_valid():
             data = form.save(commit=False)
             data.order = order
+            # Opsional: Jika ingin status pesanan langsung berubah saat retur diajukan
+            # order.status = 'Refund' 
+            # order.save()
+            
             data.save()
             messages.success(request, 'Permintaan retur berhasil dikirim. Mohon tunggu konfirmasi admin.')
             return redirect('my_orders')

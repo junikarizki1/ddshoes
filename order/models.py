@@ -35,6 +35,7 @@ class Order(models.Model):
     tracking_number = models.CharField(max_length=50, blank=True) 
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    snap_token = models.CharField(max_length=255, blank=True, null=True)
 
     def full_name(self):
         return f'{self.first_name} {self.last_name}'

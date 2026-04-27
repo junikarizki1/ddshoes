@@ -43,19 +43,41 @@
           
         {# 2. STATUS: ACCEPTED & SEDANG DIKIRIM #}
         {% elif order.status == 'Accepted' %}
-          {% if order.tracking_number %}
-            <div class="status-icon mb-4">
-              <img src="https://cdn-icons-png.flaticon.com/512/758/758461.png" width="100" alt="Shipping" />
-            </div>
-            <h2 style="color: #17a2b8">Pesanan Sedang Dikirim!</h2>
-            <p>
-              Pesanan <strong>#{{ order.order_number }}</strong> sedang dalam perjalanan menuju alamat Anda.<br />
-              No. Resi: <strong>{{ order.tracking_number }}</strong>
-            </p>
+        {% if order.tracking_number %}
+          <div class="status-icon mb-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/758/758461.png" width="100" alt="Shipping" />
+          </div>
+          <h2 style="color: #17a2b8">Pesanan Sedang Dikirim!</h2>
+          <p>
+            Pesanan <strong>#{{ order.order_number }}</strong> sedang dalam perjalanan menuju alamat Anda.<br />
+            No. Resi: <strong>{{ order.tracking_number }}</strong>
+          </p>
+      
+          <div class="mb-3">
             <a href="{% url 'track_order' %}?no_resi={{ order.tracking_number }}&kurir=jnt" class="genric-btn primary-border circle small">
-              Lacak Paket
+               Lacak Paket
             </a>
-          {% else %}
+          </div>
+      
+          <div class="d-flex align-items-center justify-content-center">
+            
+            <a href="{% url 'order_complete' order.order_number %}" class="btn btn-outline-success mr-2" 
+              onclick="return confirm('Apakah Anda yakin pesanan sudah diterima dengan baik?')">
+              Pesanan Diterima
+            </a>
+      
+            {% if order.return_request %}
+              <div class="alert alert-info mb-0 py-2 px-3">
+                Status Retur: <strong>{{ order.return_request.get_status_display }}</strong>
+              </div>
+            {% else %}
+              <a href="{% url 'submit_return' order.id %}" class="btn btn-outline-danger">
+                 Ajukan Retur
+              </a>
+            {% endif %}
+      
+          </div>
+        {% else %}
             <div class="status-icon mb-4">
               <img src="https://cdn-icons-png.flaticon.com/512/148/148767.png" width="100" alt="Success" />
             </div>
@@ -75,18 +97,6 @@
             Terima kasih! Pesanan <strong>#{{ order.order_number }}</strong> telah selesai diterima. <br />
             Sampai jumpa di orderan berikutnya!
           </p>
-          <div class="mt-4">
-            {% if order.return_request %}
-              <div class="alert alert-info">
-                Status Retur: <strong>{{ order.return_request.get_status_display }}</strong>
-              </div>
-            {% else %}
-              <p class="text-muted small">Barang tidak sesuai? Anda dapat mengajukan pengembalian dana.</p>
-              <a href="{% url 'submit_return' order.id %}" class="btn btn-outline-danger">
-                <i class="fas fa-undo"></i> Ajukan Retur & Refund
-              </a>
-            {% endif %}
-          </div>
 
         {# 4. STATUS: CANCELLED #}
         {% elif order.status == 'Cancelled' %}
