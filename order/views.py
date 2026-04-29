@@ -10,12 +10,12 @@ import midtransclient
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
-import json
 from django.template.loader import get_template
 from xhtml2pdf import pisa # Library untuk convert HTML ke PDF
 from django.shortcuts import redirect
 from django.contrib import messages
 from .forms import ReturnRequestForm
+import uuid
 
 
 
@@ -29,7 +29,7 @@ def checkout(request, total=0, quantity=0, cart_items=None):
     try:
         cart_items = CartItem.objects.filter(user=request.user, is_active=True)
         for cart_item in cart_items:
-            total += (cart_item.product.price * cart_item.quantity)
+            total += float(cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
     except ObjectDoesNotExist:
         pass
@@ -142,20 +142,24 @@ def place_order(request, total=0, quantity=0):
     if cart_items.count() <= 0:
         return redirect('home')
 
+    # 1. Hitung Total Belanja dengan Aman
     for cart_item in cart_items:
-        total += (cart_item.product.price * cart_item.quantity)
+        total += float(cart_item.product.price) * cart_item.quantity
         quantity += cart_item.quantity
 
     if request.method == 'POST':
+        # 2. Ambil Ongkir & Diskon
         try:
-            shipping_cost = int(request.POST.get('shipping_cost', 0))
-        except ValueError:
-            shipping_cost = 0
+            shipping_cost = float(request.POST.get('shipping_cost', 0))
+        except (ValueError, TypeError):
+            shipping_cost = 0.0
             
-        # Ambil diskon dari session
-        discount = request.session.get('discount_amount', 0)
-        grand_total = total + shipping_cost - discount
+        discount = float(request.session.get('discount_amount', 0))
         
+        # 3. Kalkulasi Grand Total
+        grand_total = float(total) + float(shipping_cost) - float(discount)
+        
+        # 4. Simpan Data Order
         data = Order()
         data.user = current_user
         data.first_name = request.POST.get('first_name')
@@ -175,35 +179,51 @@ def place_order(request, total=0, quantity=0):
         data.ip = request.META.get('REMOTE_ADDR')
         data.save()
 
-        # Generate Order Number
-        yr = int(datetime.date.today().strftime('%Y'))
-        mt = int(datetime.date.today().strftime('%m'))
-        dt = int(datetime.date.today().strftime('%d'))
-        current_date = datetime.date(yr, mt, dt).strftime("%Y%m%d") 
+        # 5. Generate Order Number
+        current_date = datetime.date.today().strftime("%Y%m%d") 
         order_number = current_date + str(data.id)
         data.order_number = order_number
         data.save()
 
-        # Pindahkan cart ke OrderProduct
+        # --- TAMBAHAN: LOGIKA PENGUNCIAN VOUCHER (AGAR TIDAK DOUBLE PAKAI) ---
+        used_coupon_id = request.session.get('coupon_id')
+        if used_coupon_id:
+            try:
+                from order.models import Coupon # Pastikan import sudah ada di atas
+                voucher = Coupon.objects.get(id=used_coupon_id, user=current_user)
+                voucher.is_used = True
+                voucher.save()
+            except Coupon.DoesNotExist:
+                pass
+        # --------------------------------------------------------------------
+
+        # 6. Pindahkan Item ke OrderProduct
         for item in cart_items:
             orderproduct = OrderProduct()
             orderproduct.order_id = data.id
-            orderproduct.user_id = request.user.id
+            orderproduct.user_id = current_user.id
             orderproduct.product_id = item.product_id
             orderproduct.quantity = item.quantity
-            orderproduct.product_price = item.product.price
+            orderproduct.product_price = float(item.product.price)
             orderproduct.ordered = True
             orderproduct.save()
 
-            # Stok dikurangi di sini
+            # Stok dikurangi
             product = item.product
-            product.stock -= item.quantity
+            product.stock -= int(item.quantity)
             product.save()
 
-        # Hapus keranjang
-        CartItem.objects.filter(user=request.user).delete()
+        # 7. Bersihkan Sesi & Keranjang
+        cart_items.delete()
+        
+        # Bersihkan semua session terkait diskon
+        if 'discount_amount' in request.session:
+            del request.session['discount_amount']
+        if 'coupon_id' in request.session:
+            del request.session['coupon_id']
+        if 'coupon_code' in request.session:
+            del request.session['coupon_code']
 
-        # LANGSUNG REDIRECT KE PAYMENTS
         return redirect('payments', order_number=order_number) 
     
     return redirect('checkout')
@@ -219,7 +239,6 @@ def payments(request, order_number):
     except Order.DoesNotExist:
         return redirect('home')
 
-    # Buat transaksi baru ke Midtrans agar data selalu update
     snap = midtransclient.Snap(
         is_production=False,
         server_key=settings.MIDTRANS_SERVER_KEY,
@@ -231,7 +250,7 @@ def payments(request, order_number):
     for item in order_products:
         item_list.append({
             "id": f"PROD-{item.product.id}",
-            "price": int(item.product_price),
+            "price": int(float(item.product_price)), # Bungkus float sebelum int
             "quantity": item.quantity,
             "name": item.product.product_name[:30]
         })
@@ -239,20 +258,20 @@ def payments(request, order_number):
     # 2. Tambahkan Ongkir
     item_list.append({
         "id": "SHIPPING",
-        "price": int(order.shipping_cost),
+        "price": int(float(order.shipping_cost)), # Bungkus float sebelum int
         "quantity": 1,
         "name": "Ongkos Kirim"
     })
 
-    # 3. TAMBAHKAN DISKON SEBAGAI HARGA MINUS (PENTING!)
-    # Hitung selisih antara Grand Total dan (Total Barang + Ongkir)
-    total_normal = sum(item.product_price * item.quantity for item in order_products) + order.shipping_cost
-    discount_amount = total_normal - order.grand_total
+    # 3. PERBAIKAN LOGIKA DISKON (Penyebab Error)
+    # Gunakan float() untuk semua variabel agar bisa dikalkulasi
+    total_normal = sum(float(item.product_price) * item.quantity for item in order_products) + float(order.shipping_cost)
+    discount_amount = total_normal - float(order.grand_total)
 
-    if discount_amount > 0:
+    if discount_amount > 1: # Gunakan toleransi > 1 rupiah
         item_list.append({
             "id": "DISCOUNT-LOYALTY",
-            "price": -int(discount_amount), # PAKE TANDA MINUS
+            "price": -int(discount_amount), 
             "quantity": 1,
             "name": "Potongan Voucher"
         })
@@ -260,7 +279,7 @@ def payments(request, order_number):
     param = {
         "transaction_details": {
             "order_id": order.order_number,
-            "gross_amount": int(order.grand_total) 
+            "gross_amount": int(float(order.grand_total)) # Bungkus float
         },
         "item_details": item_list,
         "customer_details": {
@@ -558,37 +577,27 @@ def admin_order_pdf(request, order_id):
     return response
 
 
-#Fungsi Order Selesai
+#Fungsi Order Selesai ada voucher juga
 def order_complete(request, order_number):
     try:
-        # 1. Ambil data order
-        order = Order.objects.get(order_number=order_number, user=request.user)
+        order = Order.objects.filter(order_number=order_number, user=request.user).first()
         
-        # 2. Update status jika masih 'Accepted'
+        if order is None:
+            return redirect('home')
+
         if order.status == 'Accepted':
+            order.is_ordered = True
             order.status = 'Completed'
-            order.save()
-            
-            # --- LOGIKA VOUCHER BISA DI EKSEKUSI DI SINI ---
-            
-            messages.success(request, "Terima kasih! Pesanan Anda telah selesai.")
-        
-        # 3. Ambil detail produk untuk ditampilkan di confirmation.html (opsional)
-        from .models import OrderProduct
-        ordered_products = OrderProduct.objects.filter(order_id=order.id)
+            order.save() 
 
-        context = {
-            'order': order,
-            'ordered_products': ordered_products,
-        }
 
-        # 4. Langsung render ke file confirmation.html
-        return render(request, 'order/confirmation.html', context)
 
-    except Order.DoesNotExist:
-        messages.error(request, "Pesanan tidak ditemukan.")
-        return redirect('my_orders')
-    
+        return render(request, 'order/confirmation.html', {'order': order})
+
+    except Exception as e:
+        print(f"Error pada order_complete: {e}")
+        return redirect('home')
+
     
 
 #FUNGSI RETUR PRODUK

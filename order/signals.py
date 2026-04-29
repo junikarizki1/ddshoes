@@ -1,16 +1,12 @@
 import string
 import random
-from decimal import Decimal
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
-from django.core.mail import send_mail
 from .models import Order, Coupon
 
 @receiver(pre_save, sender=Order)
 def capture_old_status(sender, instance, **kwargs):
-    """
-    Mengambil status pesanan lama sebelum disimpan untuk mendeteksi perubahan.
-    """
+
     if instance.pk:
         try:
             old_instance = Order.objects.get(pk=instance.pk)
@@ -23,18 +19,17 @@ def capture_old_status(sender, instance, **kwargs):
 @receiver(post_save, sender=Order)
 def handle_loyalty_logic(sender, instance, created, **kwargs):
     customer = instance.user
-    amount = Decimal(str(instance.order_total))
-    
-    # 1. LOGIKA TAMBAH (Jika status adalah Completed)
-    if instance.status == 'Completed':
-        # Cek apakah transaksi ini sudah pernah diproses (mencegah double point)
-        # Kita bisa asumsikan jika saldo bertambah, proses kelipatan berjalan
-        customer.loyalty_balance += amount
-        customer.save()
+    # Gunakan float karena loyalty_balance di model Account adalah FloatField
+    amount = float(instance.order_total)
+    old_status = getattr(instance, '_old_status', None)
 
-        while customer.loyalty_balance >= Decimal('200000'):
-            customer.loyalty_balance -= Decimal('200000')
-            customer.save()
+    # 1. LOGIKA TAMBAH (Hanya jika status BERUBAH menjadi Completed)
+    if instance.status == 'Completed' and old_status != 'Completed':
+        customer.loyalty_balance += amount
+        
+        # Kelipatan 200rb
+        while customer.loyalty_balance >= 200000:
+            customer.loyalty_balance -= 200000
             
             random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
             voucher_code = f"LOYAL-{random_str}"
@@ -42,18 +37,16 @@ def handle_loyalty_logic(sender, instance, created, **kwargs):
             Coupon.objects.create(
                 user=customer,
                 code=voucher_code,
-                discount_value=5000
+                discount_value=5000,
+                is_used=False
             )
-            # ... (Kirim email jika perlu)
+        customer.save()
 
-    # 2. LOGIKA SAPUJAGAT (Jika status BUKAN Completed)
-    # Ini akan mengeksekusi penghapusan jika status diubah ke Refunded, Cancelled, dll.
-    else:
-        # Cek apakah user punya voucher 'LOYAL-' yang belum terpakai
-        # Dan apakah saldo user mencurigakan (atau kita tarik paksa saldo sejumlah amount)
+    # 2. LOGIKA BATAL (Hanya jika status berubah DARI Completed MENJADI Cancelled/Refunded)
+    elif old_status == 'Completed' and instance.status in ['Cancelled', 'Refunded']:
         customer.loyalty_balance -= amount
         
-        # Tarik kembali voucher selama saldo di bawah 0
+        # Jika saldo minus, tarik kembali voucher yang belum terpakai
         while customer.loyalty_balance < 0:
             voucher_batal = Coupon.objects.filter(
                 user=customer, 
@@ -63,10 +56,10 @@ def handle_loyalty_logic(sender, instance, created, **kwargs):
 
             if voucher_batal:
                 voucher_batal.delete()
-                customer.loyalty_balance += Decimal('200000')
-                print(f"DEBUG: Voucher {voucher_batal.code} BERHASIL DIHAPUS")
+                customer.loyalty_balance += 200000
             else:
-                customer.loyalty_balance = Decimal('0.00')
+                # Jika tidak ada voucher untuk ditarik, mentok di angka 0
+                customer.loyalty_balance = 0.0
                 break
         
         customer.save()

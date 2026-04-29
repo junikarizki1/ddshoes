@@ -1,0 +1,120 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<section class="banner-area organic-breadcrumb">
+  <div class="container">
+    <div
+      class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
+    >
+      <div class="col-first">
+        <h1>Loyalty Program</h1>
+        <nav class="d-flex align-items-center">
+          <a href="{% url 'home' %}"
+            >Home<span class="lnr lnr-arrow-right"></span
+          ></a>
+          <a href="#">Loyalty</a>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="login_box_area section_gap">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6">
+        <div
+          class="login_box_img"
+          style="
+            height: 100%;
+            min-height: 400px;
+            background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%);
+          "
+        >
+          <div class="hover">
+            <h3 class="text-white">Halo, {{ user.first_name }}!</h3>
+            <p>
+              Kumpulkan terus saldo belanjamu. Setiap akumulasi Rp 200.000, kamu
+              otomatis dapat Voucher Rp 5.000!
+            </p>
+            <div
+              class="p-4 bg-white mt-4"
+              style="border-radius: 15px; color: #333"
+            >
+              <small>Total Saldo Terkumpul Saat Ini:</small>
+              <h2 class="text-warning">
+                Rp {{ user.loyalty_balance|floatformat:0 }}
+              </h2>
+
+              <div
+                class="progress mt-3"
+                style="height: 15px; border-radius: 10px"
+              >
+                <div
+                  class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                  style="width: {% widthratio user.loyalty_balance 200000 100 %}%"
+                ></div>
+              </div>
+              <small class="d-block mt-2">
+                {% if user.loyalty_balance < 200000 %} Butuh
+                <strong>Rp {{ sisa_belanja|floatformat:0 }}</strong> lagi untuk
+                voucher berikutnya! {% else %} Kamu sudah mencapai target!
+                Voucher akan diterbitkan otomatis. {% endif %}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="login_form_inner" style="padding: 40px; text-align: left">
+          <h3>Voucher Saya</h3>
+          <p>
+            Gunakan kode di bawah ini saat checkout untuk mendapatkan diskon.
+          </p>
+
+          <div
+            class="voucher-list mt-4"
+            style="max-height: 300px; overflow-y: auto"
+          >
+            {% if coupons %} {% for coupon in coupons %}
+            <div
+              class="card mb-3 border-dashed"
+              style="border: 2px dashed #ffba00; background: #fffcf5"
+            >
+              <div
+                class="card-body d-flex justify-content-between align-items-center"
+              >
+                <div>
+                  <h4 class="text-warning mb-0">{{ coupon.code }}</h4>
+                  <small class="text-muted"
+                    >Potongan: Rp {{ coupon.discount_value }}</small
+                  >
+                </div>
+                <span class="badge badge-warning text-white p-2"
+                  >BELUM TERPAKAI</span
+                >
+              </div>
+            </div>
+            {% endfor %} {% else %}
+            <div class="text-center py-5">
+              <span
+                class="lnr lnr-sad"
+                style="font-size: 3em; color: #ccc"
+              ></span>
+              <p class="mt-3 text-muted">
+                Kamu belum memiliki voucher. Ayo belanja lagi!
+              </p>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="mt-4">
+            <a href="{% url 'home' %}" class="primary-btn w-100 text-center"
+              >Belanja Sekarang</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

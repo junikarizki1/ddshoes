@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from .models import Account
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.decorators import login_required
+from order.models import Coupon
 
 # ==========================================
 # 1. FUNGSI LOGIN
@@ -74,6 +76,32 @@ def logout(request):
     return redirect('login')
 
 
+# ==========================================
+# 4. FUNGSI TRACKING
+# ==========================================
 def tracking(request):
     
     return render(request, 'account/tracking.html')
+
+
+# ==========================================
+# 5. FUNGSI LOYALTY
+# ==========================================
+@login_required(login_url='login')
+def loyalty_program(request):
+    # Ambil semua kupon milik user yang belum dipakai
+    coupons = Coupon.objects.filter(user=request.user, is_used=False).order_by('-id')
+    
+    target_voucher = 200000
+    current_balance = request.user.loyalty_balance
+    
+    # Hitung sisa belanja untuk ditampilkan di halaman
+    sisa_belanja = target_voucher - current_balance
+    if sisa_belanja < 0: sisa_belanja = 0
+
+    context = {
+        'coupons': coupons,
+        'sisa_belanja': sisa_belanja,
+        'target_voucher': target_voucher,
+    }
+    return render(request, 'account/loyalty_program.html', context)

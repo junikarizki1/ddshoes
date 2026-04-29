@@ -115,60 +115,136 @@
                 <li class="nav-item">
                   <a class="nav-link" href="contact.html">Contact</a>
                 </li>
+
                 <li class="nav-item submenu dropdown">
-                  <!-- CEK APAKAH USER SUDAH LOGIN -->
                   {% if request.user.is_authenticated %}
+                  <div class="d-flex align-items-center">
+                    <a
+                      href="#"
+                      class="nav-link dropdown-toggle d-flex align-items-center"
+                      data-toggle="dropdown"
+                      role="button"
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                    >
+                      <span
+                        class="lnr lnr-user"
+                        style="font-size: 1.2em; margin-right: 8px"
+                      ></span>
+                      <span style="font-weight: 500"
+                        >{{ request.user.first_name }}</span
+                      >
 
-                  <!-- Tampilan JIKA SUDAH LOGIN: Logo User dan Nama -->
-                  <a
-                    href="#"
-                    class="nav-link dropdown-toggle d-flex align-items-center"
-                    data-toggle="dropdown"
-                    role="button"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                  >
-                    <!-- Ikon User (Gunakan lnr-user atau ti-user bawaan template) -->
-                    <span
-                      class="lnr lnr-user"
-                      style="font-size: 1.2em; margin-right: 5px"
-                    ></span>
-                    {{ request.user.first_name }}
-                    <!-- Bisa diganti request.user.username -->
-                  </a>
+                      <div
+                        class="ml-2 d-none d-lg-inline-block"
+                        style="
+                          width: 40px;
+                          background: #e9ecef;
+                          height: 6px;
+                          border-radius: 10px;
+                          overflow: hidden;
+                          border: 1px solid #ddd;
+                        "
+                      >
+                        <div
+                          class="bg-warning"
+                          style="height: 100%; width: {% widthratio user.loyalty_balance 200000 100 %}%"
+                        ></div>
+                      </div>
+                    </a>
 
-                  <!-- Isi Dropdown JIKA SUDAH LOGIN -->
-                  <ul class="dropdown-menu">
-                    <li class="nav-item">
-                      <a class="nav-link" href="{% url 'tracking' %}"
-                        >Tracking</a
+                    <ul
+                      class="dropdown-menu shadow border-0"
+                      style="
+                        min-width: 240px;
+                        padding: 12px;
+                        border-radius: 12px;
+                      "
+                    >
+                      <li
+                        class="px-3 py-2 mb-2"
+                        style="background: #fff9e6; border-radius: 10px"
                       >
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="{% url 'my_orders' %}"
-                        >History</a
-                      >
-                    </li>
-                    <!-- Tambahan: Tombol Logout -->
-                    <li class="nav-item">
-                      <!-- Nanti href ini diganti dengan URL logout Anda -->
-                      <a
-                        class="nav-link"
-                        href="{% url 'logout' %}"
-                        style="color: red"
-                        >Logout</a
-                      >
-                    </li>
-                  </ul>
+                        <a
+                          href="{% url 'loyalty_program' %}"
+                          style="text-decoration: none"
+                        >
+                          <div
+                            class="d-flex justify-content-between align-items-center mb-1"
+                          >
+                            <small
+                              class="font-weight-bold"
+                              style="
+                                color: #ffba00;
+                                font-size: 10px;
+                                letter-spacing: 0.5px;
+                              "
+                              >LOYALTY PROGRAM</small
+                            >
+                            <i class="lnr lnr-star" style="color: #ffba00"></i>
+                          </div>
+                          <div
+                            class="progress"
+                            style="
+                              height: 8px;
+                              border-radius: 5px;
+                              background-color: #ddd;
+                            "
+                          >
+                            <div
+                              class="progress-bar bg-warning progress-bar-striped"
+                              role="progressbar"
+                              style="width: {% widthratio user.loyalty_balance 200000 100 %}%"
+                            ></div>
+                          </div>
+                        </a>
+                      </li>
+
+                      <div
+                        class="dropdown-divider"
+                        style="border-top: 1px solid #f1f1f1"
+                      ></div>
+
+                      <li class="nav-item">
+                        <a class="nav-link py-2" href="{% url 'tracking' %}">
+                          <i class="lnr lnr-map-marker mr-2"></i> Tracking
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link py-2" href="{% url 'my_orders' %}">
+                          <i class="lnr lnr-history mr-2"></i> History
+                        </a>
+                      </li>
+
+                      <div
+                        class="dropdown-divider"
+                        style="border-top: 1px solid #f1f1f1"
+                      ></div>
+
+                      <li class="nav-item">
+                        <a
+                          class="nav-link py-2"
+                          href="{% url 'logout' %}"
+                          style="color: #dc3545; font-weight: 500"
+                        >
+                          <i class="lnr lnr-exit mr-2"></i> Logout
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
 
                   {% else %}
-
-                  <!-- Tampilan JIKA BELUM LOGIN: Hanya Tulisan "Login" -->
-                  <!-- Menghilangkan dropdown-toggle agar tidak muncul panah bawah -->
-                  <a href="{% url 'login' %}" class="nav-link" role="button"
-                    >Login</a
+                  <a
+                    href="{% url 'login' %}"
+                    class="nav-link d-flex align-items-center"
+                    role="button"
                   >
-
+                    <span
+                      class="lnr lnr-enter"
+                      style="margin-right: 5px"
+                    ></span>
+                    Login
+                  </a>
                   {% endif %}
                 </li>
               </ul>

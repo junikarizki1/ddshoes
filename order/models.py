@@ -132,7 +132,6 @@ class Coupon(models.Model):
     discount_value = models.IntegerField(default=5000) # Potongan 5rb
     is_used = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
     def __str__(self):
         return f"{self.code} - {self.user.email}"
     
