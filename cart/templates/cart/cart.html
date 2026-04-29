@@ -181,9 +181,7 @@
 
             <!-- Tombol Bawah -->
             <tr class="bottom_button">
-              <td>
-                <a class="gray_btn" href="{% url 'cart' %}">Update Cart</a>
-              </td>
+              <td></td>
               <td></td>
               <td colspan="2">
                 <div
@@ -212,14 +210,13 @@
               </td>
             </tr>
 
-            <!-- Subtotal -->
             <tr>
               <td></td>
               <td></td>
-              <td style="text-align: right">
+              <td style="text-align: right; width: 200px">
                 <h5>Subtotal</h5>
               </td>
-              <td>
+              <td style="text-align: right; width: 150px">
                 <h5>Rp {{ total }}</h5>
               </td>
             </tr>
@@ -228,8 +225,10 @@
             <tr>
               <td></td>
               <td></td>
-              <td><h5>Diskon Kupon</h5></td>
-              <td>
+              <td style="text-align: right">
+                <h5>Diskon Kupon</h5>
+              </td>
+              <td style="text-align: right">
                 <h5 class="text-danger">
                   - Rp {{ request.session.discount_amount|floatformat:0 }}
                 </h5>
@@ -240,19 +239,22 @@
             <tr>
               <td></td>
               <td></td>
-              <td><h5>Grand Total</h5></td>
-              <td>
-                <h5>Rp {{ grand_total|floatformat:0 }}</h5>
+              <td style="text-align: right">
+                <h5>Grand Total</h5>
+              </td>
+              <td style="text-align: right">
+                <h5 style="color: #ffba00">
+                  Rp {{ grand_total|floatformat:0 }}
+                </h5>
               </td>
             </tr>
-
             <!-- Checkout -->
             <tr class="out_button_area">
               <td colspan="4">
                 <div
                   class="checkout_btn_inner d-flex align-items-center justify-content-end"
                 >
-                  <a class="gray_btn" href="{% url 'product' %}"
+                  <a class="gray_btn mr-2" href="{% url 'product' %}"
                     >Continue Shopping</a
                   >
                   <a class="primary-btn" href="{% url 'checkout' %}"

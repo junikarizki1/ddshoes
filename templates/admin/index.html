@@ -180,10 +180,14 @@
           <h3>Rp {{ total_revenue|floatformat:0 }}</h3>
           <p>Total Omzet</p>
         </div>
-        <div class="icon"><i class="fas fa-wallet"></i></div>
-        <div class="small-box-footer">Pendapatan Bersih</div>
+        <div class="icon"><i class="fas fa-check-wallet"></i></div>
+        <a
+          href="/admin/order/order/?status__exact=Completed"
+          class="small-box-footer"
+          >Lihat Transaksi <i class="fas fa-arrow-circle-right"></i
+        ></a>
       </div>
-    </div>
+    </div>   
     <div class="col-lg-3 col-6">
       <div
         class="small-box bg-teal shadow"
@@ -220,8 +224,8 @@
     <div class="col-lg-3 col-6">
       <div class="small-box bg-danger shadow">
         <div class="inner">
-          <h3>{{ out_of_stock }} | {{ low_stock }}</h3>
-          <p>Stok Habis | Menipis</p>
+          <h3>{{ out_of_stock }}</h3>
+          <p>Stok Habis</p>
         </div>
         <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
         <a href="/admin/store/product/" class="small-box-footer"

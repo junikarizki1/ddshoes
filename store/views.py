@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Product, Category, Brand
 from django.db.models import Q 
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 
 def home(request):
     # Mengambil semua produk yang tersedia
@@ -12,59 +13,51 @@ def home(request):
     return render(request, 'home.html', context)
 
 def product(request, category_slug=None):
-    categories = None
-    products = None
-
     # --- A. Logika Dasar (Filter Kategori atau Tampilkan Semua) ---
-    if category_slug != None:
+    if category_slug is not None:
         # Jika URL memiliki slug kategori (misal: /store/category/sneakers/)
-        categories = get_object_or_404(Category, slug=category_slug)
-        products = Product.objects.filter(category=categories, is_available=True)
+        current_category = get_object_or_404(Category, slug=category_slug)
+        products = Product.objects.filter(category=current_category, is_available=True)
     else:
         # Jika URL polos (/product/ atau /store/), tampilkan semua produk
-        products = Product.objects.all().filter(is_available=True).order_by('id')
+        products = Product.objects.filter(is_available=True).order_by('id')
 
     # --- B. Logika Search (Pencarian Nama) ---
-    # Mengambil nilai dari ?q=... di URL
     query = request.GET.get('q')
     if query:
-        # Filter produk berdasarkan nama ATAU deskripsi
         products = products.filter(Q(product_name__icontains=query) | Q(description__icontains=query))
 
-    # --- C. Logika Filter Brand (BARU) ---
-    # Mengambil nilai dari ?brand=... di URL
+    # --- C. Logika Filter Brand ---
     brand_id = request.GET.get('brand')
     if brand_id:
-        # Filter produk berdasarkan ID brand
         products = products.filter(brand__id=brand_id)
+        
     
-    # --- D. Data Pendukung ---
-    product_count = products.count()      # Hitung jumlah produk hasil filter
-    all_categories = Category.objects.all() # Ambil semua kategori untuk Sidebar
-    all_brands = Brand.objects.all()        # Ambil semua brand untuk Sidebar
-
-    context = {
-        'products': products,
-        'product_count': product_count,
-        'categories': all_categories,
-        'brands': all_brands,        # Data brand dikirim ke template
-        'query': query,              # Query search dikirim balik agar search bar tidak hilang teksnya
-    }
-        # --- TAMBAHAN: Hitung Total Semua Produk untuk opsi 'All' ---
+    # --- LOGIKA PAGINATION ---
+    # 1. Tentukan berapa produk per halaman (misal: 6 atau 12)
+    paginator = Paginator(products, 6) 
+    # 2. Ambil nomor halaman dari URL (misal: ?page=2)
+    page = request.GET.get('page')
+    # 3. Ambil produk untuk halaman tersebut
+    paged_products = paginator.get_page(page)
+    
+    # --- D. Data Pendukung & Context ---
+    product_count = products.count()
+    all_categories = Category.objects.all()
+    all_brands = Brand.objects.all()
     all_products_count = Product.objects.filter(is_available=True).count()
 
+    # Gabungkan semua data ke dalam satu context agar tidak tertimpa
     context = {
-        'products': products,
+        'products': paged_products,
         'product_count': product_count,
         'categories': all_categories,
         'brands': all_brands,
         'query': query,
-        # Kirim ke template
-        'all_products_count': all_products_count, 
+        'all_products_count': all_products_count,
+        'category_slug': category_slug, # PENTING: Untuk menandai radio button kategori mana yang aktif
     }
     
-    
-    # Menggunakan template 'store.html' (Halaman Katalog)
     return render(request, 'store/product.html', context)
 
 # ==========================================

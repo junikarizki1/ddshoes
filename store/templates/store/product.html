@@ -25,32 +25,38 @@
     <div class="row">
       <div class="col-xl-3 col-lg-4 col-md-5">
         <div class="sidebar-categories">
-          <div class="head">Browse Categories</div>
-          <ul class="main-categories">
-<!-- Opsi: All Products -->
-           <li class="main-nav-list">
-                <a href="{% url 'product' %}">
-                   <span class="lnr lnr-arrow-right"></span>
-                        All Products
-                    <span class="number">({{ all_products_count }})</span>
-                </a>
-            </li>
-            {% for category in categories %}
-            <li class="main-nav-list">
-              <!-- Link Filter Kategori -->
-              <a href="{{ category.get_url }}">
-                <span class="lnr lnr-arrow-right"></span>
-                {{ category.category_name }}
-                <span class="number">({{ category.product_set.count }})</span>
-              </a>
-            </li>
-            {% endfor %}
-          </ul>
+          <div class="head">Kategori</div>
+          <div class="common-filter">
+            <form action="{% url 'product' %}" id="category-form">
+              <ul>
+                <li class="filter-list">
+                  <input class="pixel-radio" type="radio" id="all_cat" name="category" value="all" 
+                         {% if not category_slug %}checked{% endif %} 
+                         onchange="window.location.href='{% url 'product' %}'">
+                  <label for="all_cat">
+                    Semua Produk <span class="number">({{ all_products_count }})</span>
+                  </label>
+                </li>
+      
+                {% for category in categories %}
+                <li class="filter-list">
+                  <input class="pixel-radio" type="radio" id="cat{{ category.id }}" name="category" 
+                         value="{{ category.slug }}"
+                         {% if category.slug == category_slug %}checked{% endif %}
+                         onchange="window.location.href='{{ category.get_url }}'">
+                  <label for="cat{{ category.id }}">
+                    {{ category.category_name }}
+                    <span class="number">({{ category.product_set.count }})</span>
+                  </label>
+                </li>
+                {% endfor %}
+              </ul>
+            </form>
+          </div>
         </div>
         <div class="sidebar-filter mt-50">
-          <div class="top-filter-head">Product Filters</div>
+          <div class="top-filter-head">Brand</div>
           <div class="common-filter">
-            <div class="head">Brands</div>
             <form action="#">
                 <ul>
                     <!-- Opsi: Semua Brand -->
@@ -59,7 +65,7 @@
                         <input class="pixel-radio" type="radio" id="all_brand" name="brand" value="" 
                                {% if not request.GET.brand %}checked{% endif %} 
                                onchange="this.form.submit()">
-                        <label for="all_brand">All Brands</label>
+                        <label for="all_brand">Semua Brand</label>
                     </li>
                     
                     <!-- Looping Brand dari Database -->
@@ -82,59 +88,55 @@
                 </ul>
             </form>
           </div>
-          <div class="common-filter">
-            <div class="head">Price</div>
-            <div class="price-range-area">
-              <div id="price-range"></div>
-              <div class="value-wrapper d-flex">
-                <div class="price">Price:</div>
-                <span>$</span>
-                <div id="lower-value"></div>
-                <div class="to">to</div>
-                <span>$</span>
-                <div id="upper-value"></div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <div class="col-xl-9 col-lg-8 col-md-7">
         <!-- Start Filter Bar -->
         <div class="filter-bar d-flex flex-wrap align-items-center">
-          <div class="sorting">
-            <select>
-              <option value="1">Default sorting</option>
-              <option value="1">Default sorting</option>
-              <option value="1">Default sorting</option>
-            </select>
-          </div>
           <div class="sorting mr-auto">
-            <select>
-              <option value="1">Show 12</option>
-              <option value="1">Show 12</option>
-              <option value="1">Show 12</option>
-            </select>
+            <span class="text-white">
+              Menampilkan {{ products.start_index }} - {{ products.end_index }} dari {{ product_count }} Produk
+          </span>
           </div>
+          
           <div class="pagination">
-            <a href="#" class="prev-arrow"
-              ><i class="fa fa-long-arrow-left" aria-hidden="true"></i
-            ></a>
-            <a href="#" class="active">1</a>
-            <a href="#">2</a>
-            <a href="#">3</a>
-            <a href="#" class="dot-dot"
-              ><i class="fa fa-ellipsis-h" aria-hidden="true"></i
-            ></a>
-            <a href="#">6</a>
-            <a href="#" class="next-arrow"
-              ><i class="fa fa-long-arrow-right" aria-hidden="true"></i
-            ></a>
+            {% if products.has_other_pages %}
+              
+              {% if products.has_previous %}
+                <a href="?page={{ products.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}" class="prev-arrow">
+                  <i class="fa fa-long-arrow-left" aria-hidden="true"></i>
+                </a>
+              {% else %}
+                <a href="#" class="prev-arrow disabled" style="pointer-events: none; opacity: 0.5;">
+                  <i class="fa fa-long-arrow-left" aria-hidden="true"></i>
+                </a>
+              {% endif %}
+        
+              {% for i in products.paginator.page_range %}
+                {% if products.number == i %}
+                  <a href="#" class="active">{{ i }}</a>
+                {% else %}
+                  <a href="?page={{ i }}{% if query %}&q={{ query }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}">{{ i }}</a>
+                {% endif %}
+              {% endfor %}
+        
+              {% if products.has_next %}
+                <a href="?page={{ products.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if request.GET.brand %}&brand={{ request.GET.brand }}{% endif %}" class="next-arrow">
+                  <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+                </a>
+              {% else %}
+                <a href="#" class="next-arrow disabled" style="pointer-events: none; opacity: 0.5;">
+                  <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+                </a>
+              {% endif %}
+        
+            {% endif %}
           </div>
         </div>
         <!-- End Filter Bar -->
 
-        <!-- Start Best Seller -->
-        <section class="lattest-product-area pb-40 category-list">
+        <!-- Start Product -->
+        <section class="lattest-product-area pb-40 mt-4">
           <div class="row">
             <!-- single product -->
             <!-- KITA BUNGKUS DENGAN FOR LOOP -->
@@ -160,7 +162,7 @@
             </div>
             {% endfor %}
         </section>
-        <!-- End Best Seller -->
+        <!-- End  -->
       </div>
     </div>
   </div>
