@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, Category, ProductGallery, Brand
+from .models import Product, Category, ProductGallery, Brand, UserInterest, Account
 import admin_thumbnails
 
 @admin_thumbnails.thumbnail('image')
@@ -19,6 +19,12 @@ class CategoryAdmin(admin.ModelAdmin):
 class BrandAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('brand_name',)}
     list_display = ('brand_name', 'slug')
+
+@admin.register(UserInterest)
+class UserInterestAdmin(admin.ModelAdmin):
+    list_display = ('user', 'brand', 'category', 'score', 'last_action')
+    list_filter = ('brand', 'category')
+    search_fields = ('user__email', 'brand__brand_name', 'category__category_name')
 
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Category, CategoryAdmin)

@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from account.models import Account
 
 # 1. MODEL KATEGORI (Untuk Sidebar "Browse Categories")
 class Category(models.Model):
@@ -42,7 +43,7 @@ class Product(models.Model):
     # Relasi ke Kategori
     category        = models.ForeignKey(Category, on_delete=models.CASCADE)
     brand           = models.ForeignKey(Brand, on_delete=models.CASCADE, null=True, blank=True)
-    size            = models.CharField(max_length=100, blank=True, null=True, help_text="Contoh: 39, 40, 41")
+    size = models.IntegerField(default=0)
     created_date    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
 
@@ -63,4 +64,16 @@ class ProductGallery(models.Model):
     class Meta:
         verbose_name = 'productgallery'
         verbose_name_plural = 'product gallery'
+
+
+#Model Untuk Menangkap kebiasaan user agar bisa dipersonalisasi
+class UserInterest(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    brand = models.ForeignKey('Brand', on_delete=models.CASCADE, null=True, blank=True)
+    category = models.ForeignKey('Category', on_delete=models.CASCADE, null=True, blank=True)
+    score = models.IntegerField(default=0)
+    last_action = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.brand or self.category} ({self.score})"
 

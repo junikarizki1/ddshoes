@@ -39,6 +39,7 @@ def register(request):
         phone_number = request.POST['phone_number']
         password = request.POST['password']
         confirm_password = request.POST['confirm_password']
+        shoe_size = request.POST.get('shoe_size') 
 
         if password == confirm_password:
             if Account.objects.filter(email=email).exists():
@@ -54,6 +55,10 @@ def register(request):
                     password=password
                 )
                 user.phone_number = phone_number
+
+                if shoe_size and shoe_size.strip():
+                    user.shoe_size = int(shoe_size)
+                
                 user.save()
                 
                 messages.success(request, 'Registrasi berhasil! Silakan login.')
@@ -61,7 +66,7 @@ def register(request):
         else:
             messages.error(request, 'Password tidak cocok! Silakan coba lagi.')
             return redirect('register')
-
+        
     return render(request, 'account/register.html')
 
 # ==========================================
@@ -105,3 +110,27 @@ def loyalty_program(request):
         'target_voucher': target_voucher,
     }
     return render(request, 'account/loyalty_program.html', context)
+
+
+# ==========================================
+# 5. FUNGSI EDIT PROFILE
+# ==========================================
+@login_required(login_url='login')
+def edit_profile(request):
+    user = request.user
+    if request.method == 'POST':
+        # Ambil data dari form
+        user.first_name = request.POST.get('first_name')
+        user.last_name = request.POST.get('last_name')
+        user.phone_number = request.POST.get('phone_number')
+        
+        # Update shoe_size (Penting untuk algoritma rekomendasi)
+        new_size = request.POST.get('shoe_size')
+        if new_size:
+            user.shoe_size = int(new_size)
+        
+        user.save()
+        messages.success(request, 'Profil berhasil diperbarui!')
+        return redirect('edit_profile')
+
+    return render(request, 'account/edit_profile.html', {'user': user})

@@ -45,6 +45,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=100, unique=True)
     phone_number = models.CharField(max_length=50)
     loyalty_balance = models.FloatField(default=0)
+    shoe_size = models.IntegerField(null=True, blank=True)
 
     # Field wajib Django
     date_joined = models.DateTimeField(auto_now_add=True)

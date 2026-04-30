@@ -1,16 +1,81 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Product, Category, Brand
-from django.db.models import Q 
+from .models import Product, Category, Brand, UserInterest
+from django.db.models import Q, Case, When, Value, IntegerField 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+import random
+from decimal import Decimal
 
 def home(request):
-    # Mengambil semua produk yang tersedia
-    products = Product.objects.all().filter(is_available=True) 
+    # Ambil semua produk yang tersedia dan memiliki stok
+    all_available = Product.objects.filter(is_available=True, stock__gt=0)
     
+    recommended_products = []
+    
+    if request.user.is_authenticated:
+        user = request.user
+        # Ambil data minat user dari database
+        user_interests = UserInterest.objects.filter(user=user)
+        
+        # Cek apakah user sudah mulai melakukan interaksi (klik produk)
+        has_interest = user_interests.exists()
+        
+        if not has_interest:
+            # --- SKENARIO A: USER BARU (Cold Start) ---
+            # Prioritaskan produk yang ukurannya pas dengan shoe_size user
+            personalized_queryset = all_available.annotate(
+                priority=Case(
+                    When(size=user.shoe_size, then=Value(1)),
+                    default=Value(2),
+                    output_field=IntegerField(),
+                )
+            ).order_by('priority', '-created_date')[:4]
+        
+        else:
+            # --- SKENARIO B: USER AKTIF (Content-Based) ---
+            # Ambil Brand dan Kategori yang paling sering diklik
+            top_brand = user_interests.filter(brand__isnull=False).order_by('-score').first()
+            top_cat = user_interests.filter(category__isnull=False).order_by('-score').first()
+            
+            personalized_queryset = all_available.annotate(
+                priority=Case(
+                    # P1: Ukuran Pas + Brand Favorit
+                    When(size=user.shoe_size, brand=top_brand.brand if top_brand else None, then=Value(1)),
+                    # P2: Ukuran Pas + Kategori Favorit
+                    When(size=user.shoe_size, category=top_cat.category if top_cat else None, then=Value(2)),
+                    # P3: Ukuran Pas saja
+                    When(size=user.shoe_size, then=Value(3)),
+                    # P4: Brand Favorit saja
+                    When(brand=top_brand.brand if top_brand else None, then=Value(4)),
+                    # P5: Kategori Favorit saja
+                    When(category=top_cat.category if top_cat else None, then=Value(5)),
+                    default=Value(6),
+                    output_field=IntegerField(),
+                )
+            ).order_by('priority', '-created_date')[:4]
+
+        recommended_products = list(personalized_queryset)
+    
+    else:
+        # --- SKENARIO C: GUEST / ANONIM ---
+        # Tampilkan 4 produk terbaru secara umum
+        recommended_products = list(all_available.order_by('-created_date')[:4])
+
+    # --- LOGIKA DISCOVERY (2 Produk Tambahan) ---
+    # Mengambil 2 produk secara acak untuk melengkapi total 6 produk di Home
+    # Mengecualikan produk yang sudah masuk dalam daftar personalisasi
+    excluded_ids = [p.id for p in recommended_products]
+    discovery_products = all_available.exclude(id__in=excluded_ids).order_by('?')[:2]
+    
+    # Gabungkan 4 produk personalisasi + 2 produk discovery
+    final_recommendations = recommended_products + list(discovery_products)
+
     context = {
-        'products': products, # <-- Data ini yang akan kita looping
+        'recommended_products': final_recommendations,
     }
     return render(request, 'home.html', context)
+    
+
+    
 
 def product(request, category_slug=None):
     # --- A. Logika Dasar (Filter Kategori atau Tampilkan Semua) ---
@@ -71,9 +136,25 @@ def product_detail(request, category_slug, product_slug):
         single_product = Product.objects.get(category__slug=category_slug, slug=product_slug)
     except Exception as e:
         raise e 
+    
+    # LOGIKA TRACKING PERSONALISASI
+    if request.user.is_authenticated:
+        # Panggil fungsi untuk update poin (bisa dibuat helper atau tulis langsung)
+        update_user_interest(request.user, single_product, action_weight=1) # 1 poin untuk klik/view
 
     context = {
         'single_product': single_product,
     }
     # Pastikan template product_detail.html sudah ada di folder store/templates/store/
     return render(request, 'store/product_detail.html', context)
+
+def update_user_interest(user, product, action_weight):
+    # 1. Update/Buat poin untuk Brand
+    brand_interest, _ = UserInterest.objects.get_or_create(user=user, brand=product.brand)
+    brand_interest.score += action_weight
+    brand_interest.save()
+
+    # 2. Update/Buat poin untuk Kategori
+    cat_interest, _ = UserInterest.objects.get_or_create(user=user, category=product.category)
+    cat_interest.score += action_weight
+    cat_interest.save()
