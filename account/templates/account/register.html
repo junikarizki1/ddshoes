@@ -1,170 +1,238 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
+<style>
+  /* Container utama agar form berada di tengah */
+  .register-container {
+    max-width: 650px;
+    margin: 60px auto;
+    padding: 40px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.05);
+  }
 
-<!-- Start Banner Area -->
-<section class="banner-area organic-breadcrumb">
+  /* Kotak instruksi keamanan password memanjang */
+  .password-instruction-wide {
+    font-size: 11px;
+    color: #555;
+    background: #fdfdfd;
+    padding: 12px 15px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    border-left: 4px solid #ffba00; /* Warna identitas DD Shoes Store */
+    text-align: left;
+    width: 100%;
+    line-height: 1.6;
+  }
+
+  .password-instruction-wide ul {
+    margin: 8px 0 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+  }
+
+  .password-instruction-wide ul li {
+    position: relative;
+    padding-left: 15px;
+    flex: 1 1 45%;
+    min-width: 200px;
+  }
+
+  .password-instruction-wide ul li::before {
+    content: "•";
+    color: #ffba00;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+  }
+
+  /* Link navigasi ke halaman login */
+  .login-link-wrapper {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+  }
+
+  .login-link-wrapper a {
+    color: #ffba00;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  /* Styling pesan error */
+  .errorlist {
+    color: #dc3545;
+    font-size: 11px;
+    margin-top: 5px;
+    padding-left: 0;
+    list-style: none;
+    text-align: left;
+  }
+</style>
+
+<section class="register_area section_gap">
   <div class="container">
-    <div
-      class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
-    >
-      <div class="col-first">
-        <h1>Register</h1>
-        <nav class="d-flex align-items-center">
-          <a href="{% url 'home' %}"
-            >Home<span class="lnr lnr-arrow-right"></span
-          ></a>
-          <a href="#">Register</a>
-        </nav>
-      </div>
-    </div>
-  </div>
-</section>
-<!-- End Banner Area -->
+    <div class="register-container">
+      <div class="login_form_inner" style="border: none">
+        <h3 style="margin-bottom: 30px">Buat Akun Baru</h3>
 
-<!--================Login Box Area =================-->
-<section class="login_box_area section_gap">
-  <div class="container">
-    <div class="row">
-      <!-- Kolom Gambar (Kiri) -->
-      <div class="col-lg-6">
-        <div class="login_box_img">
-          <!-- Kita gunakan gambar login yang sama untuk sementara -->
-          <img class="img-fluid" src="{% static 'img/login.jpg' %}" alt="" />
-          <div class="hover">
-            <h4>Sudah punya akun?</h4>
-            <p>
-              Jika Anda sudah memiliki akun di website kami, silakan langsung
-              masuk untuk melanjutkan proses belanja Anda.
-            </p>
-            <!-- Tombol ini mengarah kembali ke halaman Login -->
-            <a class="primary-btn" href="{% url 'login' %}">Log in Sekarang</a>
-          </div>
-        </div>
-      </div>
+        <!-- Notifikasi pesan dari views.py -->
+        {% include 'alerts.html' %}
 
-      <!-- Kolom Form Register (Kanan) -->
-      <div class="col-lg-6">
-        <div
-          class="login_form_inner"
-          style="padding-top: 50px; padding-bottom: 50px"
+        <form
+          class="row login_form"
+          action="{% url 'register' %}"
+          method="POST"
+          id="registerForm"
+          novalidate
         >
-          <h3>Buat Akun Baru</h3>
+          {% csrf_token %}
 
-          <!-- MEMANGGIL ALERT TEMPLATE UNTUK PESAN ERROR/SUKSES -->
-          {% include 'alerts.html' %}
+          <!-- Nama Depan & Belakang -->
+          <div class="col-md-6 form-group">
+            <input
+              type="text"
+              class="form-control"
+              name="first_name"
+              placeholder="Nama Depan"
+              value="{{ form.first_name.value|default:'' }}"
+              required
+            />
+            {% if form.first_name.errors %}
+            <div class="errorlist">{{ form.first_name.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6 form-group">
+            <input
+              type="text"
+              class="form-control"
+              name="last_name"
+              placeholder="Nama Belakang"
+              value="{{ form.last_name.value|default:'' }}"
+              required
+            />
+            {% if form.last_name.errors %}
+            <div class="errorlist">{{ form.last_name.errors }}</div>
+            {% endif %}
+          </div>
 
-          <!-- ACTION DAN METHOD DIPERBAIKI -->
-          <form
-            class="row login_form"
-            action="{% url 'register' %}"
-            method="POST"
-            id="registerForm"
+          <!-- Email -->
+          <div class="col-md-12 form-group" style="margin-top: 10px">
+            <input
+              type="email"
+              class="form-control"
+              name="email"
+              placeholder="Alamat Email"
+              value="{{ form.email.value|default:'' }}"
+              required
+            />
+            {% if form.email.errors %}
+            <div class="errorlist">{{ form.email.errors }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Nomor Telepon -->
+          <div class="col-md-12 form-group" style="margin-top: 10px">
+            <input
+              type="text"
+              class="form-control"
+              name="phone_number"
+              placeholder="Nomor Telepon"
+              value="{{ form.phone_number.value|default:'' }}"
+              required
+            />
+            {% if form.phone_number.errors %}
+            <div class="errorlist">{{ form.phone_number.errors }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Kolom Password -->
+          <div class="col-md-6 form-group">
+            <input
+              type="password"
+              class="form-control"
+              name="password"
+              placeholder="Password"
+              required
+            />
+            {% if form.password.errors %}
+            <small class="text-danger" style="display: block; text-align: left">
+              {{ form.password.errors.0 }}
+            </small>
+            {% endif %}
+          </div>
+
+          <!-- Kolom Ulangi Password -->
+          <div class="col-md-6 form-group">
+            <input
+              type="password"
+              class="form-control"
+              name="confirm_password"
+              placeholder="Ulangi Password"
+              required
+            />
+            {% if form.confirm_password.errors %}
+            <small class="text-danger" style="display: block; text-align: left">
+              {{ form.confirm_password.errors.0 }}
+            </small>
+            {% endif %}
+          </div>
+
+          <!-- Kotak Ketentuan Password (Berdasarkan AUTH_PASSWORD_VALIDATORS di settings.py) -->
+          {% if form.password.help_text %}
+          <div class="col-md-12 form-group">
+            <div class="password-instruction-wide">
+              <strong
+                ><i class="fa fa-lock"></i> Ketentuan Keamanan Kata
+                Sandi:</strong
+              >
+              {{ form.password.help_text|safe }}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Ukuran Sepatu -->
+          <div
+            class="col-md-12 form-group"
+            style="margin-top: 15px; text-align: left"
           >
-            <!-- CSRF TOKEN WAJIB ADA DI DJANGO -->
-            {% csrf_token %}
+            <label for="shoe_size" style="font-weight: 500; margin-left: 5px"
+              >Ukuran Sepatu (Opsional)</label
+            >
+            <input
+              type="number"
+              class="form-control"
+              name="shoe_size"
+              placeholder="Contoh: 42"
+              value="{{ form.shoe_size.value|default:'' }}"
+            />
+            {% if form.shoe_size.errors %}
+            <div class="errorlist">{{ form.shoe_size.errors }}</div>
+            {% endif %}
+          </div>
 
-            <div class="col-md-6 form-group">
-              <input
-                type="text"
-                class="form-control"
-                id="first_name"
-                name="first_name"
-                placeholder="Nama Depan"
-                onfocus="this.placeholder = ''"
-                onblur="this.placeholder = 'Nama Depan'"
-                required
-              />
-            </div>
-            <div class="col-md-6 form-group">
-              <input
-                type="text"
-                class="form-control"
-                id="last_name"
-                name="last_name"
-                placeholder="Nama Belakang"
-                onfocus="this.placeholder = ''"
-                onblur="this.placeholder = 'Nama Belakang'"
-                required
-              />
-            </div>
+          <!-- Tombol Submit -->
+          <div class="col-md-12 form-group" style="margin-top: 20px">
+            <button
+              type="submit"
+              class="primary-btn w-100"
+              style="border: none; border-radius: 7px"
+            >
+              Daftar Sekarang
+            </button>
+          </div>
 
-            <div class="col-md-12 form-group">
-              <input
-                type="email"
-                class="form-control"
-                id="email"
-                name="email"
-                placeholder="Alamat Email"
-                onfocus="this.placeholder = ''"
-                onblur="this.placeholder = 'Alamat Email'"
-                required
-              />
-            </div>
-
-            <div class="col-md-12 form-group">
-              <input
-                type="text"
-                class="form-control"
-                id="phone_number"
-                name="phone_number"
-                placeholder="Nomor Telepon"
-                onfocus="this.placeholder = ''"
-                onblur="this.placeholder = 'Nomor Telepon'"
-                required
-              />
-            </div>
-
-            <div class="col-md-6 form-group">
-              <input
-                type="password"
-                class="form-control"
-                id="password"
-                name="password"
-                placeholder="Password"
-                onfocus="this.placeholder = ''"
-                onblur="this.placeholder = 'Password'"
-                required
-              />
-            </div>
-            <div class="col-md-6 form-group">
-              <input
-                type="password"
-                class="form-control"
-                id="confirm_password"
-                name="confirm_password"
-                placeholder="Ulangi Password"
-                onfocus="this.placeholder = ''"
-                onblur="this.placeholder = 'Ulangi Password'"
-                required
-              />
-            </div>
-
-            <div class="col-md-12 form-group">
-              <label for="shoe_size">Ukuran Sepatu (Opsional)</label>
-              <input
-                type="number"
-                class="form-control"
-                id="shoe_size"
-                name="shoe_size"
-                placeholder="Contoh: 42"
-              />
-              <small class="form-text text-muted">
-                <i class="fa fa-info-circle"></i>
-                <strong>Tips:</strong> Masukkan ukuran sepatu kamu agar kami
-                bisa merekomendasikan stok yang pas di halaman utama!
-              </small>
-            </div>
-
-            <div class="col-md-12 form-group">
-              <button type="submit" value="submit" class="primary-btn">
-                Daftar Sekarang
-              </button>
-            </div>
-          </form>
-        </div>
+          <!-- Navigasi Login -->
+          <div class="col-md-12 login-link-wrapper">
+            <p>Sudah Punya Akun? <a href="{% url 'login' %}">Login</a></p>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </section>
-<!--================End Login Box Area =================-->
-
 {% endblock %}

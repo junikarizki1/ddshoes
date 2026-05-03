@@ -1,104 +1,99 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
+<!-- Style agar konsisten dengan register.html -->
+<style>
+  .login-container {
+    max-width: 500px; /* Lebih ramping dari register karena field lebih sedikit */
+    margin: 80px auto;
+    padding: 40px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.05);
+  }
+  .register-link-wrapper {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+  }
+  .register-link-wrapper a {
+    color: #ffba00;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .register-link-wrapper a:hover {
+    text-decoration: underline;
+  }
+  .forgot-password-link {
+    display: block;
+    text-align: right;
+    font-size: 13px;
+    margin-top: 5px;
+    color: #999;
+  }
+</style>
 
-<!-- Start Banner Area -->
-<section class="banner-area organic-breadcrumb">
+<section class="login_area section_gap">
   <div class="container">
-    <div
-      class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
-    >
-      <div class="col-first">
-        <h1>Login/Register</h1>
-        <nav class="d-flex align-items-center">
-          <a href="{% url 'home' %}"
-            >Home<span class="lnr lnr-arrow-right"></span
-          ></a>
-          <a href="#">Login/Register</a>
-        </nav>
-      </div>
-    </div>
-  </div>
-</section>
-<!-- End Banner Area -->
+    <div class="login-container">
+      <div class="login_form_inner" style="border: none">
+        <h3 style="margin-bottom: 30px">Masuk ke Akun</h3>
 
-<!--================Login Box Area =================-->
-<section class="login_box_area section_gap">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-6">
-        <div class="login_box_img">
-          <img class="img-fluid" src="{% static 'img/login.jpg' %}" alt="" />
-          <div class="hover">
-            <h4>New to our website?</h4>
-            <p>
-              There are advances being made in science and technology everyday,
-              and a good example of this is the
-            </p>
-            <!-- Mengarah ke halaman Register -->
-            <a class="primary-btn" href="{% url 'register' %}"
-              >Create an Account</a
+        <!-- Memanggil Alert (Pesan Gagal Login/Logout) -->
+        {% include 'alerts.html' %}
+
+        <form
+          class="row login_form"
+          action="{% url 'login' %}"
+          method="POST"
+          id="contactForm"
+        >
+          {% csrf_token %}
+
+          <!-- Email -->
+          <div class="col-md-12 form-group">
+            <input
+              type="email"
+              class="form-control"
+              name="email"
+              placeholder="Alamat Email"
+              required
+            />
+          </div>
+
+          <!-- Password -->
+          <div class="col-md-12 form-group" style="margin-top: 15px">
+            <input
+              type="password"
+              class="form-control"
+              name="password"
+              placeholder="Password"
+              required
+            />
+            <!-- Link Lupa Password -->
+            <a href="{% url 'reset_password' %}" class="forgot-password-link"
+              >Lupa Password?</a
             >
           </div>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="login_form_inner">
-          <h3>Log in to enter</h3>
 
-          <!-- Panggil template pesan alert di sini -->
-          {% include 'alerts.html' %}
+          <!-- Tombol Login -->
+          <div class="col-md-12 form-group" style="margin-top: 30px">
+            <button
+              type="submit"
+              value="submit"
+              class="primary-btn w-100"
+              style="border: none; border-radius: 7px"
+            >
+              Masuk Sekarang
+            </button>
+          </div>
 
-          <!-- PERBAIKAN: Ubah id="contactForm" menjadi id="loginForm" -->
-          <form
-            class="row login_form"
-            action="{% url 'login' %}"
-            method="POST"
-            id="loginForm"
-          >
-            <!-- Wajib pakai csrf_token -->
-            {% csrf_token %}
-
-            <div class="col-md-12 form-group">
-              <input
-                type="email"
-                class="form-control"
-                id="email"
-                name="email"
-                placeholder="Alamat Email"
-                onfocus="this.placeholder = ''"
-                onblur="this.placeholder = 'Alamat Email'"
-                required
-              />
-            </div>
-            <div class="col-md-12 form-group">
-              <input
-                type="password"
-                class="form-control"
-                id="password"
-                name="password"
-                placeholder="Password"
-                onfocus="this.placeholder = ''"
-                onblur="this.placeholder = 'Password'"
-                required
-              />
-            </div>
-            <div class="col-md-12 form-group">
-              <div class="creat_account">
-                <input type="checkbox" id="f-option2" name="selector" />
-                <label for="f-option2">Keep me logged in</label>
-              </div>
-            </div>
-            <div class="col-md-12 form-group">
-              <button type="submit" value="submit" class="primary-btn">
-                Log In
-              </button>
-              <a href="#">Forgot Password?</a>
-            </div>
-          </form>
-        </div>
+          <!-- Link Daftar Kecil di Bawah -->
+          <div class="col-md-12 register-link-wrapper">
+            <p>Belum Punya Akun? <a href="{% url 'register' %}">Register</a></p>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </section>
-<!--================End Login Box Area =================-->
-
 {% endblock %}

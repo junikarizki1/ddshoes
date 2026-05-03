@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Account
 from django.contrib import messages
+from .forms import RegistrationForm
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from order.models import Coupon
@@ -33,41 +34,34 @@ def login(request):
 # ==========================================
 def register(request):
     if request.method == 'POST':
-        first_name = request.POST['first_name']
-        last_name = request.POST['last_name']
-        email = request.POST['email']
-        phone_number = request.POST['phone_number']
-        password = request.POST['password']
-        confirm_password = request.POST['confirm_password']
-        shoe_size = request.POST.get('shoe_size') 
-
-        if password == confirm_password:
-            if Account.objects.filter(email=email).exists():
-                messages.error(request, 'Email ini sudah terdaftar!')
-                return redirect('register')
-            else:
-                username = email.split('@')[0]
-                user = Account.objects.create_user(
-                    first_name=first_name,
-                    last_name=last_name,
-                    email=email,
-                    username=username,
-                    password=password
-                )
-                user.phone_number = phone_number
-
-                if shoe_size and shoe_size.strip():
-                    user.shoe_size = int(shoe_size)
-                
-                user.save()
-                
-                messages.success(request, 'Registrasi berhasil! Silakan login.')
-                return redirect('login')
-        else:
-            messages.error(request, 'Password tidak cocok! Silakan coba lagi.')
-            return redirect('register')
+        form = RegistrationForm(request.POST)
         
-    return render(request, 'account/register.html')
+        # Jika form.is_valid() bernilai False (karena password "1234"), 
+        # maka blok kode di bawah ini TIDAK AKAN dijalankan.
+        if form.is_valid():
+            # Mengambil data yang SUDAH divalidasi
+            data = form.cleaned_data
+            
+            user = Account.objects.create_user(
+                first_name=data['first_name'],
+                last_name=data['last_name'],
+                email=data['email'],
+                username=data['email'].split('@')[0],
+                password=data['password']
+            )
+            user.phone_number = data['phone_number']
+            user.shoe_size = data['shoe_size']
+            user.save()
+
+            messages.success(request, 'Registrasi berhasil!')
+            return redirect('login')
+        else:
+            # Jika gagal (password 1234), kirim pesan error ke user
+            messages.error(request, 'Pendaftaran gagal. Perhatikan ketentuan keamanan kata sandi.')
+    else:
+        form = RegistrationForm()
+
+    return render(request, 'account/register.html', {'form': form})
 
 # ==========================================
 # 3. FUNGSI LOGOUT
