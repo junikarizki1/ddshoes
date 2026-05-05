@@ -68,36 +68,17 @@
             >
               <ul class="nav navbar-nav menu_nav ml-auto">
                 <li class="nav-item active">
-                  <a class="nav-link" href="{% url 'home' %}">Home</a>
+                  <a class="nav-link" href="{% url 'home' %}">Beranda</a>
                 </li>
 
                 <li class="nav-item">
-                  <a class="nav-link" href="{% url 'product' %}">Product</a>
-                </li>
-
-                <li class="nav-item submenu dropdown">
-                  <a
-                    href="#"
-                    class="nav-link dropdown-toggle"
-                    data-toggle="dropdown"
-                    role="button"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                    >Blog</a
-                  >
-                  <ul class="dropdown-menu">
-                    <li class="nav-item">
-                      <a class="nav-link" href="blog.html">Blog</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="single-blog.html"
-                        >Blog Details</a
-                      >
-                    </li>
-                  </ul>
+                  <a class="nav-link" href="{% url 'product' %}">Produk</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="contact.html">Contact</a>
+                  <a class="nav-link" href="#">Kontak</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">S&K</a>
                 </li>
 
                 <li class="nav-item submenu dropdown">
@@ -435,5 +416,37 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE"></script>
     <script src="{% static 'js/gmaps.min.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
+    <!-- Tawk.to Live Chat Setup -->
+    <script type="text/javascript">
+      var Tawk_API = Tawk_API || {},
+        Tawk_LoadStart = new Date();
+    </script>
+
+    {% if user.is_authenticated %}
+    <script type="text/javascript">
+      Tawk_API.onLoad = function () {
+        Tawk_API.setAttributes(
+          {
+            name: "{{ user.first_name }} {{ user.last_name }}",
+            email: "{{ user.email }}",
+            hash: "DD-SHOES-{{ user.id }}",
+          },
+          function (error) {}
+        );
+      };
+    </script>
+    {% endif %}
+
+    <script type="text/javascript">
+      (function () {
+        var s1 = document.createElement("script"),
+          s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = "https://embed.tawk.to/69f9c1b24126b11c39d60d31/1jnrpp8qe";
+        s1.charset = "UTF-8";
+        s1.setAttribute("crossorigin", "*");
+        s0.parentNode.insertBefore(s1, s0);
+      })();
+    </script>
   </body>
 </html>

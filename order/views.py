@@ -1,5 +1,6 @@
 import requests
 import datetime
+from django.db.models import Sum, F
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from cart.models import CartItem 
@@ -31,6 +32,9 @@ def checkout(request, total=0, quantity=0, cart_items=None):
         for cart_item in cart_items:
             total += float(cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
+            
+            discount = float(request.session.get('discount_amount', 0))
+            total = total - discount
     except ObjectDoesNotExist:
         pass
         
@@ -50,6 +54,7 @@ def checkout(request, total=0, quantity=0, cart_items=None):
         
     context = {
         'total': total,
+        'discount': discount,
         'quantity': quantity,
         'cart_items': cart_items,
         'provinces': provinces, 
@@ -156,8 +161,11 @@ def place_order(request, total=0, quantity=0):
             
         discount = float(request.session.get('discount_amount', 0))
         
-        # 3. Kalkulasi Grand Total
-        grand_total = float(total) + float(shipping_cost) - float(discount)
+# Total sekarang menjadi Omzet Bersih (Produk - Diskon)
+        total = float(total) - float(discount)
+    
+    # Grand Total tinggal menambahkan Ongkir ke hasil Total tadi
+        grand_total = total + shipping_cost
         
         # 4. Simpan Data Order
         data = Order()
@@ -595,7 +603,6 @@ def order_complete(request, order_number):
         return render(request, 'order/confirmation.html', {'order': order})
 
     except Exception as e:
-        print(f"Error pada order_complete: {e}")
         return redirect('home')
 
     
@@ -667,3 +674,4 @@ def reset_coupon(request):
     if 'discount_amount' in request.session:
         del request.session['discount_amount']
     return redirect('cart')
+

@@ -22,10 +22,14 @@ class Category(models.Model):
 class Brand(models.Model):
     brand_name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
+    brand_image = models.ImageField(upload_to='photos/brands', blank=True)
 
     class Meta:
         verbose_name = 'brand'
         verbose_name_plural = 'brands'
+        
+    def get_url(self):
+        return reverse('products_by_brand', args=[self.slug])
 
     def __str__(self):
         return self.brand_name

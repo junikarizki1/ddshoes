@@ -1,14 +1,16 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Product, Category, Brand, UserInterest
-from django.db.models import Q, Case, When, Value, IntegerField 
+from django.db.models import Q, Case, When, Value, IntegerField, Sum 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 import random
 from decimal import Decimal
+from django.db.models import Count
+from order.models import OrderProduct
+from django.db.models.functions import Coalesce
 
 def home(request):
     # Ambil semua produk yang tersedia dan memiliki stok
     all_available = Product.objects.filter(is_available=True, stock__gt=0)
-    
     recommended_products = []
     
     if request.user.is_authenticated:
@@ -68,21 +70,44 @@ def home(request):
     
     # Gabungkan 4 produk personalisasi + 2 produk discovery
     final_recommendations = recommended_products + list(discovery_products)
+    
+    
+    #TOP KATEGORI
+    top_categories = Category.objects.annotate(
+        total_sold=Coalesce(
+            Sum('product__orderproduct__quantity', filter=Q(product__orderproduct__ordered=True)),
+            Value(0)
+        )
+    ).order_by('-total_sold')[:3]
+    
+    #TOP BRAND
+    top_brands = Brand.objects.annotate(
+        brand_sales=Coalesce(
+            Sum('product__orderproduct__quantity', filter=Q(product__orderproduct__ordered=True)),
+            Value(0)
+        )
+    ).order_by('-brand_sales')[:5]
 
     context = {
         'recommended_products': final_recommendations,
+        'top_categories': top_categories,
+        'top_brands': top_brands,
     }
     return render(request, 'home.html', context)
     
 
     
 
-def product(request, category_slug=None):
+def product(request, category_slug=None, brand_slug=None):
     # --- A. Logika Dasar (Filter Kategori atau Tampilkan Semua) ---
     if category_slug is not None:
         # Jika URL memiliki slug kategori (misal: /store/category/sneakers/)
         current_category = get_object_or_404(Category, slug=category_slug)
         products = Product.objects.filter(category=current_category, is_available=True)
+    elif brand_slug != None:
+        # Filter berdasarkan brand
+        brands = get_object_or_404(Brand, slug=brand_slug)
+        products = Product.objects.filter(brand=brands, is_available=True)
     else:
         # Jika URL polos (/product/ atau /store/), tampilkan semua produk
         products = Product.objects.filter(is_available=True).order_by('id')
@@ -121,6 +146,7 @@ def product(request, category_slug=None):
         'query': query,
         'all_products_count': all_products_count,
         'category_slug': category_slug, # PENTING: Untuk menandai radio button kategori mana yang aktif
+        'brand_slug': brand_slug,
     }
     
     return render(request, 'store/product.html', context)

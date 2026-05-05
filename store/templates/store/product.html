@@ -7,13 +7,12 @@
         class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
       >
         <div class="col-first">
-          <h1>Shop Category page</h1>
+          <h1>Halaman Produk</h1>
           <nav class="d-flex align-items-center">
-            <a href="index.html"
+            <a href="{% url 'home' %}"
               >Home<span class="lnr lnr-arrow-right"></span
             ></a>
-            <a href="#">Shop<span class="lnr lnr-arrow-right"></span></a>
-            <a href="category.html">Fashon Category</a>
+            <a href="#">Produk</a>
           </nav>
         </div>
       </div>
@@ -34,7 +33,7 @@
                          {% if not category_slug %}checked{% endif %} 
                          onchange="window.location.href='{% url 'product' %}'">
                   <label for="all_cat">
-                    Semua Produk <span class="number">({{ all_products_count }})</span>
+                    All <span class="number">({{ all_products_count }})</span>
                   </label>
                 </li>
       
@@ -54,41 +53,38 @@
             </form>
           </div>
         </div>
-        <div class="sidebar-filter mt-50">
-          <div class="top-filter-head">Brand</div>
+        <div class="sidebar-categories mt-3 mb-3">
+          <div class="head">Brand</div>
           <div class="common-filter">
-            <form action="#">
-                <ul>
-                    <!-- Opsi: Semua Brand -->
-                    <li class="filter-list">
-                        <!-- Jika tidak ada parameter brand di URL, tandai ini sebagai checked -->
-                        <input class="pixel-radio" type="radio" id="all_brand" name="brand" value="" 
-                               {% if not request.GET.brand %}checked{% endif %} 
-                               onchange="this.form.submit()">
-                        <label for="all_brand">Semua Brand</label>
-                    </li>
-                    
-                    <!-- Looping Brand dari Database -->
-                    {% for brand in brands %}
-                    <li class="filter-list">
-                        <!-- 
-                            Logic Checked: Cek apakah ID brand di URL sama dengan ID brand saat ini 
-                            |stringformat:"s" digunakan karena request.GET berupa string sedangkan brand.id berupa integer
-                        -->
-                        <input class="pixel-radio" type="radio" id="brand{{ brand.id }}" name="brand" value="{{ brand.id }}" 
-                               {% if request.GET.brand == brand.id|stringformat:"s" %}checked{% endif %} 
-                               onchange="this.form.submit()">
-                        <label for="brand{{ brand.id }}">
-                            {{ brand.brand_name }}
-                            <!-- Menampilkan jumlah produk dalam brand ini -->
-                            <span class="number">({{ brand.product_set.count }})</span>
-                        </label>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </form>
+              <form action="#" id="brand-form">
+                  <ul>
+                      <!-- Opsi: Semua Brand -->
+                      <li class="filter-list">
+                          <input class="pixel-radio" type="radio" id="all_brand" name="brand" 
+                                 {% if not brand_slug %}checked{% endif %} 
+                                 onchange="window.location.href='{% url 'product' %}'">
+                          <label for="all_brand">
+                              All <span class="number">({{ all_products_count }})</span>
+                          </label>
+                      </li>
+      
+                      <!-- Looping Brand dari Database -->
+                      {% for brand in links_brand %}
+                      <li class="filter-list">
+                          <input class="pixel-radio" type="radio" id="brand{{ brand.id }}" name="brand" 
+                                 value="{{ brand.slug }}"
+                                 {% if brand.slug == brand_slug %}checked{% endif %}
+                                 onchange="window.location.href='{{ brand.get_url }}'">
+                          <label for="brand{{ brand.id }}">
+                              {{ brand.brand_name }}
+                              <span class="number">({{ brand.product_set.count }})</span>
+                          </label>
+                      </li>
+                      {% endfor %}
+                  </ul>
+              </form>
           </div>
-        </div>
+      </div>
       </div>
       <div class="col-xl-9 col-lg-8 col-md-7">
         <!-- Start Filter Bar -->

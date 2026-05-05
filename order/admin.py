@@ -43,7 +43,7 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
         orders = orders.filter(created_at__year=now.year, created_at__month=now.month)
     
     # Hitung Statistik
-    revenue = orders.filter(status='Completed').aggregate(Sum('grand_total'))['grand_total__sum'] or 0
+    revenue = orders.filter(status='Completed').aggregate(Sum('order_total'))['order_total__sum'] or 0
     unpaid_orders = orders.filter(status='New').count()
     
     # Siap Pack = Accepted & Resi Kosong
@@ -117,7 +117,7 @@ class OrderProductInline(admin.TabularInline):
 
 class OrderAdmin(admin.ModelAdmin):
     # Ganti 'status' menjadi 'status_display' di list_display
-    list_display = ['order_number', 'full_name', 'grand_total', 'status_display', 'cetak_invoice', 'created_at']
+    list_display = ['order_number', 'full_name','order_total', 'grand_total', 'status_display', 'cetak_invoice', 'created_at']
     list_filter = [
         'status',TrackingFilter       
     ]
