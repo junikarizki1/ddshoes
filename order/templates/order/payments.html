@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %}{% load humanize %}{% load static %}{% block content %}
 <section class="banner-area organic-breadcrumb">
   <div class="container">
     <div
@@ -47,7 +47,7 @@
               <a href="#"
                 >Total Tagihan
                 <span style="font-size: 20px; font-weight: bold; color: #ff6c00"
-                  >Rp {{ order.grand_total }}</span
+                  >Rp {{ order.grand_total|floatformat:0|intcomma }}</span
                 ></a
               >
             </li>

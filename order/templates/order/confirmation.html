@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %} {% load static %} {% load humanize %} {% block content %}
 <section class="banner-area organic-breadcrumb">
   <div class="container">
     <div
@@ -41,42 +41,52 @@
             </div>
           {% endif %}
           
-        {# 2. STATUS: ACCEPTED & SEDANG DIKIRIM #}
-        {% elif order.status == 'Accepted' %}
-        {% if order.tracking_number %}
-          <div class="status-icon mb-4">
-            <img src="https://cdn-icons-png.flaticon.com/512/758/758461.png" width="100" alt="Shipping" />
-          </div>
-          <h2 style="color: #17a2b8">Pesanan Sedang Dikirim!</h2>
-          <p>
-            Pesanan <strong>#{{ order.order_number }}</strong> sedang dalam perjalanan menuju alamat Anda.<br />
-            No. Resi: <strong>{{ order.tracking_number }}</strong>
-          </p>
-      
-          <div class="mb-3">
-            <a href="{% url 'track_order' %}?no_resi={{ order.tracking_number }}&kurir=jnt" class="genric-btn primary-border circle small">
-               Lacak Paket
+{# 2. STATUS: ACCEPTED & SEDANG DIKIRIM #}
+{% elif order.status == 'Accepted' %}
+    {% if order.tracking_number %}
+    <div class="status-container text-center p-4 shadow-sm rounded border bg-white col-lg-8 mx-auto">
+        <!-- Icon & Judul -->
+        <div class="status-icon mb-3">
+            <img src="https://cdn-icons-png.flaticon.com/512/758/758461.png" width="80" alt="Shipping" />
+        </div>
+        <h2 class="font-weight-bold" style="color: #17a2b8">Pesanan Sedang Dikirim!</h2>
+        <p class="text-muted">
+            Pesanan <span class="badge badge-info">#{{ order.order_number }}</span> sedang dalam perjalanan.
+        </p>
+
+        <!-- Box Resi -->
+        <div class="resi-box p-3 mb-4 bg-light rounded border-dashed" style="border: 2px dashed #dee2e6;">
+            <p class="mb-1 text-uppercase small font-weight-bold text-secondary">Nomor Resi</p>
+            <h4 class="text-dark">{{ order.tracking_number }}</h4>
+            <a href="{% url 'track_order' %}?no_resi={{ order.tracking_number }}&kurir=jnt" class="genric-btn info-border circle arrow mt-2">
+                Lacak Lokasi Paket <span class="lnr lnr-arrow-right"></span>
             </a>
-          </div>
-      
-          <div class="d-flex align-items-center justify-content-center">
-            
-            <a href="{% url 'order_complete' order.order_number %}" class="btn btn-outline-success mr-2" 
-              onclick="return confirm('Apakah Anda yakin pesanan sudah diterima dengan baik?')">
-              Pesanan Diterima
-            </a>
-      
-            {% if order.return_request %}
-              <div class="alert alert-info mb-0 py-2 px-3">
-                Status Retur: <strong>{{ order.return_request.get_status_display }}</strong>
-              </div>
-            {% else %}
-              <a href="{% url 'submit_return' order.id %}" class="btn btn-outline-danger">
-                 Ajukan Retur
-              </a>
-            {% endif %}
-      
-          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="order-actions border-top pt-4">
+            <p class="small text-secondary mb-3">Sudah menerima produk?</p>
+            <div class="d-flex flex-wrap align-items-center justify-content-center" style="gap: 10px;">
+                
+                <a href="{% url 'order_complete' order.order_number %}" 
+                   class="btn btn-success px-4 shadow-sm" 
+                   onclick="return confirm('Apakah Anda yakin pesanan sudah diterima dengan baik?')">
+                    <i class="fa fa-check-circle mr-1"></i> Pesanan Diterima
+                </a>
+
+                {% if order.return_request %}
+                    <div class="alert alert-warning mb-0 py-2 px-3 border-0 shadow-sm">
+                        <i class="fa fa-info-circle mr-1"></i> Retur: <strong>{{ order.return_request.get_status_display }}</strong>
+                    </div>
+                {% else %}
+                    <a href="{% url 'submit_return' order.id %}" class="btn btn-outline-danger px-4">
+                        <i class="fa fa-undo mr-1"></i> Ajukan Retur
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
         {% else %}
             <div class="status-icon mb-4">
               <img src="https://cdn-icons-png.flaticon.com/512/148/148767.png" width="100" alt="Success" />
@@ -129,134 +139,130 @@
     </div>
   </div>
 
-    <div class="row order_d_inner">
-      <div class="col-lg-4">
-        <div class="details_item">
-          <h4>Info Pesanan</h4>
-          <ul class="list">
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Nomor Pesanan</span> : {{ order.order_number }}</a
-              >
-            </li>
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Tanggal</span> : {{ order.created_at|date:"d M Y" }}</a
-              >
-            </li>
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Ongkos Kirim</span> : Rp {{ order.shipping_cost }}</a
-              >
-            </li>
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Total Tagihan</span> : Rp {{ order.grand_total }}</a
-              >
-            </li>
-          </ul>
+  <div class="row order_d_inner mt-4">
+    <!-- Kolom Info Pesanan -->
+    <div class="col-lg-6 col-md-6 mb-4">
+        <div class="details_item p-4 shadow-sm rounded bg-light border">
+            <h4 class="mb-3 text-primary border-bottom pb-2">
+                <i class="fa fa-shopping-bag mr-2"></i> Info Pesanan
+            </h4>
+            <ul class="list list-unstyled">
+                <li class="mb-2">
+                    <span class="d-block font-weight-bold text-dark">Nomor Pesanan:</span>
+                    <span class="text-muted">#{{ order.order_number }}</span>
+                </li>
+                <li class="mb-2">
+                    <span class="d-block font-weight-bold text-dark">Tanggal:</span>
+                    <span class="text-muted">{{ order.created_at|date:"d M Y" }}</span>
+                </li>
+                <li class="mb-2">
+                    <span class="d-block font-weight-bold text-dark">Nama Lengkap:</span>
+                    <span class="text-muted">{{ order.first_name }} {{ order.last_name }}</span>
+                </li>
+                <li class="mb-2">
+                    <span class="d-block font-weight-bold text-dark">Telepon:</span>
+                    <span class="text-muted">{{ order.phone }}</span>
+                </li>
+                <li class="mb-2">
+                    <span class="d-block font-weight-bold text-dark">Email:</span>
+                    <span class="text-muted">{{ order.email }}</span>
+                </li>
+            </ul>
         </div>
-      </div>
-
-      <div class="col-lg-4">
-        <div class="details_item">
-          <h4>Info Pemesan</h4>
-          <ul class="list">
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Nama</span> : {{ order.first_name }}
-              </a>
-            </li>
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Telepon</span> : {{ order.phone }}</a
-              >
-            </li>
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Email</span> : {{ order.email }}</a
-              >
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="col-lg-4">
-        <div class="details_item">
-          <h4>Info Pengiriman</h4>
-          <ul class="list">
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Alamat</span> : {{ order.address }}</a
-              >
-            </li>
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Kecamatan</span> : {{ order.district }}</a
-              >
-            </li>
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Kabupaten</span> : {{ order.city }}</a
-              >
-            </li>
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Provinsi</span> : {{ order.province }}</a
-              >
-            </li>
-            <li>
-              <a href="javascript:void(0);"
-                ><span>Kode Pos</span> : {{ order.postal_code }}</a
-              >
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
 
-    <div class="order_details_table mt-5">
-      <h2>Rincian Pesanan</h2>
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">Produk</th>
-              <th scope="col">Kuantitas</th>
-              <th scope="col">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in order.orderproduct_set.all %}
-            <tr>
-              <td><p>{{ item.product.product_name }}</p></td>
-              <td><h5>x {{ item.quantity }}</h5></td>
-              <td>
-                <p>Rp {% widthratio item.product_price 1 item.quantity %}</p>
-              </td>
-            </tr>
-            {% endfor %}
-            <tr>
-              <td><h4>Subtotal</h4></td>
-              <td><h5></h5></td>
-              <td><p>Rp {{ order.order_total }}</p></td>
-            </tr>
-            <tr>
-              <td><h4>Ongkos Kirim</h4></td>
-              <td><h5></h5></td>
-              <td><p>Rp {{ order.shipping_cost }}</p></td>
-            </tr>
-            <tr>
-              <td><h4>Total</h4></td>
-              <td><h5></h5></td>
-              <td>
-                <h4 style="color: #ffba00">Rp {{ order.grand_total }}</h4>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- Kolom Info Pengiriman -->
+    <div class="col-lg-6 col-md-6 mb-4">
+        <div class="details_item p-4 shadow-sm rounded bg-light border">
+            <h4 class="mb-3 text-primary border-bottom pb-2">
+                <i class="fa fa-truck mr-2"></i> Info Pengiriman
+            </h4>
+            <ul class="list list-unstyled">
+                <li class="mb-2">
+                    <span class="d-block font-weight-bold text-dark">Alamat Lengkap:</span>
+                    <span class="text-muted">{{ order.address }}</span>
+                </li>
+                <li class="mb-2">
+                    <span class="d-block font-weight-bold text-dark">Kecamatan:</span>
+                    <span class="text-muted">{{ order.district }}</span>
+                </li>
+                <li class="mb-2">
+                    <span class="d-block font-weight-bold text-dark">Kabupaten/Kota:</span>
+                    <span class="text-muted">{{ order.city }}</span>
+                </li>
+                <li class="mb-2">
+                    <span class="d-block font-weight-bold text-dark">Provinsi:</span>
+                    <span class="text-muted">{{ order.province }}</span>
+                </li>
+                <li class="mb-2">
+                    <span class="d-block font-weight-bold text-dark">Kode Pos:</span>
+                    <span class="text-muted">{{ order.postal_code }}</span>
+                </li>
+            </ul>
+        </div>
     </div>
+</div>
+
+<div class="order_details_table mt-5 shadow-sm p-4 bg-white rounded border col-lg-8 mx-auto">
+  <h2 class="text-center mb-4">Ringkasan Pesanan</h2>
+  <div class="table-responsive">
+    <table class="table table-borderless">
+      <tbody>
+        <!-- Daftar Produk -->
+        {% for item in order.orderproduct_set.all %}
+        <tr class="border-bottom">
+          <td class="text-left py-3">
+            <p class="mb-0 text-dark">
+              <span class="font-weight-bold">{{ item.product.product_name }}</span> 
+              <span class="text-muted ml-2">(x{{ item.quantity }})</span>
+            </p>
+          </td>
+          <td class="text-right py-3">
+            <p class="mb-0 font-weight-bold">Rp {% widthratio item.product_price 1 item.quantity %}</p>
+          </td>
+        </tr>
+        {% endfor %}
+
+        <!-- Bagian Perincian Biaya -->
+        <tr>
+          <td class="text-left pt-4"><h5 class="text-muted">Subtotal</h5></td>
+          <td class="text-right pt-4"><h5>Rp {{ order.order_total|add:order.discount|floatformat:0 |intcomma}}</h5></td>
+        </tr>
+        
+        {% if order.discount > 0 %}
+        <tr>
+          <td class="text-left"><h5 class="text-danger">Diskon</h5></td>
+          <td class="text-right"><h5 class="text-danger">- Rp {{ order.discount|floatformat:0 |intcomma}}</h5></td>
+        </tr>
+        {% endif %}
+        
+        <tr>
+          <td class="text-left"><h5 class="text-muted">Ongkos Kirim</h5></td>
+          <td class="text-right"><h5>Rp {{ order.shipping_cost|floatformat:0 |intcomma}}</h5></td>
+        </tr>
+        
+        <tr class="border-top mt-2">
+          <td class="text-left pt-3"><h3>Total Bayar</h3></td>
+          <td class="text-right pt-3">
+            <h3 style="color: #ffba00" class="font-weight-bold">Rp {{ order.grand_total|floatformat:0 |intcomma}}</h3>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    {% if order.order_note %}
+    <div class="mt-4 p-3 bg-light rounded border">
+      <h6 class="font-weight-bold text-dark mb-2">
+        <i class="fa fa-sticky-note-o mr-2 text-warning"></i>Catatan Pembeli:
+      </h6>
+      <p class="mb-0 text-muted italic">"{{ order.order_note }}"</p>
+    </div>
+    {% else %}
+    <div class="mt-4 p-3 bg-light rounded border-dashed" style="border: 1px dashed #ccc;">
+      <p class="mb-0 text-muted small text-center">Tidak ada catatan tambahan.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
 
     <div class="text-center mt-5">
       <a href="{% url 'home' %}" class="primary-btn">Lanjutkan Belanja</a>

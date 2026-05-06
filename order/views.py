@@ -144,30 +144,32 @@ def place_order(request, total=0, quantity=0):
     current_user = request.user
     cart_items = CartItem.objects.filter(user=current_user)
     
+    # 1. Validasi Keranjang
     if cart_items.count() <= 0:
         return redirect('home')
 
-    # 1. Hitung Total Belanja dengan Aman
+    # 2. Hitung Total Harga Produk (Gross)
     for cart_item in cart_items:
         total += float(cart_item.product.price) * cart_item.quantity
         quantity += cart_item.quantity
 
     if request.method == 'POST':
-        # 2. Ambil Ongkir & Diskon
+        # --- AMBIL DATA DARI REQUEST & SESSION ---
         try:
             shipping_cost = float(request.POST.get('shipping_cost', 0))
         except (ValueError, TypeError):
             shipping_cost = 0.0
             
         discount = float(request.session.get('discount_amount', 0))
+        coupon_id = request.session.get('coupon_id')
         
-# Total sekarang menjadi Omzet Bersih (Produk - Diskon)
-        total = float(total) - float(discount)
-    
-    # Grand Total tinggal menambahkan Ongkir ke hasil Total tadi
-        grand_total = total + shipping_cost
-        
-        # 4. Simpan Data Order
+        # --- KALKULASI FINANSIAL ---
+        # Net Revenue / Omzet Bersih (Harga Produk - Diskon)
+        order_total_net = float(total) - discount
+        # Tagihan Akhir ke User
+        grand_total = order_total_net + shipping_cost
+
+        # 3. Simpan Objek Order (Data Utama)
         data = Order()
         data.user = current_user
         data.first_name = request.POST.get('first_name')
@@ -178,34 +180,32 @@ def place_order(request, total=0, quantity=0):
         data.province = request.POST.get('province')
         data.city = request.POST.get('city')
         data.district = request.POST.get('district')
-        data.subdistrict = request.POST.get('subdistrict')
         data.postal_code = request.POST.get('postal_code')
         
-        data.order_total = total
+        # Menyimpan rincian biaya secara mendalam (Audit Trail)
+        data.order_total = order_total_net  # Ini yang dipanggil sebagai Omzet
+        data.discount = discount           # Field baru untuk menyimpan riwayat diskon
         data.shipping_cost = shipping_cost
         data.grand_total = grand_total
         data.ip = request.META.get('REMOTE_ADDR')
         data.save()
 
-        # 5. Generate Order Number
+        # 4. Generate Order Number
         current_date = datetime.date.today().strftime("%Y%m%d") 
         order_number = current_date + str(data.id)
         data.order_number = order_number
         data.save()
 
-        # --- TAMBAHAN: LOGIKA PENGUNCIAN VOUCHER (AGAR TIDAK DOUBLE PAKAI) ---
-        used_coupon_id = request.session.get('coupon_id')
-        if used_coupon_id:
+        # 5. Penguncian Voucher (Is Used)
+        if coupon_id:
             try:
-                from order.models import Coupon # Pastikan import sudah ada di atas
-                voucher = Coupon.objects.get(id=used_coupon_id, user=current_user)
+                voucher = Coupon.objects.get(id=coupon_id, user=current_user)
                 voucher.is_used = True
                 voucher.save()
             except Coupon.DoesNotExist:
                 pass
-        # --------------------------------------------------------------------
 
-        # 6. Pindahkan Item ke OrderProduct
+        # 6. Pindahkan Item ke OrderProduct & Update Stok
         for item in cart_items:
             orderproduct = OrderProduct()
             orderproduct.order_id = data.id
@@ -216,21 +216,19 @@ def place_order(request, total=0, quantity=0):
             orderproduct.ordered = True
             orderproduct.save()
 
-            # Stok dikurangi
+            # Pengurangan Stok Produk
             product = item.product
             product.stock -= int(item.quantity)
             product.save()
 
-        # 7. Bersihkan Sesi & Keranjang
-        cart_items.delete()
+        # 7. Pembersihan Akhir (Clean Up)
+        cart_items.delete() # Hapus item keranjang
         
-        # Bersihkan semua session terkait diskon
-        if 'discount_amount' in request.session:
-            del request.session['discount_amount']
-        if 'coupon_id' in request.session:
-            del request.session['coupon_id']
-        if 'coupon_code' in request.session:
-            del request.session['coupon_code']
+        # Hapus session agar tidak mengganggu transaksi berikutnya
+        session_keys = ['discount_amount', 'coupon_id', 'coupon_code']
+        for key in session_keys:
+            if key in request.session:
+                del request.session[key]
 
         return redirect('payments', order_number=order_number) 
     
@@ -362,7 +360,9 @@ def confirmation(request):
     except ObjectDoesNotExist:
         return redirect('home')
 
-    context = {'order': order}
+    context = {
+            'order': order,
+        }
     return render(request, 'order/confirmation.html', context)
 
 # =========================================================

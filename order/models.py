@@ -16,7 +16,7 @@ class Order(models.Model):
         ('Accepted', 'Accepted'), 
         ('Completed', 'Completed'), 
         ('Cancelled', 'Cancelled'),
-        ('Returned', 'Returned'), # Status baru agar UX lebih jelas
+        ('Returned', 'Returned'),
     )
 
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
@@ -38,6 +38,7 @@ class Order(models.Model):
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     snap_token = models.CharField(max_length=255, blank=True, null=True)
+    discount = models.FloatField(default=0)
 
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
