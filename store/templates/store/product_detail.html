@@ -1,251 +1,182 @@
-{% extends 'base.html' %} {% load static %}{% load humanize %} {% block content %}
-	<!-- Start Banner Area -->
-	<section class="banner-area organic-breadcrumb">
-		<div class="container">
-			<div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
-				<div class="col-first">
-					<h1>Product Details Page</h1>
-					<nav class="d-flex align-items-center">
-						<a href="index.html">Home<span class="lnr lnr-arrow-right"></span></a>
-						<a href="#">Shop<span class="lnr lnr-arrow-right"></span></a>
-						<a href="single-product.html">product-details</a>
-					</nav>
-				</div>
-			</div>
-		</div>
-	</section>
-	<!-- End Banner Area -->
+{% extends 'base.html' %} {% load humanize %} {% block content %}
+<style>
+  .gallery-item:hover {
+    border-color: #ffba00 !important;
+    transition: 0.3s;
+  }
+  .main-image img {
+    transition: opacity 0.3s ease-in-out;
+  }
+</style>
 
-	<!--================Single Product Area =================-->
-    <div class="product_image_area">
-        <div class="container">
-            <div class="row s_product_inner">
-                <!-- BAGIAN GAMBAR (SLIDER/CAROUSEL) -->
-                <div class="col-lg-6">
-                    <div class="s_Product_carousel">
-                        
-                        <!-- 1. Gambar Utama -->
-                        <div class="single-prd-item">
-                            <img class="img-fluid" src="{{ single_product.images.url }}" alt="{{ single_product.product_name }}">
-                        </div>
-    
-                        <!-- 2. Gambar Gallery (Looping jika ada foto tambahan) -->
-                        {% for gallery in single_product.productgallery_set.all %}
-                        <div class="single-prd-item">
-                            <img class="img-fluid" src="{{ gallery.image.url }}" alt="{{ single_product.product_name }}">
-                        </div>
-                        {% endfor %}
-                        
-                    </div>
-                </div>
-    
-                <!-- BAGIAN INFORMASI PRODUK -->
-                <div class="col-lg-5 offset-lg-1">
-                    <div class="s_product_text">
-                        <!-- Nama Produk Dinamis -->
-                        <h3>{{ single_product.product_name }}</h3>
-                        
-                        <!-- Harga Dinamis -->
-                        <h2>Rp {{ single_product.price | intcomma }}</h2>
-                        <ul class="list">
-                            <!-- Kategori Dinamis -->
-                            <li>
-                                <a href="{{ single_product.category.get_url }}">
-                                    <span >Category</span> : {{ single_product.category }}
-                                </a>
-                            </li>
-							<li>
-								<a href="#">
-									<span>Size</span> : {{ single_product.size }}
-								</a>
-							</li>
-                            <!-- Ketersediaan Stok Dinamis -->
-                            <li>
-                                <a href="#">
-                                    <span>Availability</span> : 
-                                    {% if single_product.stock > 0 %}
-                                        In Stock ({{ single_product.stock }})
-                                    {% else %}
-                                        Out of Stock
-                                    {% endif %}
-                                </a>
-                            </li>
-                             <!-- Brand Dinamis (Jika ada) -->
-                             {% if single_product.brand %}
-                             <li>
-                                 <a href="#">
-                                     <span>Brand</span> : {{ single_product.brand.brand_name }}
-                                 </a>
-                             </li>
-                             {% endif %}
-                        </ul>
-                        
-                        <!-- Deskripsi Dinamis -->
-                        <p>{{ single_product.description | truncatechars:200}}</p>
-                        
-                        
-                        <!-- Tombol Aksi -->
-                        <div class="card_area d-flex align-items-center">
-                            {% if single_product.stock <= 0 %}
-                                 <h4 class="text-danger">Out of Stock</h4>
-                            {% else %}
-                                <!-- Tombol Add to Cart (Belum berfungsi, nanti kita buat App Cart) -->
-                                <a class="primary-btn" href="{% url 'add_cart' single_product.id %}">Add to Cart</a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="product_image_area mt-5 mb-5">
+  <div class="container">
+    <div class="row s_product_inner">
+      <div class="col-lg-6">
+        <div
+          class="main-image shadow-sm rounded border p-2 bg-white mb-3 text-center"
+        >
+          <img
+            class="img-fluid"
+            src="{{ single_product.images.url }}"
+            alt="{{ single_product.product_name }}"
+            id="main-product-img"
+            style="
+              border-radius: 8px;
+              object-fit: contain;
+              height: 450px;
+              width: 100%;
+            "
+          />
         </div>
-    </div>
-	<!--================End Single Product Area =================-->
 
-	<!--================Product Description Area =================-->
-	<section class="product_description_area">
-		<div class="container">
-			<ul class="nav nav-tabs" id="myTab" role="tablist">
-				<li class="nav-item">
-					<a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Description</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link active" id="review-tab" data-toggle="tab" href="#review" role="tab" aria-controls="review"
-					 aria-selected="false">Reviews</a>
-				</li>
-			</ul>
-			<div class="tab-content" id="myTabContent">
-				<div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
-                    <p>{{ single_product.description }}</p>
-				</div>
-				<div class="tab-pane fade show active" id="review" role="tabpanel" aria-labelledby="review-tab">
-					<div class="row">
-						<div class="col-lg-6">
-							<div class="row total_rate">
-								<div class="col-6">
-									<div class="box_total">
-										<h5>Overall</h5>
-										<h4>4.0</h4>
-										<h6>(03 Reviews)</h6>
-									</div>
-								</div>
-								<div class="col-6">
-									<div class="rating_list">
-										<h3>Based on 3 Reviews</h3>
-										<ul class="list">
-											<li><a href="#">5 Star <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i
-													 class="fa fa-star"></i><i class="fa fa-star"></i> 01</a></li>
-											<li><a href="#">4 Star <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i
-													 class="fa fa-star"></i><i class="fa fa-star"></i> 01</a></li>
-											<li><a href="#">3 Star <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i
-													 class="fa fa-star"></i><i class="fa fa-star"></i> 01</a></li>
-											<li><a href="#">2 Star <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i
-													 class="fa fa-star"></i><i class="fa fa-star"></i> 01</a></li>
-											<li><a href="#">1 Star <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i
-													 class="fa fa-star"></i><i class="fa fa-star"></i> 01</a></li>
-										</ul>
-									</div>
-								</div>
-							</div>
-							<div class="review_list">
-								<div class="review_item">
-									<div class="media">
-										<div class="d-flex">
-											<img src="img/product/review-1.png" alt="">
-										</div>
-										<div class="media-body">
-											<h4>Blake Ruiz</h4>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-										</div>
-									</div>
-									<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-										dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-										commodo</p>
-								</div>
-								<div class="review_item">
-									<div class="media">
-										<div class="d-flex">
-											<img src="img/product/review-2.png" alt="">
-										</div>
-										<div class="media-body">
-											<h4>Blake Ruiz</h4>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-										</div>
-									</div>
-									<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-										dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-										commodo</p>
-								</div>
-								<div class="review_item">
-									<div class="media">
-										<div class="d-flex">
-											<img src="img/product/review-3.png" alt="">
-										</div>
-										<div class="media-body">
-											<h4>Blake Ruiz</h4>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-											<i class="fa fa-star"></i>
-										</div>
-									</div>
-									<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-										dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-										commodo</p>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-6">
-							<div class="review_box">
-								<h4>Add a Review</h4>
-								<p>Your Rating:</p>
-								<ul class="list">
-									<li><a href="#"><i class="fa fa-star"></i></a></li>
-									<li><a href="#"><i class="fa fa-star"></i></a></li>
-									<li><a href="#"><i class="fa fa-star"></i></a></li>
-									<li><a href="#"><i class="fa fa-star"></i></a></li>
-									<li><a href="#"><i class="fa fa-star"></i></a></li>
-								</ul>
-								<p>Outstanding</p>
-								<form class="row contact_form" action="contact_process.php" method="post" id="contactForm" novalidate="novalidate">
-									<div class="col-md-12">
-										<div class="form-group">
-											<input type="text" class="form-control" id="name" name="name" placeholder="Your Full name" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Your Full name'">
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="form-group">
-											<input type="email" class="form-control" id="email" name="email" placeholder="Email Address" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Email Address'">
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="form-group">
-											<input type="text" class="form-control" id="number" name="number" placeholder="Phone Number" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Phone Number'">
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="form-group">
-											<textarea class="form-control" name="message" id="message" rows="1" placeholder="Review" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Review'"></textarea></textarea>
-										</div>
-									</div>
-									<div class="col-md-12 text-right">
-										<button type="submit" value="submit" class="primary-btn">Submit Now</button>
-									</div>
-								</form>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
-	<!--================End Product Description Area =================-->
+        <div class="row mx-0">
+          <div class="col-3 p-1">
+            <div
+              class="gallery-item border rounded p-1 shadow-sm bg-white"
+              style="cursor: pointer"
+              onclick="changeImage('{{ single_product.images.url }}')"
+            >
+              <img
+                class="img-fluid w-100"
+                src="{{ single_product.images.url }}"
+                alt="Main Image"
+                style="height: 70px; object-fit: cover; border-radius: 4px"
+              />
+            </div>
+          </div>
+
+          {% for gallery in single_product.productgallery_set.all %}
+          <div class="col-3 p-1">
+            <div
+              class="gallery-item border rounded p-1 shadow-sm bg-white"
+              style="cursor: pointer"
+              onclick="changeImage('{{ gallery.image.url }}')"
+            >
+              <img
+                class="img-fluid w-100"
+                src="{{ gallery.image.url }}"
+                alt="{{ single_product.product_name }}"
+                style="height: 70px; object-fit: cover; border-radius: 4px"
+              />
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="col-lg-5 offset-lg-1">
+        <div class="s_product_text mt-4 mt-lg-0">
+          <h3 class="font-weight-bold text-dark">
+            {{ single_product.product_name }}
+          </h3>
+          <h2 class="text-primary mt-3 mb-3">
+            Rp {{ single_product.price|intcomma }}
+          </h2>
+
+          <p class="mb-4">
+            <span class="text-secondary font-weight-bold">Stok:</span>
+            {% if single_product.stock <= 0 %}
+            <span class="text-danger font-weight-bold">Stok Habis</span>
+            {% else %}
+            <span class="text-dark">{{ single_product.stock }} Pasang</span>
+            {% endif %}
+          </p>
+
+          <div class="description-box border-top pt-3">
+            <h5 class="text-dark font-weight-bold">Deskripsi Produk:</h5>
+            <p class="text-muted text-justify">
+              {{ single_product.description }}
+            </p>
+          </div>
+
+          <form
+            action="{% url 'add_cart' single_product.id %}"
+            method="POST"
+            class="mt-4"
+          >
+            {% csrf_token %}
+
+            <div class="card_area">
+              {% if single_product.stock <= 0 %}
+              <button
+                type="button"
+                class="btn btn-secondary btn-lg btn-block"
+                disabled
+              >
+                Stok Tidak Tersedia
+              </button>
+              {% else %}
+              <button
+                type="submit"
+                class="primary-btn border-0 shadow-sm w-100 text-uppercase"
+              >
+                <i class="fa fa-shopping-cart mr-2"></i> Tambah ke Keranjang
+              </button>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="product_description_area mt-5 pb-5">
+  <div class="container">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item">
+        <a
+          class="nav-link active font-weight-bold"
+          id="spec-tab"
+          data-toggle="tab"
+          href="#spec"
+          role="tab"
+          >Spesifikasi</a
+        >
+      </li>
+    </ul>
+    <div
+      class="tab-content p-4 border border-top-0 bg-white shadow-sm rounded-bottom"
+      id="myTabContent"
+    >
+      <div class="tab-pane fade show active" id="spec" role="tabpanel">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <tbody>
+              <tr>
+                <td
+                  width="30%"
+                  class="text-secondary font-weight-bold border-0"
+                >
+                  Kategori
+                </td>
+                <td class="text-dark border-0">
+                  {{ single_product.category.category_name }}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-secondary font-weight-bold">Brand</td>
+                <td class="text-dark text-capitalize">
+                  {{ single_product.brand.brand_name }}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-secondary font-weight-bold">Size</td>
+                <td class="text-dark">{{ single_product.size|default:"-" }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function changeImage(src) {
+    document.getElementById("main-product-img").src = src;
+  }
+</script>
 
 {% endblock %}

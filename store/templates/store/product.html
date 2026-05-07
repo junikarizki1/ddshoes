@@ -136,6 +136,7 @@
           <div class="row">
             <!-- single product -->
             <!-- KITA BUNGKUS DENGAN FOR LOOP -->
+            {% if products %}
             {% for product in products %}
             <div class="col-lg-4 col-md-6">
               <div class="single-product">
@@ -157,6 +158,16 @@
               </div>
             </div>
             {% endfor %}
+            {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="no-product-found">
+                    <img src="https://cdn-icons-png.flaticon.com/512/6134/6134065.png" width="120" alt="No Product">
+                    <h3 class="mt-4">Ups! Produk "{{ keyword }}" tidak ditemukan.</h3>
+                    <p class="text-muted">Coba gunakan kata kunci lain atau periksa ejaan Anda.</p>
+                    <a href="{% url 'product' %}" class="genric-btn primary radius mt-3">Lihat Semua Produk</a>
+                </div>
+            </div>
+        {% endif %}
         </section>
         <!-- End  -->
       </div>

@@ -67,17 +67,25 @@
               id="navbarSupportedContent"
             >
               <ul class="nav navbar-nav menu_nav ml-auto">
-                <li class="nav-item active">
+                <li
+                  class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
+                >
                   <a class="nav-link" href="{% url 'home' %}">Beranda</a>
                 </li>
 
-                <li class="nav-item">
+                <li
+                  class="nav-item {% if request.resolver_match.url_name == 'product' or request.resolver_match.url_name == 'search' %}active{% endif %}"
+                >
                   <a class="nav-link" href="{% url 'product' %}">Produk</a>
                 </li>
-                <li class="nav-item">
+                <li
+                  class="nav-item {% if request.resolver_match.url_name == 'contact' or request.resolver_match.url_name == 'search' %}active{% endif %}"
+                >
                   <a class="nav-link" href="#">Kontak</a>
                 </li>
-                <li class="nav-item">
+                <li
+                  class="nav-item {% if request.resolver_match.url_name == 'sk' or request.resolver_match.url_name == 'search' %}active{% endif %}"
+                >
                   <a class="nav-link" href="#">S&K</a>
                 </li>
 
@@ -273,12 +281,17 @@
       </div>
       <div class="search_input" id="search_input_box">
         <div class="container">
-          <form class="d-flex justify-content-between">
+          <form
+            action="{% url 'search' %}"
+            method="GET"
+            class="d-flex justify-content-between"
+          >
             <input
               type="text"
               class="form-control"
-              id="search_input"
-              placeholder="Search Here"
+              name="keyword"
+              placeholder="Cari Produk Kesukaan Anda"
+              value="{{ keyword|default:'' }}"
             />
             <button type="submit" class="btn"></button>
             <span

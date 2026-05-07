@@ -112,10 +112,6 @@ def product(request, category_slug=None, brand_slug=None):
         # Jika URL polos (/product/ atau /store/), tampilkan semua produk
         products = Product.objects.filter(is_available=True).order_by('id')
 
-    # --- B. Logika Search (Pencarian Nama) ---
-    query = request.GET.get('q')
-    if query:
-        products = products.filter(Q(product_name__icontains=query) | Q(description__icontains=query))
 
     # --- C. Logika Filter Brand ---
     brand_id = request.GET.get('brand')
@@ -143,12 +139,44 @@ def product(request, category_slug=None, brand_slug=None):
         'product_count': product_count,
         'categories': all_categories,
         'brands': all_brands,
-        'query': query,
         'all_products_count': all_products_count,
         'category_slug': category_slug, # PENTING: Untuk menandai radio button kategori mana yang aktif
         'brand_slug': brand_slug,
     }
     
+    return render(request, 'store/product.html', context)
+
+#Fungsi Search Produk
+def search(request):
+    # 1. Inisialisasi variabel dengan nilai kosong/default
+    products = None
+    product_count = 0
+    keyword = ""
+
+    # 2. Cek apakah ada parameter keyword di URL
+    if 'keyword' in request.GET:
+        keyword = request.GET.get('keyword', '') # Ambil keyword, default string kosong
+        
+        if keyword:
+            # Cari produk berdasarkan nama atau deskripsi
+            products = Product.objects.order_by('-created_date').filter(
+                Q(description__icontains=keyword) | Q(product_name__icontains=keyword)
+            )
+            product_count = products.count()
+        else:
+            # Jika keyword dikirim tapi kosong (search kosong)
+            products = Product.objects.all().order_by('-created_date')
+            product_count = products.count()
+    else:
+        # Jika akses langsung ke /search/ tanpa parameter keyword
+        products = Product.objects.all().order_by('-created_date')
+        product_count = products.count()
+
+    context = {
+        'products': products,
+        'product_count': product_count,
+        'keyword': keyword,
+    }
     return render(request, 'store/product.html', context)
 
 # ==========================================

@@ -14,6 +14,9 @@ urlpatterns = [
     
     #Filter brand
     path('product/brand/<slug:brand_slug>/', views.product, name='products_by_brand'),
+    
+    #Search Produk
+    path('search/', views.search, name='search'),
 
     # Detail Produk
     path('product/<slug:category_slug>/<slug:product_slug>/', views.product_detail, name='product_detail'),
