@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from account.models import Account
+from django.utils.text import slugify
 
 # 1. MODEL KATEGORI (Untuk Sidebar "Browse Categories")
 class Category(models.Model):
@@ -56,6 +57,11 @@ class Product(models.Model):
 
     def __str__(self):
         return self.product_name
+    
+    def save(self, *args, **kwargs):
+        # Baris ini akan memaksa slug dibuat ulang setiap kali nama produk diubah/disimpan
+        self.slug = slugify(self.product_name)
+        super(Product, self).save(*args, **kwargs)
 
 # 5. MODEL GALLERY (Opsional: Jika 1 produk punya banyak foto kecil-kecil)
 class ProductGallery(models.Model):

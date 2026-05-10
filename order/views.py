@@ -181,6 +181,8 @@ def place_order(request, total=0, quantity=0):
         data.city = request.POST.get('city')
         data.district = request.POST.get('district')
         data.postal_code = request.POST.get('postal_code')
+        data.order_note = request.POST.get('order_note')
+        data.shipping_service = request.POST.get('shipping_service')
         
         # Menyimpan rincian biaya secara mendalam (Audit Trail)
         data.order_total = order_total_net  # Ini yang dipanggil sebagai Omzet

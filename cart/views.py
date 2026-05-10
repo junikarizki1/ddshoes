@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from store.models import Product
 from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
 
 # IMPORT PELINDUNG LOGIN
 from django.contrib.auth.decorators import login_required
@@ -12,18 +13,29 @@ def add_cart(request, product_id):
     current_user = request.user
     product = Product.objects.get(id=product_id)
 
-    # Kita tidak lagi pakai cart session, langsung hubungkan ke user
     try:
         cart_item = CartItem.objects.get(product=product, user=current_user)
+        
+        # VALIDASI: Cek apakah jumlah yang ingin ditambah melebihi stok yang ada
+        if cart_item.quantity + 1 > product.stock:
+            messages.error(request, f"Maaf, stok {product.product_name} hanya tersisa {product.stock}.")
+            return redirect('cart')
+        
         cart_item.quantity += 1
         cart_item.save()
+        
     except CartItem.DoesNotExist:
-        cart_item = CartItem.objects.create(
-            product=product,
-            quantity=1,
-            user=current_user, # Menghubungkan barang dengan user yang login
-        )
-        cart_item.save()
+        # VALIDASI: Cek stok bahkan saat pertama kali membuat item (jika stok 0)
+        if product.stock > 0:
+            cart_item = CartItem.objects.create(
+                product=product,
+                quantity=1,
+                user=current_user,
+            )
+            cart_item.save()
+        else:
+            messages.error(request, f"Maaf, stok {product.product_name} sedang kosong.")
+            return redirect('cart')
     
     return redirect('cart')
 

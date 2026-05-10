@@ -138,25 +138,30 @@
             <!-- KITA BUNGKUS DENGAN FOR LOOP -->
             {% if products %}
             {% for product in products %}
-            <div class="col-lg-4 col-md-6">
-              <div class="single-product">
-                <!-- 1. GAMBAR DINAMIS -->
-                <!-- Menggunakan {{ product.images.url }} -->
-                <a href="{{ product.get_url }}" style="display: block;">
-                    <img class="img-fluid w-100" src="{{ product.images.url }}" ...>
-                </a>
-                <div class="product-details">
-                  <div class="price">
-                    <!-- 3. HARGA DINAMIS -->
-                    <h6>Rp {{ product.price | intcomma }}</h6>
-                    <!-- Saya menyembunyikan harga coret (diskon) karena di database belum ada field harga diskon -->
-                    <!-- <h6 class="l-through">$210.00</h6> -->
+            <div class="col-lg-4 col-md-6 mb-2">
+              <div class="single-product-item" style="
+                  border: 1px solid #eee; 
+                  padding: 15px; 
+                  border-radius: 12px; 
+                  background: #fff;
+                  transition: all 0.3s ease;">
+                  
+                  <a href="{{ product.get_url }}">
+                      <div style="height: 250px; overflow: hidden; border-radius: 8px;">
+                          <img class="img-fluid w-100" src="{{ product.images.url }}" alt="{{ product.product_name }}" 
+                               style="height: 100%; object-fit: cover;">
+                      </div>
+                  </a>
+
+                  <div class="product-info mt-3 text-center">
+                      <h6 style="margin-bottom: 5px; font-weight: 600;">{{ product.product_name }}</h6>
+                      <h5 style="color: #ffba00; font-weight: 700;">Rp {{ product.price|intcomma }}</h5>
+                      <div style="margin-top: 10px;">
+                          <small class="text-muted">Size: {{ product.size }} | {{ product.brand.brand_name }} | {{ product.category.category_name }}</small>
+                      </div>
                   </div>
-                  <!-- 2. NAMA PRODUK DINAMIS -->
-                  <h6>{{ product.product_name }}</h6>
-                </div>
               </div>
-            </div>
+          </div>
             {% endfor %}
             {% else %}
             <div class="col-12 text-center py-5">

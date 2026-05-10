@@ -1,54 +1,75 @@
 {% extends 'base.html' %} {% load static %} {% load humanize %}{% block content %}
 <!-- start banner Area -->
-<section class="banner-area">
+<section class="banner-area" >
     <div class="container">
         <div class="row fullscreen align-items-center justify-content-start">
             <div class="col-lg-12">
                 <div class="active-banner-slider owl-carousel">
+                    
+                    {% for product in banner_products %}
                     <!-- single-slide -->
-                    <div class="row single-slide align-items-center d-flex">
-                        <div class="col-lg-5 col-md-6">
-                            <div class="banner-content">
-                                <h1>Nike New <br />Collection!</h1>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed
-                                    do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                                    Ut enim ad minim veniam, quis nostrud exercitation.
+                    <div class="row single-slide align-items-center d-flex justify-content-between">
+                        
+                        <!-- KOLOM KIRI: GAMBAR PRODUK -->
+                        <div class="col-lg-6 col-md-6 order-1 order-md-1">
+                            <div class="banner-img text-center">
+                                <a href="{{ product.get_url }}" style="display: block;">
+                                <!-- Gunakan PNG Transparan agar background menyatu sempurna -->
+                                <img class="img-fluid" src="{{ product.images.url }}" alt="{{ product.product_name }}" 
+                                     style="max-height: 480px; width: auto; object-fit: contain;">
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- KOLOM KANAN: KONTEN TEKS -->
+                        <div class="col-lg-5 col-md-7 order-2 order-md-2">
+                            <div class="banner-content p-4" style="border-left: 4px solid var(--primary-color3); padding-left: 30px !important;">
+                        
+                                <!-- Judul Menengah (Produk Terbaru) -->
+                                <h6 class="text-uppercase mb-1" style="color: #ffba00; letter-spacing: 3px; font-weight: 500; font-size: 1.9rem;">
+                                    Koleksi Terbaru
+                                </h6>
+                        
+                                <!-- Nama Produk (Besar & Tegas) -->
+                                <h1 class="text-black mb-2" style="font-size: 3.5rem; font-weight: 900; line-height: 1; letter-spacing: -1px;">
+                                    {{ product.product_name }}
+                                </h1>
+                        
+                                <!-- Harga (Menggunakan warna Lavender Grey, bukan kuning) -->
+                                <h3 class="mt-2 mb-4" style="color: white; font-weight: 800; font-size: 2rem;">
+                                    Rp {{ product.price|intcomma }}
+                                </h3>
+                        
+                                <!-- Deskripsi (Lebih Rapi & Terbaca) -->
+                                <p class="mb-5" style="color: #666; font-size: 1.1rem; line-height: 1.7; max-width: 400px; font-weight: 400;">
+                                    {{ product.description|truncatechars:140 }}
                                 </p>
-                                <div class="add-bag d-flex align-items-center">
-                                    <a class="add-btn" href=""><span class="lnr lnr-cross"></span></a>
-                                    <span class="add-text text-uppercase">Add to Bag</span>
-                                </div>
+                                
+                                <!-- Form Add to Cart dengan Button Lebih Modern -->
+                                <form action="{% url 'add_cart' product.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quantity" value="1">
+                                    <div class=" d-flex align-items-center mt-4" style="margin-left: 150px;">
+                                        <button type="submit" class="add-btn border-0 shadow" 
+                                        style="cursor: pointer; 
+                                               background: #ffba00; 
+                                               width: 50px; 
+                                               height: 50px; 
+                                               border-radius: 50%; 
+                                               display: flex; 
+                                               align-items: center; 
+                                               justify-content: center; 
+                                               transition: all 0.3s ease;">
+                                            <span class="ti-bag" style="font-size: 20px; font-weight: bold;"></span>
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
-                        <div class="col-lg-7">
-                            <div class="banner-img">
-                                <img class="img-fluid" src="{% static 'img/banner/banner-img.png' %}" alt="" />
-                            </div>
-                        </div>
+                        
                     </div>
-                    <!-- single-slide -->
-                    <div class="row single-slide">
-                        <div class="col-lg-5">
-                            <div class="banner-content">
-                                <h1>Nike New <br />Collection!</h1>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed
-                                    do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                                    Ut enim ad minim veniam, quis nostrud exercitation.
-                                </p>
-                                <div class="add-bag d-flex align-items-center">
-                                    <a class="add-btn" href=""><span class="lnr lnr-cross"></span></a>
-                                    <span class="add-text text-uppercase">Add to Bag</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-7">
-                            <div class="banner-img">
-                                <img class="img-fluid" src="{% static 'img/banner/banner-img.png' %}" />
-                            </div>
-                        </div>
-                    </div>
+                    {% endfor %}
+
                 </div>
             </div>
         </div>
@@ -113,7 +134,7 @@
             <div class="col-lg-8 text-center">
                 <div class="section-title">
                     <h1 style="font-weight: 700;">Top Kategori</h1>
-                    <p style="color: #777;">Temukan koleksi sepatu terbaik berdasarkan tren penjualan terbanyak di DD Shoes Kuala Dua.</p>
+                    <p style="color: #777;">Temukan koleksi sepatu terbaik berdasarkan tren penjualan terbanyak di DD Shoes Store.</p>
                 </div>
             </div>
         </div>
@@ -222,8 +243,8 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 text-center">
                 <div class="section-title">
-                    <h2 style="font-weight: 700;">Merek Terpopuler</h2>
-                    <p>5 Brand sepatu dengan tingkat loyalitas pelanggan tertinggi di DD Shoes.</p>
+                    <h2 style="font-weight: 700;">Brand Terpopuler</h2>
+                    <p>5 Brand sepatu dengan tingkat penjualan tertinggi di DD Shoes Store.</p>
                 </div>
             </div>
         </div>

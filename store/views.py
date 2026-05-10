@@ -11,6 +11,7 @@ from django.db.models.functions import Coalesce
 def home(request):
     # Ambil semua produk yang tersedia dan memiliki stok
     all_available = Product.objects.filter(is_available=True, stock__gt=0)
+    banner_products = Product.objects.filter(stock__gt=0).order_by('-created_date')[:3]
     recommended_products = []
     
     if request.user.is_authenticated:
@@ -89,6 +90,7 @@ def home(request):
     ).order_by('-brand_sales')[:5]
 
     context = {
+        'banner_products': banner_products,
         'recommended_products': final_recommendations,
         'top_categories': top_categories,
         'top_brands': top_brands,

@@ -221,8 +221,8 @@
               />
               <input
                 type="hidden"
-                name="courier_service"
-                id="input_courier_service"
+                name="shipping_service"
+                id="input_shipping_service"
                 value=""
               />
             </div>
@@ -367,7 +367,7 @@
       "Rp " + initialTotal.toLocaleString("id-ID");
 
     var inputShipping = document.getElementById("input_shipping_cost");
-    var inputCourier = document.getElementById("input_courier_service");
+    var inputCourier = document.getElementById("input_shipping_service");
 
     if (inputShipping) inputShipping.value = 0;
     if (inputCourier) inputCourier.value = "";
@@ -618,7 +618,7 @@
           "Rp " + grandTotal.toLocaleString("id-ID");
 
         document.getElementById("input_shipping_cost").value = cost;
-        document.getElementById("input_courier_service").value = serviceName;
+        document.getElementById("input_shipping_service").value = serviceName;
       } else {
         resetOngkir();
       }

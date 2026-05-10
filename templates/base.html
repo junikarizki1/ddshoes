@@ -44,10 +44,35 @@
       <div class="main_menu">
         <nav class="navbar navbar-expand-lg navbar-light main_box">
           <div class="container">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <a class="navbar-brand logo_h" href="{% url 'home' %}"
-              ><img src="{% static 'img/logo.png' %}" alt=""
-            /></a>
+            <a
+              class="navbar-brand logo_h d-flex align-items-center"
+              href="{% url 'home' %}"
+            >
+              <!-- Gambar Logo -->
+              <img
+                src="{% static 'img/logo.png' %}"
+                alt="DD Shoes Logo"
+                style="max-height: 45px; width: auto; object-fit: contain"
+              />
+
+              <!-- Teks Nama Toko dengan Styling Langsung -->
+              <span
+                class="ml-2 d-none d-md-inline-block"
+                style="
+                  font-family: 'Montserrat', 'Segoe UI', sans-serif;
+                  font-weight: 800;
+                  font-size: 22px;
+                  letter-spacing: 1.5px;
+                  color: var(--primary-color);
+                  text-transform: uppercase;
+                  line-height: 1;
+                  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+                "
+              >
+                DD
+                <span style="font-weight: 300; opacity: 0.8">Shoes</span>
+              </span>
+            </a>
             <button
               class="navbar-toggler"
               type="button"
@@ -152,7 +177,7 @@
                                 font-size: 10px;
                                 letter-spacing: 0.5px;
                               "
-                              >LOYALTY PROGRAM</small
+                              >PROGRAM LOYALITAS</small
                             >
                             <i class="lnr lnr-star" style="color: #ffba00"></i>
                           </div>
@@ -183,18 +208,12 @@
                           class="nav-link py-2"
                           href="{% url 'edit_profile' %}"
                         >
-                          <i class="lnr lnr-user mr-2"></i> My Profile
-                        </a>
-                      </li>
-
-                      <li class="nav-item">
-                        <a class="nav-link py-2" href="{% url 'tracking' %}">
-                          <i class="lnr lnr-map-marker mr-2"></i> Tracking
+                          <i class="lnr lnr-user mr-2"></i> Profil saya
                         </a>
                       </li>
                       <li class="nav-item">
                         <a class="nav-link py-2" href="{% url 'my_orders' %}">
-                          <i class="lnr lnr-history mr-2"></i> History
+                          <i class="lnr lnr-history mr-2"></i> Pesanan
                         </a>
                       </li>
 
@@ -209,7 +228,7 @@
                           href="{% url 'logout' %}"
                           style="color: #dc3545; font-weight: 500"
                         >
-                          <i class="lnr lnr-exit mr-2"></i> Logout
+                          <i class="lnr lnr-exit mr-2"></i> Keluar
                         </a>
                       </li>
                     </ul>
@@ -401,10 +420,7 @@
             <script>
               document.write(new Date().getFullYear());
             </script>
-            All rights reserved | This template is made with
-            <i class="fa fa-heart-o" aria-hidden="true"></i> by
-            <a href="https://colorlib.com" target="_blank">Colorlib</a>
-            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+            DD Shoes Store. All rights reserved
           </p>
         </div>
       </div>

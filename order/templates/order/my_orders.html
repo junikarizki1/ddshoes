@@ -26,7 +26,6 @@
               <th scope="col">No. Pesanan</th>
               <th scope="col">Tanggal</th>
               <th scope="col">Total</th>
-              <th scope="col">Invoice</th>
               <th scope="col">Keterangan</th>
             </tr>
           </thead>
@@ -45,28 +44,24 @@
                 <h5>Rp {{ order.grand_total|floatformat:0|intcomma }}</h5>
               </td>
               <td>
-                <a
-                  href="{% url 'admin_order_pdf' order.id %}"
-                  target="_blank"
-                  class="btn btn-sm btn-outline-primary"
-                >
-                  <i class="fa fa-file-pdf"></i> Download PDF
-                </a>
-              </td>
-              <td>
                 {% if order.status == 'Cancelled' %}
                 <span
                   class="badge"
                   style="color: black; padding: 5px 12px; border-radius: 4px"
                   >❌ Dibatalkan</span
                 >
-
+                
                 {% elif order.status == 'Returned' %}
                 <span
                   class="badge"
                   style="color: black; padding: 5px 12px; border-radius: 4px"
-                  >✅ Rerund</span
+                  >✅ Refund</span
                 >
+                {% elif order.return_request %}
+                <span class="badge" style="color: black; padding: 5px 12px; border-radius: 4px">
+                  <i class="fa fa-undo mr-1"></i> Retur: {{ order.return_request.get_status_display }}
+               </span>
+
 
                 {% elif order.status == 'Completed' %}
                 <span
@@ -103,7 +98,7 @@
                 <div class="d-flex flex-column">
                   <a
                     href="{% url 'confirmation' %}?order_number={{ order.order_number }}"
-                    class="genric-btn info circle small"
+                    class="genric-btn primary-btn circle small"
                     >Detail</a
                   >
                 </div>
