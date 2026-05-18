@@ -230,3 +230,10 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'tguys894@gmail.com')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'hnxj ysny kdfj dhdw')
 DEFAULT_FROM_EMAIL = 'DD Shoes Store'
+
+# Setelah ALLOWED_HOSTS
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'CSRF_TRUSTED_ORIGINS', 
+    'https://localhost,https://127.0.0.1'
+).split(',')
+CSRF_TRUSTED_ORIGINS += ['https://ddshoes.up.railway.app', 'https://*.up.railway.app']
