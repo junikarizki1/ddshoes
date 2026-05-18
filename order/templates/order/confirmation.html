@@ -66,9 +66,9 @@
         </p>
 
         <div class="resi-box p-3 mb-4 bg-light rounded border-dashed" style="border: 2px dashed #dee2e6;">
-            <p class="mb-1 text-uppercase small font-weight-bold text-secondary">Nomor Resi</p>
+            <p class="mb-1 small font-weight-bold text-secondary">Nomor Resi</p>
             <h4 class="text-dark">{{ order.tracking_number }}</h4>
-            <a href="{% url 'track_order' %}?no_resi={{ order.tracking_number }}&kurir=jnt" class="genric-btn info-border circle arrow mt-2">
+            <a href="{% url 'track_order' %}?no_resi={{ order.tracking_number }}&kurir=jnt" class="genric-btn primary-btn circle arrow mt-2">
                 Lacak <span class="lnr lnr-arrow-right"></span>
             </a>
         </div>
@@ -81,7 +81,7 @@
                    onclick="return confirm('Apakah Anda yakin pesanan sudah diterima dengan baik?')">
                     <i class="fa fa-check-circle mr-1"></i> Pesanan Diterima
                 </a>
-                <a href="{% url 'submit_return' order.id %}" class="btn btn-outline-danger px-4" style="border-radius: 50px;">
+                <a href="{% url 'submit_return' order.id %}" class="btn btn-danger px-4" style="border-radius: 50px;">
                     <i class="fa fa-undo mr-1"></i> Ajukan Retur
                 </a>
           {% endif %}
@@ -103,7 +103,7 @@
 
         {# 3. STATUS: COMPLETED (SELESAI) #}
         {% elif order.status == 'Completed' %}
-        <div class="status-container text-center p-4 shadow-sm rounded border bg-white col-lg-20 mx-auto">
+        <div class="status-container text-center p-4 shadow-sm rounded border bg-white col-lg-20 mx-auto mb-4">
           <div class="status-icon mb-4">
             <img src="https://cdn-icons-png.flaticon.com/512/148/148767.png" width="100" alt="Completed" />
           </div>
@@ -113,6 +113,134 @@
             Sampai jumpa di orderan berikutnya!
           </p>
         </div>
+        
+        {% if not has_reviewed %}
+        <div class="review-form-box p-4 shadow-sm rounded border bg-white col-lg-20 mx-auto mt-4">
+          <h4 style="color: #888da7;" class="mb-4 font-weight-bold text-center">Beri Penilaian Pelayanan Kami</h4>
+          
+          <form action="{% url 'submit_review' order.id %}" method="POST" id="reviewForm">
+            {% csrf_token %}
+            
+            <div class="form-group text-center mb-4">
+              <label class="d-block font-weight-bold text-secondary mb-2">Rating Bintang *</label>
+              
+              <div class="star-rating-wrapper" style="display: inline-flex; flex-direction: row-reverse; justify-content: center; gap: 8px;">
+                <input type="hidden" name="rating" id="ratingValue" value="" required />
+                
+                <i class="fa fa-star star-btn" data-value="5" title="Sangat Puas"></i>
+                <i class="fa fa-star star-btn" data-value="4" title="Puas"></i>
+                <i class="fa fa-star star-btn" data-value="3" title="Cukup Puas"></i>
+                <i class="fa fa-star star-btn" data-value="2" title="Kurang Puas"></i>
+                <i class="fa fa-star star-btn" data-value="1" title="Kecewa"></i>
+              </div>
+              
+              <div id="starDescription" class="text-muted small mt-2 font-weight-bold" style="min-height: 18px; color: #888da7 !important;">
+                Pilih rating bintang
+              </div>
+            </div>
+        
+            <div class="form-group mb-3">
+              <label class="font-weight-bold text-secondary">Judul Ulasan *</label>
+              <input type="text" name="subject" class="form-control" placeholder="Contoh: Pelayanan Ramah & Cepat" required style="border: 1px solid #eeeeee; height: 40px;" />
+            </div>
+        
+            <div class="form-group mb-3">
+              <label class="font-weight-bold text-secondary">Isi Ulasan *</label>
+              <textarea name="review" rows="4" class="form-control" placeholder="Tulis pendapat Anda tentang pelayanan DD Shoes Store..." required style="border: 1px solid #eeeeee; resize: none;"></textarea>
+            </div>
+        
+            <div class="form-check mb-4 mt-3">
+              <input class="form-check-input" type="checkbox" name="is_anonymous" value="true" id="anonCheck" />
+              <label class="form-check-label text-muted small" for="anonCheck" style="cursor: pointer; user-select: none; padding-left: 5px;">
+                Sembunyikan nama saya di halaman utama (Kirim sebagai Pembeli Anonim)
+              </label>
+            </div>
+        
+            <div class="text-center">
+              <button type="submit" class="btn text-white px-5" style="background-color: #888da7; border-radius: 50px; font-weight: bold; font-size: 14px; border: none; height: 45px; min-width: 200px; cursor: pointer;">
+                Kirim Penilaian
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <style>
+          .star-btn {
+            font-size: 32px;
+            color: #e4e4e4;
+            cursor: pointer;
+            transition: color 0.2s ease-in-out, transform 0.1s ease;
+          }
+        
+          .star-btn:hover {
+            transform: scale(1.15);
+          }
+        
+          .star-btn:hover,
+          .star-btn:hover ~ .star-btn,
+          .star-btn.active,
+          .star-btn.active ~ .star-btn {
+            color: #ffc107 !important;
+          }
+        </style>
+        
+        <script>
+          document.addEventListener("DOMContentLoaded", function () {
+            const stars = document.querySelectorAll(".star-btn");
+            const ratingInput = document.getElementById("ratingValue");
+            const descriptionBox = document.getElementById("starDescription");
+            const form = document.getElementById("reviewForm");
+        
+            const descriptions = [
+              "",
+              "⭐ (1) Kecewa",
+              "⭐⭐ (2) Kurang Puas",
+              "⭐⭐⭐ (3) Cukup Puas",
+              "⭐⭐⭐⭐ (4) Puas",
+              "⭐⭐⭐⭐⭐ (5) Sangat Puas"
+            ];
+        
+            stars.forEach((star) => {
+              star.addEventListener("mouseover", function () {
+                const hoverValue = this.getAttribute("data-value");
+                descriptionBox.innerText = descriptions[hoverValue];
+              });
+        
+              star.addEventListener("mouseout", function () {
+                const clickedValue = ratingInput.value;
+                if (clickedValue) {
+                  descriptionBox.innerText = descriptions[clickedValue];
+                } else {
+                  descriptionBox.innerText = "Pilih rating bintang";
+                }
+              });
+        
+              star.addEventListener("click", function () {
+                const selectValue = this.getAttribute("data-value");
+                ratingInput.value = selectValue;
+        
+                stars.forEach((s) => s.classList.remove("active"));
+                this.classList.add("active");
+              });
+            });
+        
+            form.addEventListener("submit", function (e) {
+              if (!ratingInput.value) {
+                e.preventDefault();
+                alert("Mohon pilih rating bintang terlebih dahulu sebelum mengirim!");
+              }
+            });
+          });
+        </script>
+        
+    {% else %}
+        <div class="p-4 shadow-sm rounded border bg-white col-lg-8 mx-auto mt-4 text-center">
+          <p class="mb-0 small" style="color: #888da7; font-weight: 600;">
+            <i class="fa fa-check-circle mr-1"></i> Anda telah memberikan penilaian untuk transaksi ini. Terima kasih atas ulasan Anda!
+          </p>
+        </div>
+    {% endif %}
+
 
         {# 4. STATUS: CANCELLED #}
         {% elif order.status == 'Cancelled' %}

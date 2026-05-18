@@ -20,4 +20,6 @@ urlpatterns = [
 
     # Detail Produk
     path('product/<slug:category_slug>/<slug:product_slug>/', views.product_detail, name='product_detail'),
+    
+    path('submit_review/<int:order_id>/', views.submit_review, name='submit_review'),
 ]

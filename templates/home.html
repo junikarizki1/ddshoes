@@ -278,6 +278,65 @@
     </div>
 </section>
 
+<section class="testimonial-area section_gap" style="background-color: #fafaff; padding: 60px 0;">
+    <div class="container">
+        <div class="row justify-content-center text-center mb-5">
+            <div class="col-lg-8">
+                <h2 style="color: #888da7; font-weight: 700;">Apa Kata Mereka Tentang Kami</h2>
+                <p class="text-muted">Ulasan nyata dari pelanggan setia DD Shoes Store</p>
+                
+                <div class="d-inline-flex align-items-center mt-3 p-3 bg-white shadow-sm rounded" style="gap: 15px; border: 1px solid #eee;">
+                    <h1 style="color: #ffc107; font-weight: 800; margin: 0;">⭐ {{ average_rating }}</h1>
+                    <div class="text-left">
+                        <p class="mb-0 font-weight-bold text-dark" style="font-size: 14px;">Rating Keseluruhan</p>
+                        <small class="text-muted">Based on {{ total_reviews }} ulasan pelanggan</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            {% if reviews %}
+                {% for review in reviews %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm p-4 bg-white" style="border-radius: 15px;">
+                        <div class="mb-2" style="color: #ffc107; font-size: 16px;">
+                            {% if review.rating == 5 %}⭐⭐⭐⭐⭐
+                            {% elif review.rating == 4 %}⭐⭐⭐⭐
+                            {% elif review.rating == 3 %}⭐⭐⭐
+                            {% elif review.rating == 2 %}⭐⭐
+                            {% else %}⭐{% endif %}
+                        </div>
+                        
+                        <h5 class="font-weight-bold text-dark mb-2">{{ review.subject }}</h5>
+                        <p class="text-muted small mb-3" style="line-height: 1.6; font-style: italic;">
+                            "{{ review.review }}"
+                        </p>
+                        
+                        <div class="mt-auto border-top pt-3 d-flex justify-content-between align-items-center">
+                            <span class="font-weight-bold small" style="color: #888da7;">
+                                {% if review.is_anonymous %}
+                                    {{ review.masked_username }}
+                                {% else %}
+                                    {{ review.user.username }}
+                                {% endif %}
+                            </span>
+                            <small class="text-muted" style="font-size: 11px;">
+                                {{ review.created_at|date:"d M Y" }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center py-4">
+                    <p class="text-muted italic">Belum ada ulasan yang ditampilkan.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
 <style>
     /* Menghilangkan gap berlebih dan memberikan efek hover */
     .single-product-item:hover {

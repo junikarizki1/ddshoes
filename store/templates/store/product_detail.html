@@ -173,6 +173,41 @@
   </div>
 </section>
 
+{% if related_products %}
+<section class="related_product_area section_gap_bottom" style="margin-top: 30px;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-6 text-center">
+        <div class="section-title" style="margin-bottom: 30px;">
+          <h2 style="font-weight: 700;">Kamu mungkin juga suka</h2>
+          <p>Koleksi lain dari brand {{ single_product.brand.brand_name }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      {% for product in related_products %}
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="single-product-item" style="border: 1px solid #eee; padding: 15px; border-radius: 12px; background: #fff; transition: all 0.3s ease;">
+          <a href="{{ product.get_url }}">
+            <div style="height: 250px; overflow: hidden; border-radius: 8px;">
+              <img class="img-fluid w-100" src="{{ product.images.url }}" alt="{{ product.product_name }}" style="height: 100%; object-fit: cover; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            </div>
+          </a>
+          <div class="product-info mt-3 text-center">
+            <h6 style="margin-bottom: 5px; font-weight: 600;">{{ product.product_name }}</h6>
+            <h5 style="color: #ffba00; font-weight: 700;">Rp {{ product.price|intcomma }}</h5>
+            <div style="margin-top: 10px;">
+              <small class="text-muted">Size: {{ product.size|default:"-" }} | {{ product.brand.brand_name }} | {{ product.category.category_name }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <script>
   function changeImage(src) {
     document.getElementById("main-product-img").src = src;

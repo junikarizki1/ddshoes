@@ -17,6 +17,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from .forms import ReturnRequestForm
 import uuid
+from store.models import ReviewRating
 
 
 
@@ -591,19 +592,17 @@ def admin_order_pdf(request, order_id):
 def order_complete(request, order_number):
     try:
         order = Order.objects.filter(order_number=order_number, user=request.user).first()
-        
         if order is None:
             return redirect('home')
 
-        if order.status == 'Accepted':
-            order.is_ordered = True
-            order.status = 'Completed'
-            order.save() 
+        # Memeriksa apakah transaksi ini sudah ada datanya di tabel ReviewRating
+        has_reviewed = ReviewRating.objects.filter(order=order).exists()
 
-
-
-        return render(request, 'order/confirmation.html', {'order': order})
-
+        context = {
+            'order': order,
+            'has_reviewed': has_reviewed, # Variabel penentu form muncul atau tidak
+        }
+        return render(request, 'order/confirmation.html', context)
     except Exception as e:
         return redirect('home')
 

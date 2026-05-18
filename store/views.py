@@ -1,12 +1,16 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Product, Category, Brand, UserInterest
+from .models import Product, Category, Brand, UserInterest, ReviewRating
 from django.db.models import Q, Case, When, Value, IntegerField, Sum 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 import random
 from decimal import Decimal
-from django.db.models import Count
+from django.db.models import Count, Avg
 from order.models import OrderProduct
 from django.db.models.functions import Coalesce
+from django.contrib import messages
+from django.shortcuts import redirect
+from order.models import Order       # Import model Order dari app orders
+from .models import ReviewRating
 
 def home(request):
     # Ambil semua produk yang tersedia dan memiliki stok
@@ -88,12 +92,24 @@ def home(request):
             Value(0)
         )
     ).order_by('-brand_sales')[:5]
+    
+    
+    #rating
+    reviews = ReviewRating.objects.filter(is_visible=True).order_by('-rating', '-created_at')[:6]
+
+    review_stats = ReviewRating.objects.filter(is_visible=True).aggregate(Avg('rating'), Count('id'))
+    average_rating = review_stats['rating__avg'] or 0
+    total_reviews = review_stats['id__count'] or 0
+    average_rating = round(average_rating, 1)
 
     context = {
         'banner_products': banner_products,
         'recommended_products': final_recommendations,
         'top_categories': top_categories,
         'top_brands': top_brands,
+        'reviews': reviews,
+        'average_rating': average_rating,
+        'total_reviews': total_reviews,
     }
     return render(request, 'home.html', context)
     
@@ -198,8 +214,12 @@ def product_detail(request, category_slug, product_slug):
         # Panggil fungsi untuk update poin (bisa dibuat helper atau tulis langsung)
         update_user_interest(request.user, single_product, action_weight=1) # 1 poin untuk klik/view
 
+    # Ambil maksimal 3 produk lain dengan brand yang sama
+    related_products = Product.objects.filter(brand=single_product.brand, is_available=True).exclude(id=single_product.id)[:3]
+
     context = {
         'single_product': single_product,
+        'related_products': related_products,
     }
     # Pastikan template product_detail.html sudah ada di folder store/templates/store/
     return render(request, 'store/product_detail.html', context)
@@ -214,3 +234,35 @@ def update_user_interest(user, product, action_weight):
     cat_interest, _ = UserInterest.objects.get_or_create(user=user, category=product.category)
     cat_interest.score += action_weight
     cat_interest.save()
+    
+
+def submit_review(request, order_id):
+    if request.method == 'POST':
+        try:
+            order = Order.objects.get(id=order_id, user=request.user, status='Completed')
+        except Order.DoesNotExist:
+            messages.error(request, "Pesanan tidak ditemukan.")
+            return redirect('home')
+
+        if ReviewRating.objects.filter(order=order).exists():
+            messages.error(request, "Anda sudah memberikan ulasan.")
+            return redirect('order_complete', order_number=order.order_number)
+
+        rating = request.POST.get('rating')
+        subject = request.POST.get('subject')
+        review = request.POST.get('review')
+        is_anonymous = request.POST.get('is_anonymous') == 'true'
+
+        data = ReviewRating()
+        data.order = order
+        data.user = request.user
+        data.rating = rating
+        data.subject = subject
+        data.review = review
+        data.is_anonymous = is_anonymous
+        data.save()
+        
+        messages.success(request, "Terima kasih! Penilaian Anda sangat berharga bagi DD Shoes Store.")
+        
+        # PERBAIKAN: Redirect paksa ke halaman order_complete agar data has_reviewed ter-refresh sempurna
+        return redirect('order_complete', order_number=order.order_number)

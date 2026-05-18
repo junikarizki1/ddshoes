@@ -51,8 +51,8 @@ $(document).ready(function () {
 
   $(".active-banner-slider").owlCarousel({
     items: 1,
-    autoplay: false,
-    autoplayTimeout: 5000,
+    autoplay: true,
+    autoplayTimeout: 3000,
     loop: true,
     nav: true,
     // PERUBAHAN ADA DI SINI: Tambahkan /static/ di depan img/

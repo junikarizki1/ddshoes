@@ -33,4 +33,5 @@ urlpatterns = [
     path('submit_return/<int:order_id>/', views.submit_return, name='submit_return'),
     path('apply_coupon/', views.apply_coupon, name='apply_coupon'),
     path('reset_coupon/', views.reset_coupon, name='reset_coupon'),
+    path('order_complete/<str:order_number>/', views.order_complete, name='order_complete'),
 ]

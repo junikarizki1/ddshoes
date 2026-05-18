@@ -2,6 +2,9 @@ from django.db import models
 from django.urls import reverse
 from account.models import Account
 from django.utils.text import slugify
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # 1. MODEL KATEGORI (Untuk Sidebar "Browse Categories")
 class Category(models.Model):
@@ -87,3 +90,32 @@ class UserInterest(models.Model):
     def __str__(self):
         return f"{self.user.email} - {self.brand or self.category} ({self.score})"
 
+
+#Model Rating atau review
+class ReviewRating(models.Model):
+    # Perbaikan E301: Menggunakan settings.AUTH_USER_MODEL agar relasi User aman
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    
+    # Perbaikan E300 & E307: Hubungkan ke app 'orders' tempat model 'Order' berada
+    # JIKA nama aplikasi order Anda bukan 'orders', ganti teks 'orders.Order' di bawah ini
+    order = models.OneToOneField('order.Order', on_delete=models.CASCADE, related_name='review')
+    
+    subject = models.CharField(max_length=100, blank=True)
+    review = models.TextField(max_length=500, blank=True)
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    is_anonymous = models.BooleanField(default=False)
+    is_visible = models.BooleanField(default=True)    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    @property
+    def masked_username(self):
+        username = self.user.username
+        if len(username) <= 2:
+            # Jika username sangat pendek (misal: "Ab"), tampilkan huruf pertama ditambah bintang
+            return username[0] + "*"
+        else:
+            # Ambil huruf pertama + bintang-bintang + huruf terakhir (Misal: "Randi" -> "R***i")
+            return f"{username[0]}***{username[-1]}"
+
+    def __str__(self):
+        return f"Review {self.user.username} - Order #{self.order.order_number}"
