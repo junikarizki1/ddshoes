@@ -8,3 +8,4 @@ psycopg2-binary
 requests
 gunicorn
 whitenoise
+dj-database-url

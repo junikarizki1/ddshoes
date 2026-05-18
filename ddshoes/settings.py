@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -151,14 +152,10 @@ WSGI_APPLICATION = 'ddshoes.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('PGDATABASE', os.environ.get('DB_NAME', 'ddshoes')),
-        'USER': os.environ.get('PGUSER', os.environ.get('DB_USER', 'postgres')),
-        'PASSWORD': os.environ.get('PGPASSWORD', os.environ.get('DB_PASSWORD', 'root')),
-        'HOST': os.environ.get('PGHOST', os.environ.get('DB_HOST', 'localhost')),
-        'PORT': os.environ.get('PGPORT', os.environ.get('DB_PORT', '5432')),
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', 'postgres://postgres:root@localhost:5432/ddshoes'),
+        conn_max_age=600,
+    )
 }
 
 
