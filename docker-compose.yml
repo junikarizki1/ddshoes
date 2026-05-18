@@ -20,11 +20,7 @@ services:
     depends_on:
       - db
     environment:
-      - DB_HOST=db
-      - DB_NAME=ddshoes
-      - DB_USER=postgres
-      - DB_PASSWORD=root
-      - DB_PORT=5432
+      - DATABASE_URL=postgres://postgres:root@db:5432/ddshoes
 
 volumes:
   postgres_data:
