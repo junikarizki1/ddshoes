@@ -1,0 +1,8 @@
+Django>=5.2,<6.0
+django-jazzmin
+django-admin-thumbnails
+midtransclient
+xhtml2pdf
+Pillow
+psycopg2-binary
+requests
