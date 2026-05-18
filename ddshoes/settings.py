@@ -9,12 +9,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qjl7*cx^#v*fq8@a3=&vre61typp(moi-c1i7l@(842a2#s(4^'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-qjl7*cx^#v*fq8@a3=&vre61typp(moi-c1i7l@(842a2#s(4^')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -116,6 +116,7 @@ JAZZMIN_UI_TWEAKS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -152,11 +153,11 @@ WSGI_APPLICATION = 'ddshoes.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'ddshoes'),
-        'USER': os.environ.get('DB_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'root'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+        'NAME': os.environ.get('PGDATABASE', os.environ.get('DB_NAME', 'ddshoes')),
+        'USER': os.environ.get('PGUSER', os.environ.get('DB_USER', 'postgres')),
+        'PASSWORD': os.environ.get('PGPASSWORD', os.environ.get('DB_PASSWORD', 'root')),
+        'HOST': os.environ.get('PGHOST', os.environ.get('DB_HOST', 'localhost')),
+        'PORT': os.environ.get('PGPORT', os.environ.get('DB_PORT', '5432')),
     }
 }
 
@@ -197,10 +198,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -214,19 +218,8 @@ AUTH_USER_MODEL = 'account.Account'
 
 
 
-#MIDTRANS
-MIDTRANS_CLIENT_KEY = 'Mid-client-vWPcASXDMnfQq180'
-MIDTRANS_SERVER_KEY = 'Mid-server-gaoPXRvg5eN3D9zid5oNEJbk'
-
-
-#Ngrok
-ALLOWED_HOSTS = [
-    'localhost', 
-    '127.0.0.1', 
-    'subsonic-calm-throwaway.ngrok-free.dev', # Alamat Ngrok kamu sekarang
-    '.ngrok-free.dev', # Menambahkan titik di depan agar semua sub-domain Ngrok dev diizinkan
-    '.ngrok-free.app', # Berjaga-jaga jika kamu dapat domain .app
-]
+MIDTRANS_CLIENT_KEY = os.environ.get('MIDTRANS_CLIENT_KEY', 'Mid-client-vWPcASXDMnfQq180')
+MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY', 'Mid-server-gaoPXRvg5eN3D9zid5oNEJbk')
 
 
 #Notifikasi Gmail
@@ -236,6 +229,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'tguys894@gmail.com' 
-EMAIL_HOST_PASSWORD = 'hnxj ysny kdfj dhdw' #App Password Gmail
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'tguys894@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'hnxj ysny kdfj dhdw')
 DEFAULT_FROM_EMAIL = 'DD Shoes Store'

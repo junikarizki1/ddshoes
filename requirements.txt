@@ -6,3 +6,5 @@ xhtml2pdf
 Pillow
 psycopg2-binary
 requests
+gunicorn
+whitenoise
