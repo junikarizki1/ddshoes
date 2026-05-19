@@ -46,7 +46,7 @@ JAZZMIN_SETTINGS = {
     "site_logo_classes": "img-circle",
     "site_icon": None, # Favicon di tab browser
     "welcome_sign": "Selamat Datang di Dashboard DD Shoes",
-    "copyright": "DD Shoes Store Pontianak",
+    "copyright": "DD Shoes Store",
     "user_avatar": None, # Bisa diisi 'image' jika model Account punya field foto
 
     # -- Pencarian --
@@ -221,8 +221,6 @@ MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY', 'Mid-server-gaoPXRvg
 
 
 #Notifikasi Gmail
-# settings.py
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -231,7 +229,7 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'tguys894@gmail.com')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'hnxj ysny kdfj dhdw')
 DEFAULT_FROM_EMAIL = 'DD Shoes Store'
 
-# Setelah ALLOWED_HOSTS
+
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     'CSRF_TRUSTED_ORIGINS', 
     'https://localhost,https://127.0.0.1'

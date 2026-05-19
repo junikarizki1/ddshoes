@@ -12,6 +12,11 @@ Django 5.2 e-commerce store for shoes ("DD Shoes Store Pontianak"). Indonesian l
 
 URL routing: `store` at `/`, `cart` at `/cart/`, `order` at `/order/`, `account` at `/account/`, admin at `/admin/`.
 
+## Deployment
+- Deployed on **Railway** (see `ALLOWED_HOSTS` / `CSRF_TRUSTED_ORIGINS` for `*.up.railway.app`)
+- `Procfile` → `start.sh`: runs migrations, auto-creates superuser (`admin@gmail.com` / `admin`), collects static, then starts gunicorn
+- Gunicorn binds to `$PORT` (default 8000), 2 workers, 2 threads, 120s timeout
+
 ## Key Commands
 ```
 python manage.py runserver          # Start dev server
@@ -19,6 +24,7 @@ python manage.py makemigrations     # Generate migrations
 python manage.py migrate            # Apply migrations
 python manage.py createsuperuser    # Create admin user
 python manage.py test               # Run tests (all empty stubs)
+docker compose up                   # Full stack: PostgreSQL 16 + web on :8000
 ```
 
 ## Setup
@@ -30,6 +36,7 @@ python manage.py test               # Run tests (all empty stubs)
 ## Database
 - PostgreSQL, custom user model: `AUTH_USER_MODEL = 'account.Account'`
 - `Account` has extra fields: `loyalty_balance` (float), `shoe_size` (int), `is_superadmin`
+- `USERNAME_FIELD = 'email'` but model also has a `username` field (required for superuser creation)
 
 ## Important Conventions
 - `Product.slug` is auto-generated from `product_name` via `slugify()` on every `save()` — manual slugs are overwritten
@@ -39,6 +46,12 @@ python manage.py test               # Run tests (all empty stubs)
 - Loyalty signal (`order/signals.py`): every 200k accumulated from completed orders → auto-generates `LOYAL-XXXXX` coupon (5k discount). Reverses on cancellation.
 - `store.signals.update_user_interest()` exists but is NOT wired as a Django signal — called manually from views. `store/apps.py` does not import signals.
 - `order/signals.py` IS wired via `order/apps.py` `ready()` — handles `capture_old_status` and `handle_loyalty_logic`
+- **Midtrans webhook is commented out** — payment status sync happens via polling in `confirmation()` and `my_orders()` views by calling Midtrans API directly
+- **Midtrans runs in sandbox mode** (`is_production=False` in `payments()` view)
+- Stock is restored in **multiple places**: `Order.save()`, `ReturnRequest.save()`, `my_orders()` view (Midtrans cancel/expire/deny), and `place_order()` view (decrements on order creation)
+- `Order.order_total` stores **net revenue** (product total minus discount), NOT gross total — this is what loyalty calculations use
+- Jazzmin `search_model` references `my_account.Account` but the app is named `account` — this is a known quirk that may cause search to fail in admin
+- Hardcoded API keys exist in `order/views.py`: `KOMERCE_API_KEY` (RajaOngkir shipping) and binderbyte API key (tracking) — not loaded from env
 
 ## External Integrations
 - **Midtrans** payment gateway (snap token stored on Order model)

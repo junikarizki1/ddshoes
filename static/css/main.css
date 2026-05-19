@@ -1608,12 +1608,9 @@ h6 {
 }
 @media (max-width: 767px) {
   .organic-breadcrumb {
-    background: none;
-    background: -webkit-linear-gradient(90deg, #ffba00 0%, #ff6c00 100%);
-    background: -moz-linear-gradient(90deg, #ffba00 0%, #ff6c00 100%);
-    background: -o-linear-gradient(90deg, #ffba00 0%, #ff6c00 100%);
-    background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%);
+    background: linear-gradient(90deg, #888da7 0%, #6b708d 100%);
   }
+}
 }
 
 #category .organic-breadcrumb {
