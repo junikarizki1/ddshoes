@@ -219,14 +219,6 @@ AUTH_USER_MODEL = 'account.Account'
 MIDTRANS_CLIENT_KEY = os.environ.get('MIDTRANS_CLIENT_KEY', 'Mid-client-vWPcASXDMnfQq180')
 MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY', 'Mid-server-gaoPXRvg5eN3D9zid5oNEJbk')
 
-# Validasi Midtrans Keys di Startup (Production Only)
-import sys
-if not DEBUG:
-    if 'your-midtrans' in MIDTRANS_SERVER_KEY or 'your-midtrans' in MIDTRANS_CLIENT_KEY:
-        print("WARNING: Midtrans credentials masih menggunakan placeholder!", file=sys.stderr)
-    elif 'Mid-client-vWPcASXDMnfQq180' in MIDTRANS_SERVER_KEY or 'Mid-server-gaoPXRvg5eN3D9zid5oNEJbk' in MIDTRANS_SERVER_KEY:
-        print("WARNING: Midtrans credentials menggunakan hardcoded fallback key!", file=sys.stderr)
-
 
 #Notifikasi Gmail
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
