@@ -1,5 +1,6 @@
 import requests
 import datetime
+import logging
 from django.db.models import Sum, F
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -18,6 +19,8 @@ from django.contrib import messages
 from .forms import ReturnRequestForm
 import uuid
 from store.models import ReviewRating
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -299,19 +302,29 @@ def payments(request, order_number):
         }
     }
     
+    snap_token = None
+    error_message = None
     try:
         snap_transaction = snap.create_transaction(param)
-        snap_token = snap_transaction['token']
-        order.snap_token = snap_token
-        order.save()
+        snap_token = snap_transaction.get('token')
+        if snap_token:
+            order.snap_token = snap_token
+            order.save()
+        else:
+            error_message = "Midtrans tidak mengembalikan token. Periksa credentials Anda."
+            logger.error("Midtrans: No token returned")
+    except midtransclient.CoreApiError as e:
+        error_message = f"Midtrans API Error: {str(e)}"
+        logger.error(f"Midtrans CoreApiError: {e}")
     except Exception as e:
-        print(f"Error Midtrans: {e}")
-        snap_token = None
+        error_message = f"Gagal koneksi ke Midtrans: {str(e)}"
+        logger.error(f"Midtrans unexpected error: {e}")
 
     context = {
         'order': order,
         'snap_token': snap_token,
         'client_key': settings.MIDTRANS_CLIENT_KEY,
+        'error_message': error_message,
     }
     return render(request, 'order/payments.html', context)
 

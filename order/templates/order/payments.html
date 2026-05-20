@@ -72,6 +72,47 @@
   </div>
 </section>
 
+{% if error_message %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="alert alert-danger" style="border-radius: 10px;">
+        <h5 class="alert-heading"><i class="fa fa-exclamation-triangle mr-2"></i>Gagal Membuat Sesi Pembayaran</h5>
+        <p class="mb-2">{{ error_message }}</p>
+        <hr>
+        <p class="mb-0 small">
+          <strong>Langkah perbaikan:</strong><br>
+          1. Pastikan environment variables Midtrans sudah di-set di Railway<br>
+          2. Cek Railway logs untuk detail error<br>
+          3. Hubungi admin jika masalah berlanjut
+        </p>
+      </div>
+      <div class="text-center">
+        <a href="{% url 'payments' order.order_number %}" class="primary-btn" style="text-decoration: none;">
+          <i class="fa fa-refresh mr-1"></i> Coba Lagi
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% elif not snap_token or snap_token == "None" %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="alert alert-warning" style="border-radius: 10px;">
+        <h5 class="alert-heading"><i class="fa fa-exclamation-circle mr-2"></i>Sesi Pembayaran Tidak Tersedia</h5>
+        <p class="mb-0">Token pembayaran tidak berhasil dibuat. Silakan buat pesanan baru dari keranjang.</p>
+      </div>
+      <div class="text-center">
+        <a href="{% url 'cart' %}" class="primary-btn" style="text-decoration: none;">
+          <i class="fa fa-shopping-cart mr-1"></i> Kembali ke Keranjang
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+
 <script
   type="text/javascript"
   src="https://app.sandbox.midtrans.com/snap/snap.js"
@@ -116,5 +157,7 @@
     });
   };
 </script>
+
+{% endif %}
 
 {% endblock %}
