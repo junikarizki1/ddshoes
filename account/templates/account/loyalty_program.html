@@ -1,15 +1,204 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %} {% load static %} {% load humanize %} {% block content %}
+<style>
+  .loyalty-hero {
+    background: linear-gradient(135deg, #2c2c3a 0%, #1a1a2e 100%);
+    border-radius: 20px;
+    padding: 40px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .loyalty-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,186,0,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .loyalty-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(136,141,167,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .loyalty-hero h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: rgba(255,255,255,0.7);
+  }
+  .loyalty-hero p {
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+  .balance-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+  }
+  .balance-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 4px;
+  }
+  .balance-amount {
+    font-size: 36px;
+    font-weight: 800;
+    color: #ffba00;
+    margin-bottom: 16px;
+  }
+  .progress-track {
+    background: rgba(255,255,255,0.1);
+    border-radius: 50px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffba00, #ff9500);
+    border-radius: 50px;
+    transition: width 0.6s ease;
+  }
+  .progress-info {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+  }
+  .progress-info strong {
+    color: #ffba00;
+  }
+  .voucher-section h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2c2c3a;
+    margin-bottom: 4px;
+  }
+  .voucher-section > p {
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .voucher-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .voucher-card:hover {
+    border-color: #ffba00;
+    box-shadow: 0 4px 16px rgba(255,186,0,0.12);
+  }
+  .voucher-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #ffba00;
+  }
+  .voucher-icon {
+    width: 48px;
+    height: 48px;
+    background: #fff8e1;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .voucher-icon i {
+    font-size: 20px;
+    color: #ffba00;
+  }
+  .voucher-details {
+    flex: 1;
+  }
+  .voucher-code {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2c2c3a;
+    font-family: monospace;
+    letter-spacing: 1px;
+  }
+  .voucher-value {
+    font-size: 13px;
+    color: #888;
+    margin-top: 2px;
+  }
+  .voucher-badge {
+    background: #fff8e1;
+    color: #ffba00;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .empty-voucher {
+    text-align: center;
+    padding: 40px 20px;
+    color: #ccc;
+  }
+  .empty-voucher i {
+    font-size: 48px;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .empty-voucher p {
+    color: #999;
+    font-size: 14px;
+  }
+  .btn-shop {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2c2c3a;
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-shop:hover {
+    background: #1a1a2e;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+</style>
+
 <section class="banner-area organic-breadcrumb">
   <div class="container">
-    <div
-      class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
-    >
+    <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
       <div class="col-first">
         <h1>Program Loyalitas</h1>
         <nav class="d-flex align-items-center">
-          <a href="{% url 'home' %}"
-            >Beranda<span class="lnr lnr-arrow-right"></span
-          ></a>
+          <a href="{% url 'home' %}">Beranda<span class="lnr lnr-arrow-right"></span></a>
           <a href="#">Loyalitas</a>
         </nav>
       </div>
@@ -17,100 +206,66 @@
   </div>
 </section>
 
-<section class="login_box_area section_gap">
-  <div class="container">
+<section class="section_gap">
+  <div class="container" style="max-width: 900px;">
     <div class="row">
-      <div class="col-lg-6">
-        <div
-          class="login_box_img"
-          style="
-            height: 100%;
-            min-height: 400px;
-            background: linear-gradient(90deg, #888da7 0%, #888da7 100%);
-          "
-        >
-          <div class="hover">
-            <h3 class="text-white">Halo, {{ user.first_name }}!</h3>
-            <p>
-              Kumpulkan terus saldo belanjamu. Setiap akumulasi Rp 200.000, kamu
-              otomatis dapat Voucher Rp 5.000!
-            </p>
-            <div
-              class="p-4 bg-white mt-4"
-              style="border-radius: 15px; color: #333"
-            >
-              <small>Total Saldo Terkumpul Saat Ini:</small>
-              <h2 class="text-warning">
-                Rp {{ user.loyalty_balance|floatformat:0 }}
-              </h2>
-
-              <div
-                class="progress mt-3"
-                style="height: 15px; border-radius: 10px"
-              >
-                <div
-                  class="progress-bar bg-success progress-bar-striped progress-bar-animated"
-                  style="width: {% widthratio user.loyalty_balance 200000 100 %}%"
-                ></div>
-              </div>
-              <small class="d-block mt-2">
-                {% if user.loyalty_balance < 200000 %} Butuh
-                <strong>Rp {{ sisa_belanja|floatformat:0 }}</strong> lagi untuk
-                voucher berikutnya! {% else %} Kamu sudah mencapai target!
-                Voucher akan diterbitkan otomatis. {% endif %}
-              </small>
+      <!-- Left: Balance Card -->
+      <div class="col-lg-5 mb-4">
+        <div class="loyalty-hero">
+          <h1>Halo, {{ user.first_name }}!</h1>
+          <p>Kumpulkan saldo belanjamu. Setiap Rp 200.000 otomatis dapat Voucher Rp 5.000.</p>
+          
+          <div class="balance-card">
+            <div class="balance-label">Total Saldo Terkumpul</div>
+            <div class="balance-amount">Rp {{ user.loyalty_balance|floatformat:0|intcomma }}</div>
+            
+            <div class="progress-track">
+              <div class="progress-fill" style="width: {% widthratio user.loyalty_balance 200000 100 %}%"></div>
+            </div>
+            
+            <div class="progress-info">
+              {% if user.loyalty_balance < 200000 %}
+                Butuh <strong>Rp {{ sisa_belanja|floatformat:0|intcomma }}</strong> lagi untuk voucher berikutnya
+              {% else %}
+                Target tercapai! Voucher akan diterbitkan otomatis
+              {% endif %}
             </div>
           </div>
         </div>
       </div>
 
-      <div class="col-lg-6">
-        <div class="login_form_inner" style="padding: 40px; text-align: left">
+      <!-- Right: Voucher List -->
+      <div class="col-lg-7">
+        <div class="voucher-section">
           <h3>Voucher Saya</h3>
-          <p>
-            Gunakan kode di bawah ini saat checkout untuk mendapatkan diskon.
-          </p>
+          <p>Gunakan kode di bawah saat checkout untuk mendapatkan diskon.</p>
 
-          <div
-            class="voucher-list mt-4"
-            style="max-height: 300px; overflow-y: auto"
-          >
-            {% if coupons %} {% for coupon in coupons %}
-            <div
-              class="card mb-3 border-dashed"
-              style="border: 2px dashed #ffba00; background: #fffcf5"
-            >
-              <div
-                class="card-body d-flex justify-content-between align-items-center"
-              >
-                <div>
-                  <h4 class="text-warning mb-0">{{ coupon.code }}</h4>
-                  <small class="text-muted"
-                    >Potongan: Rp {{ coupon.discount_value }}</small
-                  >
+          <div style="max-height: 400px; overflow-y: auto;">
+            {% if coupons %}
+              {% for coupon in coupons %}
+              <div class="voucher-card">
+                <div class="voucher-icon">
+                  <i class="fa fa-ticket"></i>
                 </div>
-                <span class="badge badge-warning text-white p-2"
-                  >BELUM TERPAKAI</span
-                >
+                <div class="voucher-details">
+                  <div class="voucher-code">{{ coupon.code }}</div>
+                  <div class="voucher-value">Potongan Rp {{ coupon.discount_value|intcomma }}</div>
+                </div>
+                <span class="voucher-badge">Aktif</span>
               </div>
-            </div>
-            {% endfor %} {% else %}
-            <div class="text-center py-5">
-              <span
-                class="lnr lnr-sad"
-                style="font-size: 3em; color: #ccc"
-              ></span>
-              <p class="mt-3 text-muted">
-                Kamu belum memiliki voucher. Ayo belanja lagi!
-              </p>
-            </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty-voucher">
+                <i class="fa fa-gift"></i>
+                <p>Kamu belum memiliki voucher.<br/>Ayo belanja untuk mengumpulkan saldo!</p>
+              </div>
             {% endif %}
           </div>
 
           <div class="mt-4">
-            <a href="{% url 'home' %}" class="primary-btn w-100 text-center"
-              >Belanja Sekarang</a
-            >
+            <a href="{% url 'home' %}" class="btn-shop">
+              <i class="fa fa-shopping-bag"></i> Belanja Sekarang
+            </a>
           </div>
         </div>
       </div>

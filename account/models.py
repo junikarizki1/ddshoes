@@ -44,6 +44,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=100, unique=True)
     phone_number = models.CharField(max_length=50)
+    profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)
     loyalty_balance = models.FloatField(default=0)
     shoe_size = models.IntegerField(null=True, blank=True)
 
@@ -74,3 +75,29 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def has_module_perms(self, add_label):
         return True
+
+
+# Model Alamat Terpisah (Multi-Address Support)
+class Address(models.Model):
+    user = models.ForeignKey('Account', on_delete=models.CASCADE, related_name='addresses')
+    label = models.CharField(max_length=50, default='Alamat Baru')
+    province_id = models.CharField(max_length=20)
+    province_name = models.CharField(max_length=100)
+    city_id = models.CharField(max_length=20)
+    city_name = models.CharField(max_length=100)
+    district_id = models.CharField(max_length=20)
+    district_name = models.CharField(max_length=100)
+    subdistrict_id = models.CharField(max_length=20)
+    subdistrict_name = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=10)
+    address = models.TextField()
+    shipping_service = models.CharField(max_length=100, blank=True)
+    shipping_cost = models.FloatField(default=0)
+    is_default = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-is_default', '-created_at']
+
+    def __str__(self):
+        return f"{self.label} - {self.user.email}"

@@ -1,0 +1,518 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<style>
+  .terms-hero {
+    background: linear-gradient(135deg, #2c2c3a 0%, #1a1a2e 100%);
+    border-radius: 20px;
+    padding: 50px 40px;
+    text-align: center;
+    color: #fff;
+    margin-bottom: 40px;
+  }
+  .terms-hero h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: #fff !important;
+  }
+  .terms-hero p {
+    color: rgba(255,255,255,0.8) !important;
+    font-size: 15px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .terms-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+  .terms-nav a {
+    padding: 10px 20px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 50px;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .terms-nav a:hover,
+  .terms-nav a.active {
+    background: #888da7;
+    color: #fff;
+    border-color: #888da7;
+  }
+  .terms-section {
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    border: 1px solid #eee;
+    scroll-margin-top: 100px;
+  }
+  .terms-section h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .terms-section h2 .icon-circle {
+    width: 40px;
+    height: 40px;
+    background: #f0f0f5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .terms-section h2 .icon-circle i {
+    font-size: 16px;
+    color: #888da7;
+  }
+  .terms-section .subtitle {
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 20px;
+    padding-left: 52px;
+  }
+  .terms-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #555;
+    margin-top: 24px;
+    margin-bottom: 12px;
+  }
+  .terms-section p,
+  .terms-section li {
+    color: #555;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  .terms-section ul,
+  .terms-section ol {
+    padding-left: 20px;
+    margin-bottom: 16px;
+  }
+  .terms-section li {
+    margin-bottom: 8px;
+  }
+  .terms-section .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #ffba00;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .terms-section .highlight-box p {
+    color: #856404;
+    margin: 0;
+    font-weight: 500;
+  }
+  .terms-section .info-box {
+    background: #f0f4ff;
+    border-left: 4px solid #888da7;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .terms-section .info-box p {
+    color: #4a4e69;
+    margin: 0;
+    font-weight: 500;
+  }
+  .terms-section .danger-box {
+    background: #fff5f5;
+    border-left: 4px solid #dc3545;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .terms-section .danger-box p {
+    color: #721c24;
+    margin: 0;
+    font-weight: 500;
+  }
+  .step-list {
+    counter-reset: step;
+    list-style: none;
+    padding: 0;
+  }
+  .step-list li {
+    counter-increment: step;
+    padding: 16px 16px 16px 60px;
+    position: relative;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+  .step-list li::before {
+    content: counter(step);
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    background: #888da7;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .courier-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+  }
+  .courier-table th,
+  .courier-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+  }
+  .courier-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #2c2c3a;
+  }
+  .courier-table td {
+    color: #555;
+  }
+</style>
+
+<section class="banner-area organic-breadcrumb">
+  <div class="container">
+    <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+      <div class="col-first">
+        <h1>Syarat & Ketentuan</h1>
+        <nav class="d-flex align-items-center">
+          <a href="{% url 'home' %}">Beranda<span class="lnr lnr-arrow-right"></span></a>
+          <a href="#">Syarat & Ketentuan</a>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section_gap">
+  <div class="container" style="max-width: 900px;">
+    
+    <div class="terms-hero">
+      <h1>Syarat & Ketentuan</h1>
+      <p>Silakan baca ketentuan berikut dengan seksama sebelum menggunakan layanan DD Shoes Store. Dengan menggunakan website ini, Anda menyetujui semua ketentuan yang berlaku.</p>
+    </div>
+
+    <div class="terms-nav">
+      <a href="#transaksi">Cara Bertransaksi</a>
+      <a href="#pengiriman">Pengiriman</a>
+      <a href="#pembayaran">Pembayaran</a>
+      <a href="#retur">Retur & Refund</a>
+      <a href="#privasi">Privasi</a>
+      <a href="#umum">Ketentuan Umum</a>
+    </div>
+
+    <!-- 1. Cara Bertransaksi -->
+    <div class="terms-section" id="transaksi">
+      <h2>
+        <span class="icon-circle"><i class="fa fa-shopping-cart"></i></span>
+        Cara Bertransaksi
+      </h2>
+      <p class="subtitle">Panduan lengkap melakukan pemesanan di DD Shoes Store</p>
+
+      <ol class="step-list">
+        <li>
+          <strong>Pilih Produk</strong><br/>
+          Jelajahi katalog kami, pilih ukuran sepatu yang sesuai, dan klik <em>"Tambah ke Keranjang"</em>. Anda bisa menambahkan lebih dari satu produk.
+        </li>
+        <li>
+          <strong>Cek Keranjang</strong><br/>
+          Buka halaman keranjang untuk melihat ringkasan pesanan. Anda bisa mengubah jumlah atau menghapus produk yang tidak diinginkan.
+        </li>
+        <li>
+          <strong>Checkout</strong><br/>
+          Klik <em>"Proses Pesanan"</em> dan isi data pengiriman. Anda bisa memilih alamat tersimpan atau mengisi alamat baru. Pilih jasa kirim yang tersedia.
+        </li>
+        <li>
+          <strong>Gunakan Voucher (Opsional)</strong><br/>
+          Jika Anda memiliki voucher dari program loyalitas, pilih voucher yang ingin digunakan di halaman checkout. Hanya 1 voucher per transaksi.
+        </li>
+        <li>
+          <strong>Bayar</strong><br/>
+          Setelah konfirmasi pesanan, Anda akan diarahkan ke halaman pembayaran Midtrans. Selesaikan pembayaran sebelum batas waktu yang ditentukan.
+        </li>
+        <li>
+          <strong>Konfirmasi</strong><br/>
+          Setelah pembayaran berhasil, status pesanan berubah menjadi <em>"Diproses"</em>. Kami akan mengirimkan sepatu Anda sesuai estimasi waktu pengiriman.
+        </li>
+      </ol>
+
+      <div class="highlight-box">
+        <p><i class="fa fa-lightbulb-o mr-2"></i> <strong>Tips:</strong> Pastikan ukuran sepatu yang Anda pilih sudah benar. Cek panduan ukuran di halaman detail produk sebelum memesan.</p>
+      </div>
+    </div>
+
+    <!-- 2. Kebijakan Pengiriman -->
+    <div class="terms-section" id="pengiriman">
+      <h2>
+        <span class="icon-circle"><i class="fa fa-truck"></i></span>
+        Kebijakan Pengiriman
+      </h2>
+      <p class="subtitle">Informasi lengkap tentang pengiriman pesanan Anda</p>
+
+      <h3>Estimasi Waktu Pengiriman</h3>
+      <table class="courier-table">
+        <thead>
+          <tr>
+            <th>Kurir</th>
+            <th>Layanan</th>
+            <th>Estimasi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>JNE</td><td>REG</td><td>2-5 hari kerja</td></tr>
+          <tr><td>J&T Express</td><td>Regular</td><td>2-4 hari kerja</td></tr>
+          <tr><td>SiCepat</td><td>REG</td><td>2-4 hari kerja</td></tr>
+          <tr><td>AnterAja</td><td>Regular</td><td>2-5 hari kerja</td></tr>
+          <tr><td>POS Indonesia</td><td>Regular</td><td>3-7 hari kerja</td></tr>
+          <tr><td>TIKI</td><td>ECO</td><td>3-5 hari kerja</td></tr>
+          <tr><td>Wahana</td><td>Ekonomis</td><td>3-5 hari kerja</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info-box">
+        <p><i class="fa fa-info-circle mr-2"></i> Estimasi waktu pengiriman dapat berubah tergantung kondisi cuaca, hari libur, atau faktor lainnya di luar kendali kami.</p>
+      </div>
+
+      <h3>Biaya Pengiriman</h3>
+      <ul>
+        <li>Ongkos kirim ditanggung sepenuhnya oleh pembeli.</li>
+        <li>Biaya ongkir dihitung otomatis berdasarkan berat produk dan lokasi tujuan.</li>
+        <li>Kami tidak bertanggung jawab atas keterlambatan pengiriman yang disebabkan oleh pihak kurir.</li>
+      </ul>
+
+      <h3>Tracking Pesanan</h3>
+      <ul>
+        <li>Nomor resi akan tersedia di halaman konfirmasi pesanan setelah pesanan dikirim.</li>
+        <li>Anda bisa melacak status pengiriman melalui website resmi kurir yang bersangkutan.</li>
+        <li>Notifikasi pengiriman juga akan dikirim ke email Anda.</li>
+      </ul>
+    </div>
+
+    <!-- 3. Kebijakan Pembayaran -->
+    <div class="terms-section" id="pembayaran">
+      <h2>
+        <span class="icon-circle"><i class="fa fa-credit-card"></i></span>
+        Kebijakan Pembayaran
+      </h2>
+      <p class="subtitle">Metode pembayaran dan ketentuan yang berlaku</p>
+
+      <h3>Metode Pembayaran</h3>
+      <p>Kami menggunakan <strong>Midtrans</strong> sebagai payment gateway. Metode pembayaran yang tersedia:</p>
+      <ul>
+        <li><strong>Transfer Bank:</strong> BCA, BNI, BRI, Mandiri, dan bank lainnya</li>
+        <li><strong>E-Wallet:</strong> GoPay, OVO, DANA, ShopeePay, LinkAja</li>
+        <li><strong>Kartu Kredit/Debit:</strong> Visa, Mastercard, JCB</li>
+        <li><strong>Virtual Account:</strong> Berbagai bank tersedia</li>
+      </ul>
+
+      <h3>Batas Waktu Pembayaran</h3>
+      <div class="danger-box">
+        <p><i class="fa fa-exclamation-triangle mr-2"></i> <strong>Penting:</strong> Pembayaran harus diselesaikan dalam waktu 24 jam setelah pemesanan. Jika melebihi batas waktu, pesanan akan otomatis dibatalkan dan stok dikembalikan.</p>
+      </div>
+
+      <h3>Konfirmasi Pembayaran</h3>
+      <ul>
+        <li>Status pembayaran akan diperbarui otomatis oleh sistem Midtrans.</li>
+        <li>Anda akan menerima notifikasi email setelah pembayaran berhasil.</li>
+        <li>Jika pembayaran gagal, silakan coba lagi atau gunakan metode pembayaran lain.</li>
+      </ul>
+    </div>
+
+    <!-- 4. Retur & Refund -->
+    <div class="terms-section" id="retur">
+      <h2>
+        <span class="icon-circle"><i class="fa fa-undo"></i></span>
+        Kebijakan Retur & Refund
+      </h2>
+      <p class="subtitle">Ketentuan pengembalian barang dan pengembalian dana</p>
+
+      <h3>Syarat Pengajuan Retur</h3>
+      <ul>
+        <li>Retur hanya bisa diajukan saat status pesanan <strong>"Sedang Dikirim"</strong> atau setelah barang diterima.</li>
+        <li>Pengajuan retur maksimal <strong>7 hari</strong> setelah barang diterima.</li>
+        <li>Barang harus dalam kondisi <strong>original</strong>, belum dipakai, dan masih dalam kemasan asli.</li>
+        <li>Sertakan bukti foto kondisi barang sebagai pendukung pengajuan.</li>
+      </ul>
+
+      <h3>Proses Retur</h3>
+      <ol>
+        <li>Ajukan retur melalui halaman konfirmasi pesanan atau riwayat pesanan.</li>
+        <li>Admin akan mereview pengajuan Anda dalam waktu 1-3 hari kerja.</li>
+        <li>Jika disetujui, Anda akan mendapat instruksi pengiriman barang kembali.</li>
+        <li>Setelah barang diterima dan dicek, proses refund akan dilakukan.</li>
+      </ol>
+
+      <h3>Pengembalian Dana (Refund)</h3>
+      <ul>
+        <li>Refund dilakukan via transfer bank ke rekening yang Anda daftarkan saat pengajuan retur.</li>
+        <li>Proses refund membutuhkan waktu <strong>3-7 hari kerja</strong> setelah retur disetujui.</li>
+        <li>Ongkos kirim retur ditanggung oleh pembeli, kecuali jika retur disebabkan oleh kesalahan kami (barang salah/rusak).</li>
+      </ul>
+
+      <div class="highlight-box">
+        <p><i class="fa fa-info-circle mr-2"></i> <strong>Catatan:</strong> Barang yang sudah dipakai, rusak karena kelalaian pembeli, atau bukan dari DD Shoes Store tidak dapat diretur.</p>
+      </div>
+
+      <h3>Pembatalan Pesanan</h3>
+      <ul>
+        <li>Pesanan bisa dibatalkan oleh pembeli sebelum status berubah menjadi <em>"Diproses"</em>.</li>
+        <li>Pesanan yang sudah dibayar tapi belum diproses akan mendapat refund penuh.</li>
+        <li>Pesanan yang sudah dikirim tidak bisa dibatalkan, hanya bisa diretur sesuai ketentuan di atas.</li>
+      </ul>
+    </div>
+
+    <!-- 5. Kebijakan Privasi -->
+    <div class="terms-section" id="privasi">
+      <h2>
+        <span class="icon-circle"><i class="fa fa-shield"></i></span>
+        Kebijakan Privasi
+      </h2>
+      <p class="subtitle">Bagaimana kami mengumpulkan dan menggunakan data Anda</p>
+
+      <h3>Data yang Kami Kumpulkan</h3>
+      <ul>
+        <li><strong>Data Pribadi:</strong> Nama lengkap, email, nomor telepon, alamat pengiriman</li>
+        <li><strong>Data Transaksi:</strong> Riwayat pesanan, metode pembayaran, jumlah belanja</li>
+        <li><strong>Data Preferensi:</strong> Ukuran sepatu, kategori dan brand yang sering dilihat</li>
+        <li><strong>Foto Profil:</strong> Foto yang Anda upload untuk profil akun</li>
+      </ul>
+
+      <h3>Penggunaan Data</h3>
+      <ul>
+        <li>Memproses dan mengirimkan pesanan Anda</li>
+        <li>Mengirimkan notifikasi status pesanan via email</li>
+        <li>Program loyalitas dan pemberian voucher</li>
+        <li>Rekomendasi produk berdasarkan preferensi Anda</li>
+        <li>Meningkatkan kualitas layanan website</li>
+      </ul>
+
+      <h3>Keamanan Data</h3>
+      <div class="info-box">
+        <p><i class="fa fa-lock mr-2"></i> Kami menggunakan enkripsi untuk melindungi password dan data sensitif Anda. Data tidak akan dijual atau dibagikan ke pihak ketiga tanpa persetujuan Anda.</p>
+      </div>
+
+      <h3>Hak Anda</h3>
+      <ul>
+        <li>Anda bisa mengedit atau menghapus data profil kapan saja.</li>
+        <li>Anda bisa meminta penghapusan akun dan data pribadi dengan menghubungi admin.</li>
+        <li>Anda bisa memilih untuk tidak menerima email promosi.</li>
+      </ul>
+    </div>
+
+    <!-- 6. Ketentuan Umum -->
+    <div class="terms-section" id="umum">
+      <h2>
+        <span class="icon-circle"><i class="fa fa-gavel"></i></span>
+        Ketentuan Umum
+      </h2>
+      <p class="subtitle">Aturan dan ketentuan tambahan yang perlu Anda ketahui</p>
+
+      <h3>Harga dan Stok</h3>
+      <ul>
+        <li>Harga produk dapat berubah sewaktu-waktu tanpa pemberitahuan sebelumnya.</li>
+        <li>Stok produk dapat habis sewaktu-waktu. Kami tidak bertanggung jawab jika produk yang dipesan ternyata sudah habis.</li>
+        <li>Harga yang tertera sudah termasuk PPN (jika berlaku).</li>
+      </ul>
+
+      <h3>Akun Pengguna</h3>
+      <ul>
+        <li>Anda bertanggung jawab atas kerahasiaan akun dan password Anda.</li>
+        <li>Informasi yang diberikan harus benar dan akurat.</li>
+        <li>Kami berhak menonaktifkan akun yang terindikasi melakukan kecurangan.</li>
+      </ul>
+
+      <h3>Program Loyalitas</h3>
+      <ul>
+        <li>Setiap akumulasi belanja sebesar <strong>Rp 200.000</strong> akan menghasilkan voucher diskon <strong>Rp 5.000</strong>.</li>
+        <li>Voucher otomatis dibuat dan bisa digunakan di halaman checkout.</li>
+        <li>Voucher hanya bisa digunakan 1 kali per transaksi.</li>
+        <li>Jika pesanan dibatalkan, saldo loyalitas dan voucher yang belum dipakai akan dikembalikan.</li>
+      </ul>
+
+      <h3>Pembatalan oleh Pihak Kami</h3>
+      <div class="danger-box">
+        <p><i class="fa fa-exclamation-triangle mr-2"></i> DD Shoes Store berhak membatalkan pesanan jika terindikasi kecurangan, pembayaran mencurigakan, atau pelanggaran terhadap syarat dan ketentuan yang berlaku.</p>
+      </div>
+
+      <h3>Perubahan Ketentuan</h3>
+      <ul>
+        <li>Kami berhak mengubah syarat dan ketentuan ini sewaktu-waktu.</li>
+        <li>Perubahan akan berlaku efektif setelah dipublikasikan di halaman ini.</li>
+        <li>Penggunaan website setelah perubahan berarti Anda menyetujui ketentuan yang baru.</li>
+      </ul>
+
+      <h3>Hubungi Kami</h3>
+      <p>Jika Anda memiliki pertanyaan mengenai syarat dan ketentuan ini, silakan hubungi kami melalui:</p>
+      <ul>
+        <li><strong>WhatsApp:</strong> 0812-3456-7890</li>
+        <li><strong>Email:</strong> admin@ddshoes.com</li>
+        <li><strong>Live Chat:</strong> Tersedia di website (jam operasional 09.00 - 21.00 WIB)</li>
+      </ul>
+    </div>
+
+    <div class="text-center mt-5 mb-5">
+      <a href="{% url 'home' %}" class="primary-btn">
+        <i class="fa fa-arrow-left mr-2"></i> Kembali ke Beranda
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Smooth scroll for nav links
+  document.querySelectorAll('.terms-nav a').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      // Update active state
+      document.querySelectorAll('.terms-nav a').forEach(function(l) { l.classList.remove('active'); });
+      this.classList.add('active');
+    });
+  });
+
+  // Update active nav on scroll
+  window.addEventListener('scroll', function() {
+    var sections = document.querySelectorAll('.terms-section');
+    var navLinks = document.querySelectorAll('.terms-nav a');
+    var current = '';
+    
+    sections.forEach(function(section) {
+      var sectionTop = section.offsetTop - 120;
+      if (window.scrollY >= sectionTop) {
+        current = section.getAttribute('id');
+      }
+    });
+
+    navLinks.forEach(function(link) {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+    });
+  });
+</script>
+
+{% endblock %}

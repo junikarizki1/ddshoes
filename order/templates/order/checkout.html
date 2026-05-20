@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %} {% load static %}{% load humanize %} {% block content %}
 
 <!-- ========================================================= -->
 <!-- CSS SAKTI UNTUK MEMATIKAN BUG DROPDOWN TEMPLATE -->
@@ -51,7 +51,46 @@
       <div class="row">
         <!-- KOLOM KIRI: FORM ALAMAT -->
         <div class="col-lg-8">
-          <h3>Billing Details</h3>
+          <h3>Detail Checkout</h3>
+
+          {% if has_saved_address %}
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0" style="color: #888da7;">
+                <i class="fa fa-map-marker mr-2"></i>Pilih Alamat Pengiriman
+              </h5>
+              <a href="{% url 'address_list' %}" class="btn btn-sm btn-outline-secondary" style="border-radius: 50px; font-size: 12px;">
+                <i class="fa fa-cog mr-1"></i>Kelola Alamat
+              </a>
+            </div>
+            
+            {% for addr in user_addresses %}
+            <div class="card mb-2 {% if addr.is_default %}border-primary{% endif %}" style="border-radius: 10px; cursor: pointer;" onclick="selectAddress({{ addr.id }})">
+              <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="selected_address_id" 
+                           value="{{ addr.id }}" id="addr{{ addr.id }}"
+                           {% if addr.is_default %}checked{% endif %}>
+                    <label class="form-check-label font-weight-bold" for="addr{{ addr.id }}">
+                      {{ addr.label }} {% if addr.is_default %}<span class="badge badge-primary ml-1" style="font-size: 10px;">Default</span>{% endif %}
+                    </label>
+                  </div>
+                </div>
+                <p class="mb-1 small mt-2 ml-4 text-muted">
+                  {{ addr.address }}<br>
+                  {{ addr.subdistrict_name }}, {{ addr.district_name }}<br>
+                  {{ addr.city_name }}, {{ addr.province_name }} {{ addr.postal_code }}
+                </p>
+                <p class="mb-0 small text-muted ml-4">
+                  <i class="fa fa-truck mr-1"></i>{{ addr.shipping_service }} - Rp {{ addr.shipping_cost|floatformat:0|intcomma }}
+                </p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
           <form
             class="row contact_form"
             action="{% url 'place_order' %}"
@@ -209,7 +248,7 @@
                 required
                 disabled
               >
-                <option value="">-- Pilih Kecamatan Tujuan --</option>
+                <option value="">-- Pilih Jasa Kirim --</option>
               </select>
 
               <!-- Input tersembunyi untuk dikirim ke backend database -->
@@ -233,10 +272,22 @@
                 type="text"
                 class="form-control"
                 name="address"
+                id="address_input"
                 placeholder="Nama Jalan, Gedung, No. Rumah, RT/RW"
                 required
               />
             </div>
+
+            <div class="col-md-12 form-group mt-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="save_address" id="save_address" value="on">
+                <label class="form-check-label small" for="save_address" style="cursor: pointer;">
+                  <i class="fa fa-save mr-1"></i>Simpan alamat ini untuk pesanan berikutnya
+                </label>
+              </div>
+            </div>
+
+            <input type="hidden" name="address_label" id="address_label" value="Alamat Baru" />
 
             <div class="col-md-12 form-group mb-5 mt-3">
               <label>Catatan Pesanan (Opsional)</label>
@@ -253,7 +304,7 @@
         <!-- KOLOM KANAN: RINGKASAN PESANAN -->
         <div class="col-lg-4">
           <div class="order_box">
-            <h2>Your Order</h2>
+            <h2>Orderan Kamu</h2>
             <ul class="list">
               <li>
                 <a href="#">Product <span>Total</span></a>
@@ -268,6 +319,35 @@
               </li>
               {% endfor %}
             </ul>
+
+            {% if available_coupons %}
+            <div class="mt-3 p-3 rounded" style="background: #f8f9fa; border: 1px solid #eee;">
+              <h6 class="mb-2 font-weight-bold" style="color: #888da7;">
+                <i class="fa fa-ticket mr-1"></i> Voucher Tersedia
+              </h6>
+              {% for coupon in available_coupons %}
+              <div class="d-flex justify-content-between align-items-center mb-2 p-2 rounded {% if coupon.id == active_coupon_id %}border{% endif %}" 
+                   style="background: {% if coupon.id == active_coupon_id %}#fff3cd{% else %}#fff{% endif %}; cursor: pointer; border: 1px solid {% if coupon.id == active_coupon_id %}#ffc107{% else %}#eee{% endif %};"
+                   onclick="applyVoucher({{ coupon.id }}, {{ coupon.discount_value }})">
+                <div>
+                  <strong class="small" style="color: #888da7;">{{ coupon.code }}</strong>
+                  <div class="text-muted" style="font-size: 11px;">Diskon Rp {{ coupon.discount_value|intcomma }}</div>
+                </div>
+                {% if coupon.id == active_coupon_id %}
+                <span class="badge badge-warning">Terpakai</span>
+                {% else %}
+                <span class="badge badge-light" style="font-size: 10px;">Pakai</span>
+                {% endif %}
+              </div>
+              {% endfor %}
+              {% if active_coupon_id %}
+              <button type="button" class="btn btn-sm btn-outline-danger w-100 mt-2" style="border-radius: 50px; font-size: 12px;" onclick="removeVoucher()">
+                <i class="fa fa-times mr-1"></i> Hapus Voucher
+              </button>
+              {% endif %}
+            </div>
+            {% endif %}
+
             <ul class="list list_2 mt-3">
               <li>
                 <a href="#">Subtotal <span>Rp {{ total }}</span></a>
@@ -623,6 +703,185 @@
         resetOngkir();
       }
     });
+
+  // DATA ALAMAT TERSIMPAN (untuk selectAddress tanpa API call untuk lokasi)
+  var addressData = {};
+  {% for addr in user_addresses %}
+  console.log('Loading address {{ addr.id }}:', {
+    province_id: '{{ addr.province_id }}',
+    district_id: '{{ addr.district_id }}',
+    district_name: '{{ addr.district_name }}'
+  });
+  addressData[{{ addr.id }}] = {
+    province_id: '{{ addr.province_id }}',
+    province_name: '{{ addr.province_name }}',
+    city_id: '{{ addr.city_id }}',
+    city_name: '{{ addr.city_name }}',
+    district_id: '{{ addr.district_id }}',
+    district_name: '{{ addr.district_name }}',
+    subdistrict_id: '{{ addr.subdistrict_id }}',
+    subdistrict_name: '{{ addr.subdistrict_name }}',
+    postal_code: '{{ addr.postal_code }}',
+    address: '{{ addr.address|escapejs }}',
+    label: '{{ addr.label }}',
+  };
+  {% endfor %}
+  console.log('All addressData:', addressData);
+
+  // FUNGSI PILIH ALAMAT TERSIMPAN (ZERO API CALLS untuk lokasi, tapi fetch ongkir)
+  function selectAddress(addressId) {
+    console.log('selectAddress called with ID:', addressId);
+    var addr = addressData[addressId];
+    if (!addr) {
+      console.error('Address not found in addressData:', addressId);
+      return;
+    }
+    console.log('Selected address data:', addr);
+
+    // Set radio button
+    document.getElementById('addr' + addressId).checked = true;
+
+    // 1. Set Provinsi
+    var provinceSelect = document.getElementById('province_id');
+    provinceSelect.value = addr.province_id;
+    document.getElementById('province_name').value = addr.province_name;
+
+    // 2. Set Kota
+    var citySelect = document.getElementById('city_id');
+    citySelect.innerHTML = '<option value="' + addr.city_id + '" selected>' + addr.city_name + '</option>';
+    citySelect.disabled = false;
+    document.getElementById('city_name').value = addr.city_name;
+
+    // 3. Set Kecamatan
+    var districtSelect = document.getElementById('district_id');
+    districtSelect.innerHTML = '<option value="' + addr.district_id + '" selected>' + addr.district_name + '</option>';
+    districtSelect.disabled = false;
+    document.getElementById('district_name').value = addr.district_name;
+
+    // 4. Set Kelurahan
+    var subdistrictSelect = document.getElementById('subdistrict_id');
+    subdistrictSelect.innerHTML = '<option value="' + addr.subdistrict_id + '" selected>' + addr.subdistrict_name + '</option>';
+    subdistrictSelect.disabled = false;
+    document.getElementById('subdistrict_name').value = addr.subdistrict_name;
+
+    // 5. Set Kode Pos
+    var postalCodeSelect = document.getElementById('postal_code');
+    postalCodeSelect.innerHTML = '<option value="' + addr.postal_code + '" selected>' + addr.postal_code + '</option>';
+    postalCodeSelect.disabled = false;
+
+    // 6. Fetch Jasa Kirim via API (satu-satunya API call)
+    var courierSelect = document.getElementById('courier_selection');
+    courierSelect.innerHTML = '<option value="">Loading ongkir...</option>';
+    courierSelect.disabled = false; // Enable dulu agar user bisa lihat loading
+    resetOngkir();
+
+    console.log('Fetching shipping cost for district:', addr.district_id);
+    
+    fetch(`/order/get_shipping_cost/?destination=${addr.district_id}&weight=1000`)
+      .then(r => {
+        console.log('Response status:', r.status);
+        return r.json();
+      })
+      .then(data => {
+        console.log('Shipping API response:', JSON.stringify(data, null, 2));
+        courierSelect.innerHTML = '<option value="">-- Pilih Jasa Kirim --</option>';
+        
+        // Handle different response structures
+        var results = data.results || data.data || [];
+        
+        if (results.length > 0) {
+          results.forEach(courier => {
+            // Structure 1: {courier: {code}, costs: [{service, cost, etd}]}
+            if (courier.costs && courier.costs.length > 0) {
+              var courierCode = (courier.courier && courier.courier.code) || courier.code || 'UNK';
+              courier.costs.forEach(cost => {
+                var option = document.createElement('option');
+                option.value = cost.cost + '|' + courierCode.toUpperCase() + ' ' + cost.service;
+                option.text = courierCode.toUpperCase() + ' ' + cost.service + ' (Rp ' + parseInt(cost.cost).toLocaleString('id-ID') + ') - ' + cost.etd + ' hari';
+                courierSelect.appendChild(option);
+              });
+            }
+            // Structure 2: {code, service, cost, etd}
+            else if (courier.cost && courier.service) {
+              var option = document.createElement('option');
+              option.value = courier.cost + '|' + courier.code.toUpperCase() + ' ' + courier.service;
+              option.text = courier.code.toUpperCase() + ' ' + courier.service + ' (Rp ' + parseInt(courier.cost).toLocaleString('id-ID') + ') - ' + courier.etd + ' hari';
+              courierSelect.appendChild(option);
+            }
+          });
+        } else {
+          console.warn('No shipping results for district:', addr.district_id, 'Response:', data);
+          courierSelect.innerHTML = '<option value="">Kurir tidak tersedia</option>';
+        }
+      })
+      .catch(err => {
+        console.error('Error loading shipping:', err);
+        courierSelect.innerHTML = '<option value="">Gagal memuat ongkir</option>';
+      });
+
+    // 7. Set alamat lengkap dan label
+    document.getElementById('address_input').value = addr.address;
+    document.getElementById('address_label').value = addr.label;
+
+    // Uncheck save_address karena sudah pakai alamat tersimpan
+    document.getElementById('save_address').checked = false;
+  }
+
+  // Auto-select default address on page load
+  {% if default_address %}
+  document.addEventListener('DOMContentLoaded', function() {
+    selectAddress({{ default_address.id }});
+  });
+  {% endif %}
+
+  // VOUCHER FUNCTIONS
+  function applyVoucher(couponId, discountValue) {
+    var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch('{% url "apply_coupon" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': csrftoken,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: 'coupon_id=' + couponId
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert(data.error || 'Gagal menerapkan voucher');
+      }
+    })
+    .catch(err => {
+      console.error('Error applying voucher:', err);
+      alert('Terjadi kesalahan saat menerapkan voucher');
+    });
+  }
+
+  function removeVoucher() {
+    var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch('{% url "reset_coupon" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': csrftoken,
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      }
+    })
+    .catch(err => {
+      console.error('Error removing voucher:', err);
+    });
+  }
 </script>
 
 {% endblock %}

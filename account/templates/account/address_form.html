@@ -1,0 +1,272 @@
+{% extends 'base.html' %} {% load static %} {% load humanize %} {% block content %}
+<style>
+  .address-form select.form-control {
+    display: block !important; width: 100%; height: 42px;
+    padding: 0 15px; border: 1px solid #e0e0e0; border-radius: 8px;
+    color: #333; background-color: #fff; font-size: 14px;
+    -webkit-appearance: menulist !important;
+    -moz-appearance: menulist !important;
+    appearance: menulist !important; cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .address-form select.form-control:focus {
+    border-color: #888da7; outline: none; box-shadow: 0 0 0 2px rgba(136,141,167,0.15);
+  }
+  .address-form select.form-control:disabled {
+    background-color: #f5f5f5; color: #999; cursor: not-allowed;
+  }
+  .address-form .form-group label {
+    font-weight: 600; font-size: 13px; color: #555; margin-bottom: 6px; display: block;
+  }
+  .address-form .form-control {
+    height: 42px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px;
+  }
+  .address-form .form-control:focus {
+    border-color: #888da7; box-shadow: 0 0 0 2px rgba(136,141,167,0.15);
+  }
+  .address-card {
+    background: #fff; border-radius: 12px; padding: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid #eee;
+  }
+</style>
+
+<section class="section_gap">
+  <div class="container" style="max-width: 650px; margin-top: 70px">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="mb-0"><i class="fa fa-map-marker mr-2" style="color: #888da7;"></i>{{ title }}</h3>
+      <a href="{% url 'address_list' %}" class="btn btn-outline-secondary btn-sm" style="border-radius: 50px;">
+        <i class="fa fa-arrow-left mr-1"></i>Kembali
+      </a>
+    </div>
+    {% include 'alerts.html' %}
+
+    <div class="address-card">
+      <form class="address-form" action="" method="POST" id="addressForm">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label>Label Alamat *</label>
+          <input type="text" class="form-control" name="label" placeholder="Contoh: Rumah, Kantor, Kos"
+                 value="{{ address.label|default:'Alamat Baru' }}" required />
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 form-group">
+            <label>Provinsi *</label>
+            <select class="form-control" name="province_id" id="province_id" required>
+              <option value="">-- Pilih Provinsi --</option>
+              {% for prov in provinces|dictsort:"name" %}
+              <option value="{{ prov.id }}" {% if address.province_id == prov.id %}selected{% endif %}>{{ prov.name }}</option>
+              {% endfor %}
+            </select>
+            <input type="hidden" name="province" id="province_name" value="{{ address.province_name|default:'' }}" />
+          </div>
+
+          <div class="col-md-6 form-group">
+            <label>Kota / Kabupaten *</label>
+            <select class="form-control" name="city_id" id="city_id" required {% if not address.city_id %}disabled{% endif %}>
+              {% if address.city_id %}
+              <option value="{{ address.city_id }}" selected>{{ address.city_name }}</option>
+              {% endif %}
+            </select>
+            <input type="hidden" name="city" id="city_name" value="{{ address.city_name|default:'' }}" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 form-group">
+            <label>Kecamatan *</label>
+            <select class="form-control" name="district_id" id="district_id" required {% if not address.district_id %}disabled{% endif %}>
+              {% if address.district_id %}
+              <option value="{{ address.district_id }}" selected>{{ address.district_name }}</option>
+              {% endif %}
+            </select>
+            <input type="hidden" name="district" id="district_name" value="{{ address.district_name|default:'' }}" />
+          </div>
+
+          <div class="col-md-6 form-group">
+            <label>Kelurahan *</label>
+            <select class="form-control" name="subdistrict_id" id="subdistrict_id" required {% if not address.subdistrict_id %}disabled{% endif %}>
+              {% if address.subdistrict_id %}
+              <option value="{{ address.subdistrict_id }}" selected>{{ address.subdistrict_name }}</option>
+              {% endif %}
+            </select>
+            <input type="hidden" name="subdistrict" id="subdistrict_name" value="{{ address.subdistrict_name|default:'' }}" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Kode Pos *</label>
+          <select class="form-control" name="postal_code" id="postal_code" required {% if not address.postal_code %}disabled{% endif %}>
+            {% if address.postal_code %}
+            <option value="{{ address.postal_code }}" selected>{{ address.postal_code }}</option>
+            {% endif %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Alamat Lengkap *</label>
+          <input type="text" class="form-control" name="address" placeholder="Nama Jalan, Gedung, No. Rumah, RT/RW"
+                 value="{{ address.address|default:'' }}" required />
+        </div>
+
+        <button type="submit" class="primary-btn w-100 mt-3" style="border: none; border-radius: 8px; height: 46px;">
+          <i class="fa fa-save mr-1"></i>{% if is_edit %}Perbarui{% else %}Simpan{% endif %} Alamat
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  function resetDropdowns(level) {
+    if (level <= 1) {
+      var citySelect = document.getElementById('city_id');
+      citySelect.innerHTML = '';
+      citySelect.disabled = true;
+    }
+    if (level <= 2) {
+      var districtSelect = document.getElementById('district_id');
+      districtSelect.innerHTML = '';
+      districtSelect.disabled = true;
+    }
+    if (level <= 3) {
+      var subdistrictSelect = document.getElementById('subdistrict_id');
+      subdistrictSelect.innerHTML = '';
+      subdistrictSelect.disabled = true;
+    }
+    if (level <= 4) {
+      var postalCodeSelect = document.getElementById('postal_code');
+      postalCodeSelect.innerHTML = '';
+      postalCodeSelect.disabled = true;
+    }
+  }
+
+  document.getElementById('province_id').addEventListener('change', function() {
+    var provinceId = this.value;
+    var citySelect = document.getElementById('city_id');
+    resetDropdowns(2);
+    if (provinceId) {
+      document.getElementById('province_name').value = this.options[this.selectedIndex].text;
+      citySelect.innerHTML = '<option value="">Loading...</option>';
+      citySelect.disabled = true;
+      fetch(`/order/get_cities/?province_id=${provinceId}`)
+        .then(r => r.json())
+        .then(data => {
+          citySelect.innerHTML = '';
+          if (data.cities) {
+            data.cities.sort((a, b) => a.name.localeCompare(b.name));
+            data.cities.forEach(city => {
+              var option = document.createElement('option');
+              option.value = city.id;
+              var tipe = city.type ? city.type + ' ' : '';
+              option.text = tipe + city.name;
+              citySelect.appendChild(option);
+            });
+          }
+          citySelect.disabled = false;
+        })
+        .catch(err => {
+          console.error('Error loading cities:', err);
+          citySelect.innerHTML = '<option value="">Error</option>';
+          citySelect.disabled = false;
+        });
+    } else {
+      document.getElementById('province_name').value = '';
+      resetDropdowns(1);
+    }
+  });
+
+  document.getElementById('city_id').addEventListener('change', function() {
+    var cityId = this.value;
+    var districtSelect = document.getElementById('district_id');
+    resetDropdowns(3);
+    if (cityId) {
+      document.getElementById('city_name').value = this.options[this.selectedIndex].text;
+      districtSelect.innerHTML = '<option value="">Loading...</option>';
+      districtSelect.disabled = true;
+      fetch(`/order/get_districts/?city_id=${cityId}`)
+        .then(r => r.json())
+        .then(data => {
+          districtSelect.innerHTML = '';
+          if (data.districts) {
+            data.districts.sort((a, b) => a.name.localeCompare(b.name));
+            data.districts.forEach(district => {
+              var option = document.createElement('option');
+              option.value = district.id;
+              option.text = district.name;
+              districtSelect.appendChild(option);
+            });
+          }
+          districtSelect.disabled = false;
+        })
+        .catch(err => {
+          console.error('Error loading districts:', err);
+          districtSelect.innerHTML = '<option value="">Error</option>';
+          districtSelect.disabled = false;
+        });
+    } else {
+      document.getElementById('city_name').value = '';
+      resetDropdowns(2);
+    }
+  });
+
+  document.getElementById('district_id').addEventListener('change', function() {
+    var districtId = this.value;
+    var subdistrictSelect = document.getElementById('subdistrict_id');
+    resetDropdowns(4);
+    if (districtId) {
+      document.getElementById('district_name').value = this.options[this.selectedIndex].text;
+      
+      subdistrictSelect.innerHTML = '<option value="">Loading...</option>';
+      subdistrictSelect.disabled = true;
+      fetch(`/order/get_subdistricts/?district_id=${districtId}`)
+        .then(r => r.json())
+        .then(data => {
+          subdistrictSelect.innerHTML = '';
+          if (data.subdistricts) {
+            data.subdistricts.sort((a, b) => a.name.localeCompare(b.name));
+            data.subdistricts.forEach(sub => {
+              var option = document.createElement('option');
+              option.value = sub.id;
+              option.text = sub.name;
+              option.dataset.zip = sub.zip_code || '';
+              subdistrictSelect.appendChild(option);
+            });
+          }
+          subdistrictSelect.disabled = false;
+        })
+        .catch(err => {
+          console.error('Error loading subdistricts:', err);
+          subdistrictSelect.innerHTML = '<option value="">Error</option>';
+          subdistrictSelect.disabled = false;
+        });
+    } else {
+      document.getElementById('district_name').value = '';
+      resetDropdowns(3);
+    }
+  });
+
+  document.getElementById('subdistrict_id').addEventListener('change', function() {
+    var postalCodeSelect = document.getElementById('postal_code');
+    if (this.value) {
+      document.getElementById('subdistrict_name').value = this.options[this.selectedIndex].text;
+      var zipCode = this.options[this.selectedIndex].dataset.zip;
+      postalCodeSelect.innerHTML = '';
+      if (zipCode && zipCode !== '0') {
+        var option = document.createElement('option');
+        option.value = zipCode;
+        option.text = zipCode;
+        postalCodeSelect.appendChild(option);
+        postalCodeSelect.disabled = false;
+      } else {
+        postalCodeSelect.innerHTML = '<option value="">Tidak tersedia</option>';
+        postalCodeSelect.disabled = false;
+      }
+    } else {
+      document.getElementById('subdistrict_name').value = '';
+      resetDropdowns(4);
+    }
+  });
+</script>
+{% endblock %}

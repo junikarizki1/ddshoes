@@ -1,409 +1,480 @@
-{% extends 'base.html' %} {% load static %} {% load humanize %} {% block content %}
+{% extends 'base.html' %} {% load static %} {% load humanize %} {% load courier_tags %} {% block content %}
+<style>
+  .status-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+  }
+  .status-icon-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .status-icon-circle i {
+    font-size: 48px;
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .resi-box {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+  }
+  .order-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+  }
+  .btn-action {
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .details-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 1px solid #eee;
+    height: 100%;
+  }
+  .details-card h4 {
+    color: #888da7;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+  .details-card ul li {
+    padding: 8px 0;
+    border-bottom: 1px solid #f5f5f5;
+  }
+  .details-card ul li:last-child {
+    border-bottom: none;
+  }
+  .summary-table {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 1px solid #eee;
+  }
+  .star-btn {
+    font-size: 32px;
+    color: #e4e4e4;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out, transform 0.1s ease;
+  }
+  .star-btn:hover {
+    transform: scale(1.15);
+  }
+  .star-btn:hover,
+  .star-btn:hover ~ .star-btn,
+  .star-btn.active,
+  .star-btn.active ~ .star-btn {
+    color: #ffc107 !important;
+  }
+</style>
+
 <section class="order_details section_gap">
-  <div class="container" style="max-width: 600px; margin-top: 70px">
-    <div class="row justify-content-center mb-5">
-      <div class="col-md-8 text-center">
-        
-        {# 1. STATUS: RETURNED (Ditempatkan di atas agar tidak tertimpa status Accepted) #}
-        {% if order.status == 'Returned' %}
-        <div class="status-container text-center p-5 shadow-sm rounded border bg-white col-lg-20 mx-auto">
-          <div class="status-icon mb-4">
-            <img src="https://cdn-icons-png.flaticon.com/512/3502/3502601.png" width="100" alt="Returned" />
-          </div>
-          <h2 style="color: #6f42c1">Dana Dikembalikan</h2>
-          <p>
-            Pesanan <strong>#{{ order.order_number }}</strong> telah berhasil diretur.<br />
-            Dana telah dikembalikan ke rekening Anda.
-          </p>
-          
-          {% if order.return_request.refund_proof %}
-            <div class="mt-3">
-              <p class="small text-muted">Bukti Transfer Refund:</p>
-              <a href="{{ order.return_request.refund_proof.url }}" target="_blank">
-                <img src="{{ order.return_request.refund_proof.url }}" width="150" class="img-thumbnail" alt="Bukti Transfer">
-              </a>
-            </div>
-          {% endif %}
+  <div class="container" style="max-width: 700px; margin-top: 70px">
+    
+    {# 1. STATUS: RETURNED #}
+    {% if order.status == 'Returned' %}
+    <div class="status-card text-center mb-4">
+      <div class="status-icon-circle" style="background: #f3e8ff;">
+        <i class="lnr lnr-undo" style="color: #6f42c1;"></i>
+      </div>
+      <h2 style="color: #6f42c1;">Dana Dikembalikan</h2>
+      <p class="text-muted">
+        Pesanan <strong>#{{ order.order_number }}</strong> telah berhasil diretur.<br />
+        Dana telah dikembalikan ke rekening Anda.
+      </p>
+      
+      {% if order.return_request.refund_proof %}
+        <div class="mt-3">
+          <p class="small text-muted mb-2">Bukti Transfer Refund:</p>
+          <a href="{{ order.return_request.refund_proof.url }}" target="_blank">
+            <img src="{{ order.return_request.refund_proof.url }}" width="150" class="img-thumbnail rounded" alt="Bukti Transfer">
+          </a>
         </div>
-          
-{# 2. STATUS: ACCEPTED & SEDANG DIKIRIM #}
-{% elif order.status == 'Accepted' %}
-    {% if order.tracking_number %}
-    {% if order.return_request %}
-    <div class="status-container text-center p-5 shadow-sm rounded border bg-white col-lg-20 mx-auto">
-      <div class="status-icon mb-3">
-        <i class="lnr lnr-undo" style="font-size: 80px; color: #888da7;"></i>
+      {% endif %}
     </div>
-        <h2 style="color: #888da7">Retur Pesanan</h2>
+
+    {# 2. STATUS: ACCEPTED & SEDANG DIKIRIM #}
+    {% elif order.status == 'Accepted' %}
+      {% if order.return_request %}
+      <div class="status-card text-center mb-4">
+        <div class="status-icon-circle" style="background: #e8f0fe;">
+          <i class="lnr lnr-sync" style="color: #888da7;"></i>
+        </div>
+        <h2 style="color: #888da7;">Retur Pesanan</h2>
         <p class="text-muted">
-            Kami telah menerima permintaan retur untuk pesanan <span class="badge" style="background: #888da7; color: white;">#{{ order.order_number }}</span>.
+          Kami telah menerima permintaan retur untuk pesanan <span class="status-badge" style="background: #888da7; color: white;">#{{ order.order_number }}</span>.
         </p>
 
         <div class="p-4 mb-4 rounded" style="background-color: #f9f9ff; border: 1px solid #dee2e6;">
-            <p class="mb-1 text-uppercase small font-weight-bold text-secondary">Status Retur Saat Ini:</p>
-            <h4 class="text-dark">{{ order.return_request.get_status_display }}</h4>
-            <hr>
-            <p class="small text-muted mb-0">
-                <i class="fa fa-clock-o mr-1"></i> Mohon hubungi admin via Live Chat untuk informasi lebih lanjut.
-            </p>
+          <p class="mb-1 text-uppercase small font-weight-bold text-secondary">Status Retur Saat Ini:</p>
+          <h4 class="text-dark mb-0">{{ order.return_request.get_status_display }}</h4>
+          <hr>
+          <p class="small text-muted mb-0">
+            <i class="fa fa-clock-o mr-1"></i> Mohon hubungi admin via Live Chat untuk informasi lebih lanjut.
+          </p>
         </div>
 
-        <div class="order-actions border-top pt-4">
-            <a href="{% url 'my_orders' %}" class="btn btn-outline-secondary px-4" style="border-radius: 50px;">
-                <i class="fa fa-arrow-left mr-1"></i> Kembali ke Pesanan Saya
-            </a>
+        <div class="order-actions">
+          <a href="{% url 'my_orders' %}" class="btn-action" style="background: #e9ecef; color: #333;">
+            <i class="fa fa-arrow-left mr-1"></i> Kembali ke Pesanan Saya
+          </a>
         </div>
-    </div>
+      </div>
 
-    {% else %}
-    <div class="status-container text-center p-4 shadow-sm rounded border bg-white col-lg-20 mx-auto">
-        <div class="status-icon mb-3">
-            <img src="https://cdn-icons-png.flaticon.com/512/758/758461.png" width="80" alt="Shipping" />
+      {% elif order.tracking_number %}
+      <div class="status-card text-center mb-4">
+        <div class="status-icon-circle" style="background: #e3f2fd;">
+          <i class="fa fa-truck" style="color: #1976d2;"></i>
         </div>
-        <h2 style="color: #888da7">Pesanan Sedang Dikirim!</h2>
+        <h2 style="color: #1976d2;">Pesanan Sedang Dikirim!</h2>
         <p class="text-muted">
-            Pesanan <span class="badge" style="background: #888da7; color: white;">#{{ order.order_number }}</span> sedang dalam perjalanan.
+          Pesanan <span class="status-badge" style="background: #1976d2; color: white;">#{{ order.order_number }}</span> sedang dalam perjalanan.
         </p>
 
-        <div class="resi-box p-3 mb-4 bg-light rounded border-dashed" style="border: 2px dashed #dee2e6;">
-            <p class="mb-1 small font-weight-bold text-secondary">Nomor Resi</p>
-            <h4 class="text-dark">{{ order.tracking_number }}</h4>
-            <a href="{% url 'track_order' %}?no_resi={{ order.tracking_number }}&kurir=jnt" class="genric-btn primary-btn circle arrow mt-2">
-                Lacak <span class="lnr lnr-arrow-right"></span>
-            </a>
+        <div class="resi-box">
+          <p class="mb-1 small font-weight-bold text-secondary">Nomor Resi</p>
+          <h4 class="text-dark mb-3">{{ order.tracking_number }}</h4>
+          <a href="{{ order.shipping_service|courier_tracking_url }}" target="_blank" rel="noopener" class="btn-action" style="background: #1976d2; color: white;">
+            Lacak di {{ order.shipping_service|upper }} <i class="fa fa-external-link ml-1"></i>
+          </a>
         </div>
 
-        <div class="order-actions border-top pt-4">
-            <div class="d-flex flex-wrap align-items-center justify-content-center" style="gap: 15px;">
-                <a href="{% url 'order_complete' order.order_number %}" 
-                   class="btn btn-success px-5 shadow-sm" 
-                   style="border-radius: 50px; font-weight: 700;"
-                   onclick="return confirm('Apakah Anda yakin pesanan sudah diterima dengan baik?')">
-                    <i class="fa fa-check-circle mr-1"></i> Pesanan Diterima
-                </a>
-                <a href="{% url 'submit_return' order.id %}" class="btn btn-danger px-4" style="border-radius: 50px;">
-                    <i class="fa fa-undo mr-1"></i> Ajukan Retur
-                </a>
-          {% endif %}
-            </div>
+        <div class="order-actions">
+          <a href="{% url 'order_complete' order.order_number %}" 
+             class="btn-action" 
+             style="background: #28a745; color: white;"
+             onclick="return confirm('Apakah Anda yakin pesanan sudah diterima dengan baik?')">
+            <i class="fa fa-check-circle mr-1"></i> Pesanan Diterima
+          </a>
+          <a href="{% url 'submit_return' order.id %}" class="btn-action" style="background: #dc3545; color: white;">
+            <i class="fa fa-undo mr-1"></i> Ajukan Retur
+          </a>
         </div>
+      </div>
+
+      {% else %}
+      <div class="status-card text-center mb-4">
+        <div class="status-icon-circle" style="background: #fff3cd;">
+          <i class="lnr lnr-gift" style="color: #856404;"></i>
+        </div>
+        <h2 style="color: #856404;">Pesanan Diproses</h2>
+        <p class="text-muted">
+          Terima kasih! Pesanan <strong>#{{ order.order_number }}</strong> telah kami terima dan sedang disiapkan untuk dikirim.
+        </p>
+        <div class="status-badge" style="background: #fff3cd; color: #856404;">
+          <i class="fa fa-spinner fa-spin mr-1"></i> Menunggu Pengiriman
+        </div>
+      </div>
+      {% endif %}
+
+    {# 3. STATUS: COMPLETED #}
+    {% elif order.status == 'Completed' %}
+    <div class="status-card text-center mb-4">
+      <div class="status-icon-circle" style="background: #d4edda;">
+        <i class="lnr lnr-checkmark-circle" style="color: #28a745;"></i>
+      </div>
+      <h2 style="color: #28a745;">Pesanan Selesai</h2>
+      <p class="text-muted">
+        Terima kasih! Pesanan <strong>#{{ order.order_number }}</strong> telah selesai.<br />
+        Sampai jumpa di orderan berikutnya!
+      </p>
     </div>
-
-        {% else %}
-        <div class="status-container text-center p-4 shadow-sm rounded border bg-white col-lg-20 mx-auto">
-            <div class="status-icon mb-4">
-              <img src="https://cdn-icons-png.flaticon.com/512/148/148767.png" width="100" alt="Success" />
-            </div>
-            <h2 style="color: #28a745">Pembayaran Berhasil!</h2>
-            <p>
-              Terima kasih! Pesanan <strong>#{{ order.order_number }}</strong> telah kami terima dan sedang disiapkan untuk dikirim.
-            </p>
-        </div>
-          {% endif %}
-
-        {# 3. STATUS: COMPLETED (SELESAI) #}
-        {% elif order.status == 'Completed' %}
-        <div class="status-container text-center p-4 shadow-sm rounded border bg-white col-lg-20 mx-auto mb-4">
-          <div class="status-icon mb-4">
-            <img src="https://cdn-icons-png.flaticon.com/512/148/148767.png" width="100" alt="Completed" />
-          </div>
-          <h2 style="color: #343a40">Pesanan Selesai</h2>
-          <p>
-            Terima kasih! Pesanan <strong>#{{ order.order_number }}</strong> telah selesai. <br />
-            Sampai jumpa di orderan berikutnya!
-          </p>
-        </div>
+    
+    {% if not has_reviewed %}
+    <div class="status-card mb-4 mt-4">
+      <h4 style="color: #888da7;" class="mb-4 font-weight-bold text-center">Beri Penilaian Pelayanan Kami</h4>
+      
+      <form action="{% url 'submit_review' order.id %}" method="POST" id="reviewForm">
+        {% csrf_token %}
         
-        {% if not has_reviewed %}
-        <div class="review-form-box p-4 shadow-sm rounded border bg-white col-lg-20 mx-auto mt-4">
-          <h4 style="color: #888da7;" class="mb-4 font-weight-bold text-center">Beri Penilaian Pelayanan Kami</h4>
+        <div class="form-group text-center mb-4">
+          <label class="d-block font-weight-bold text-secondary mb-2">Rating Bintang *</label>
           
-          <form action="{% url 'submit_review' order.id %}" method="POST" id="reviewForm">
-            {% csrf_token %}
+          <div class="star-rating-wrapper" style="display: inline-flex; flex-direction: row-reverse; justify-content: center; gap: 8px;">
+            <input type="hidden" name="rating" id="ratingValue" value="" required />
             
-            <div class="form-group text-center mb-4">
-              <label class="d-block font-weight-bold text-secondary mb-2">Rating Bintang *</label>
-              
-              <div class="star-rating-wrapper" style="display: inline-flex; flex-direction: row-reverse; justify-content: center; gap: 8px;">
-                <input type="hidden" name="rating" id="ratingValue" value="" required />
-                
-                <i class="fa fa-star star-btn" data-value="5" title="Sangat Puas"></i>
-                <i class="fa fa-star star-btn" data-value="4" title="Puas"></i>
-                <i class="fa fa-star star-btn" data-value="3" title="Cukup Puas"></i>
-                <i class="fa fa-star star-btn" data-value="2" title="Kurang Puas"></i>
-                <i class="fa fa-star star-btn" data-value="1" title="Kecewa"></i>
-              </div>
-              
-              <div id="starDescription" class="text-muted small mt-2 font-weight-bold" style="min-height: 18px; color: #888da7 !important;">
-                Pilih rating bintang
-              </div>
-            </div>
-        
-            <div class="form-group mb-3">
-              <label class="font-weight-bold text-secondary">Judul Ulasan *</label>
-              <input type="text" name="subject" class="form-control" placeholder="Contoh: Pelayanan Ramah & Cepat" required style="border: 1px solid #eeeeee; height: 40px;" />
-            </div>
-        
-            <div class="form-group mb-3">
-              <label class="font-weight-bold text-secondary">Isi Ulasan *</label>
-              <textarea name="review" rows="4" class="form-control" placeholder="Tulis pendapat Anda tentang pelayanan DD Shoes Store..." required style="border: 1px solid #eeeeee; resize: none;"></textarea>
-            </div>
-        
-            <div class="form-check mb-4 mt-3">
-              <input class="form-check-input" type="checkbox" name="is_anonymous" value="true" id="anonCheck" />
-              <label class="form-check-label text-muted small" for="anonCheck" style="cursor: pointer; user-select: none; padding-left: 5px;">
-                Sensor nama saya di halaman utama
-              </label>
-            </div>
-        
-            <div class="text-center">
-              <button type="submit" class="btn text-white px-5" style="background-color: #888da7; border-radius: 50px; font-weight: bold; font-size: 14px; border: none; height: 45px; min-width: 200px; cursor: pointer;">
-                Kirim Penilaian
-              </button>
-            </div>
-          </form>
+            <i class="fa fa-star star-btn" data-value="5" title="Sangat Puas"></i>
+            <i class="fa fa-star star-btn" data-value="4" title="Puas"></i>
+            <i class="fa fa-star star-btn" data-value="3" title="Cukup Puas"></i>
+            <i class="fa fa-star star-btn" data-value="2" title="Kurang Puas"></i>
+            <i class="fa fa-star star-btn" data-value="1" title="Kecewa"></i>
+          </div>
+          
+          <div id="starDescription" class="text-muted small mt-2 font-weight-bold" style="min-height: 18px; color: #888da7 !important;">
+            Pilih rating bintang
+          </div>
         </div>
-        
-        <style>
-          .star-btn {
-            font-size: 32px;
-            color: #e4e4e4;
-            cursor: pointer;
-            transition: color 0.2s ease-in-out, transform 0.1s ease;
-          }
-        
-          .star-btn:hover {
-            transform: scale(1.15);
-          }
-        
-          .star-btn:hover,
-          .star-btn:hover ~ .star-btn,
-          .star-btn.active,
-          .star-btn.active ~ .star-btn {
-            color: #ffc107 !important;
-          }
-        </style>
-        
-        <script>
-          document.addEventListener("DOMContentLoaded", function () {
-            const stars = document.querySelectorAll(".star-btn");
-            const ratingInput = document.getElementById("ratingValue");
-            const descriptionBox = document.getElementById("starDescription");
-            const form = document.getElementById("reviewForm");
-        
-            const descriptions = [
-              "",
-              "⭐ (1) Kecewa",
-              "⭐⭐ (2) Kurang Puas",
-              "⭐⭐⭐ (3) Cukup Puas",
-              "⭐⭐⭐⭐ (4) Puas",
-              "⭐⭐⭐⭐⭐ (5) Sangat Puas"
-            ];
-        
-            stars.forEach((star) => {
-              star.addEventListener("mouseover", function () {
-                const hoverValue = this.getAttribute("data-value");
-                descriptionBox.innerText = descriptions[hoverValue];
-              });
-        
-              star.addEventListener("mouseout", function () {
-                const clickedValue = ratingInput.value;
-                if (clickedValue) {
-                  descriptionBox.innerText = descriptions[clickedValue];
-                } else {
-                  descriptionBox.innerText = "Pilih rating bintang";
-                }
-              });
-        
-              star.addEventListener("click", function () {
-                const selectValue = this.getAttribute("data-value");
-                ratingInput.value = selectValue;
-        
-                stars.forEach((s) => s.classList.remove("active"));
-                this.classList.add("active");
-              });
-            });
-        
-            form.addEventListener("submit", function (e) {
-              if (!ratingInput.value) {
-                e.preventDefault();
-                alert("Mohon pilih rating bintang terlebih dahulu sebelum mengirim!");
-              }
-            });
+    
+        <div class="form-group mb-3">
+          <label class="font-weight-bold text-secondary">Judul Ulasan *</label>
+          <input type="text" name="subject" class="form-control" placeholder="Contoh: Pelayanan Ramah & Cepat" required style="border: 1px solid #eeeeee; height: 40px;" />
+        </div>
+    
+        <div class="form-group mb-3">
+          <label class="font-weight-bold text-secondary">Isi Ulasan *</label>
+          <textarea name="review" rows="4" class="form-control" placeholder="Tulis pendapat Anda tentang pelayanan DD Shoes Store..." required style="border: 1px solid #eeeeee; resize: none;"></textarea>
+        </div>
+    
+        <div class="form-check mb-4 mt-3">
+          <input class="form-check-input" type="checkbox" name="is_anonymous" value="true" id="anonCheck" />
+          <label class="form-check-label text-muted small" for="anonCheck" style="cursor: pointer; user-select: none; padding-left: 5px;">
+            Sensor nama saya di halaman utama
+          </label>
+        </div>
+    
+        <div class="text-center">
+          <button type="submit" class="btn-action" style="background-color: #888da7; color: white; min-width: 200px;">
+            Kirim Penilaian
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const stars = document.querySelectorAll(".star-btn");
+        const ratingInput = document.getElementById("ratingValue");
+        const descriptionBox = document.getElementById("starDescription");
+        const form = document.getElementById("reviewForm");
+    
+        const descriptions = [
+          "",
+          "⭐ (1) Kecewa",
+          "⭐⭐ (2) Kurang Puas",
+          "⭐⭐⭐ (3) Cukup Puas",
+          "⭐⭐⭐⭐ (4) Puas",
+          "⭐⭐⭐⭐⭐ (5) Sangat Puas"
+        ];
+    
+        stars.forEach((star) => {
+          star.addEventListener("mouseover", function () {
+            const hoverValue = this.getAttribute("data-value");
+            descriptionBox.innerText = descriptions[hoverValue];
           });
-        </script>
-        
+    
+          star.addEventListener("mouseout", function () {
+            const clickedValue = ratingInput.value;
+            if (clickedValue) {
+              descriptionBox.innerText = descriptions[clickedValue];
+            } else {
+              descriptionBox.innerText = "Pilih rating bintang";
+            }
+          });
+    
+          star.addEventListener("click", function () {
+            const selectValue = this.getAttribute("data-value");
+            ratingInput.value = selectValue;
+    
+            stars.forEach((s) => s.classList.remove("active"));
+            this.classList.add("active");
+          });
+        });
+    
+        form.addEventListener("submit", function (e) {
+          if (!ratingInput.value) {
+            e.preventDefault();
+            alert("Mohon pilih rating bintang terlebih dahulu sebelum mengirim!");
+          }
+        });
+      });
+    </script>
+    
     {% else %}
-        <div class="p-4 shadow-sm rounded border bg-white col-lg-8 mx-auto mt-4 text-center">
-          <p class="mb-0 small" style="color: #888da7; font-weight: 600;">
-            <i class="fa fa-check-circle mr-1"></i> Anda telah memberikan penilaian untuk transaksi ini. Terima kasih atas ulasan Anda!
-          </p>
-        </div>
+    <div class="status-card mb-4 mt-4 text-center">
+      <p class="mb-0 small" style="color: #888da7; font-weight: 600;">
+        <i class="fa fa-check-circle mr-1"></i> Anda telah memberikan penilaian untuk transaksi ini. Terima kasih atas ulasan Anda!
+      </p>
+    </div>
     {% endif %}
 
+    {# 4. STATUS: CANCELLED #}
+    {% elif order.status == 'Cancelled' %}
+    <div class="status-card text-center mb-4">
+      <div class="status-icon-circle" style="background: #f8d7da;">
+        <i class="lnr lnr-cross-circle" style="color: #dc3545;"></i>
+      </div>
+      <h2 style="color: #dc3545;">Pesanan Dibatalkan</h2>
+      <p class="text-muted">
+        Mohon maaf, pesanan <strong>#{{ order.order_number }}</strong> telah dibatalkan karena waktu pembayaran berakhir atau alasan lainnya.
+      </p>
+    </div>
 
-        {# 4. STATUS: CANCELLED #}
-        {% elif order.status == 'Cancelled' %}
-        <div class="status-container text-center p-4 shadow-sm rounded border bg-white col-lg-20 mx-auto">
-          <div class="status-icon mb-4">
-            <img src="https://cdn-icons-png.flaticon.com/512/6659/6659895.png" width="100" alt="Cancelled" />
-          </div>
-          <h2 style="color: #dc3545">Pesanan Dibatalkan</h2>
-          <p>
-            Mohon maaf, pesanan <strong>#{{ order.order_number }}</strong> telah dibatalkan karena waktu pembayaran berakhir atau alasan lainnya.
-          </p>
-        </div>
-
-        {# 5. STATUS: PENDING/NEW (MENUNGGU PEMBAYARAN) #}
-        {% else %}
-        <div class="status-container text-center p-4 shadow-sm rounded border bg-white col-lg-20 mx-auto">
-          <div class="status-icon mb-4">
-            <img src="https://cdn-icons-png.flaticon.com/512/4831/4831732.png" width="100" alt="Pending" />
-          </div>
-          <h2 style="color: #ffba00">Menunggu Pembayaran</h2>
-          <p>
-            Pesanan <strong>#{{ order.order_number }}</strong> telah kami terima.<br />
-            Segera selesaikan pembayaran agar sepatu pilihan Anda tidak kehabisan stok!
-          </p>
-          <div class="mt-4">
-            <a href="{% url 'payments' order.order_number %}" class="primary-btn" style="text-decoration: none">
-              Bayar Sekarang
-            </a>
-          </div>
-        </div>
-        {% endif %}
-
+    {# 5. STATUS: PENDING/NEW #}
+    {% else %}
+    <div class="status-card text-center mb-4">
+      <div class="status-icon-circle" style="background: #fff3cd;">
+        <i class="lnr lnr-clock" style="color: #ffba00;"></i>
+      </div>
+      <h2 style="color: #ffba00;">Menunggu Pembayaran</h2>
+      <p class="text-muted">
+        Pesanan <strong>#{{ order.order_number }}</strong> telah kami terima.<br />
+        Segera selesaikan pembayaran agar sepatu pilihan Anda tidak kehabisan stok!
+      </p>
+      <div class="mt-4">
+        <a href="{% url 'payments' order.order_number %}" class="btn-action" style="background: #ffba00; color: white;">
+          <i class="fa fa-credit-card mr-1"></i> Bayar Sekarang
+        </a>
       </div>
     </div>
-  </div>
-
-  <div class="row order_d_inner mt-4">
-    <!-- Kolom Info Pesanan -->
-    <div class="col-lg-6 col-md-6 mb-4">
-        <div class="details_item p-4 shadow-sm rounded bg-light border">
-            <h4 class="mb-3  border-bottom pb-2" style="color: #ffba00;">
-                <i class="fa fa-shopping-bag mr-2"></i> Info Pesanan
-            </h4>
-            <ul class="list list-unstyled">
-                <li class="mb-2">
-                    <span class="d-block font-weight-bold text-dark">Nomor Pesanan:</span>
-                    <span class="text-muted">#{{ order.order_number }}</span>
-                </li>
-                <li class="mb-2">
-                    <span class="d-block font-weight-bold text-dark">Tanggal:</span>
-                    <span class="text-muted">{{ order.created_at|date:"d M Y" }}</span>
-                </li>
-                <li class="mb-2">
-                    <span class="d-block font-weight-bold text-dark">Nama Lengkap:</span>
-                    <span class="text-muted">{{ order.first_name }} {{ order.last_name }}</span>
-                </li>
-                <li class="mb-2">
-                    <span class="d-block font-weight-bold text-dark">Telepon:</span>
-                    <span class="text-muted">{{ order.phone }}</span>
-                </li>
-                <li class="mb-2">
-                    <span class="d-block font-weight-bold text-dark">Email:</span>
-                    <span class="text-muted">{{ order.email }}</span>
-                </li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Kolom Info Pengiriman -->
-    <div class="col-lg-6 col-md-6 mb-4">
-        <div class="details_item p-4 shadow-sm rounded bg-light border">
-            <h4 class="mb-3 border-bottom pb-2" style="color: #ffba00;">
-                <i class="fa fa-truck mr-2"></i> Info Pengiriman
-            </h4>
-            <ul class="list list-unstyled">
-                <li class="mb-2">
-                    <span class="d-block font-weight-bold text-dark">Alamat Lengkap:</span>
-                    <span class="text-muted">{{ order.address }}. Kode Post: {{ order.postal_code }} </span>
-                </li>
-                <li class="mb-2">
-                    <span class="d-block font-weight-bold text-dark">Kecamatan:</span>
-                    <span class="text-muted">{{ order.district }}</span>
-                </li>
-                <li class="mb-2">
-                    <span class="d-block font-weight-bold text-dark">Kabupaten/Kota:</span>
-                    <span class="text-muted">{{ order.city }}</span>
-                </li>
-                <li class="mb-2">
-                    <span class="d-block font-weight-bold text-dark">Provinsi:</span>
-                    <span class="text-muted">{{ order.province }}</span>
-                </li>
-                <li class="mb-2">
-                    <span class="d-block font-weight-bold text-dark">Jasa Kirim:</span>
-                    <span class="text-muted">{{ order.shipping_service }}</span>
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-<div class="order_details_table mt-5 shadow-sm p-4 bg-white rounded border col-lg-8 mx-auto">
-  <h2 class="text-center mb-4">Ringkasan Pesanan</h2>
-  <div class="table-responsive">
-    <table class="table table-borderless">
-      <tbody>
-        <!-- Daftar Produk -->
-        {% for item in order.orderproduct_set.all %}
-        <tr class="border-bottom">
-          <td class="text-left py-3">
-            <p class="mb-0 text-dark">
-              <span class="font-weight-bold">{{ item.product.product_name }}</span> 
-              <span class="text-muted ml-2">(x{{ item.quantity }})</span>
-            </p>
-          </td>
-          <td class="text-right py-3">
-            <p class="mb-0 font-weight-bold">Rp {% widthratio item.product_price 1 item.quantity %}</p>
-          </td>
-        </tr>
-        {% endfor %}
-
-        <!-- Bagian Perincian Biaya -->
-        <tr>
-          <td class="text-left pt-4"><h5 class="text-muted">Subtotal</h5></td>
-          <td class="text-right pt-4"><h5>Rp {{ order.order_total|add:order.discount|floatformat:0 |intcomma}}</h5></td>
-        </tr>
-        
-        {% if order.discount > 0 %}
-        <tr>
-          <td class="text-left"><h5 class="text-danger">Diskon</h5></td>
-          <td class="text-right"><h5 class="text-danger">- Rp {{ order.discount|floatformat:0 |intcomma}}</h5></td>
-        </tr>
-        {% endif %}
-        
-        <tr>
-          <td class="text-left"><h5 class="text-muted">Ongkos Kirim</h5></td>
-          <td class="text-right"><h5>Rp {{ order.shipping_cost|floatformat:0 |intcomma}}</h5></td>
-        </tr>
-        
-        <tr class="border-top mt-2">
-          <td class="text-left pt-3"><h3>Total Bayar</h3></td>
-          <td class="text-right pt-3">
-            <h3 style="color: #ffba00" class="font-weight-bold">Rp {{ order.grand_total|floatformat:0 |intcomma}}</h3>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    {% if order.order_note %}
-    <div class="mt-4 p-3 bg-light rounded border">
-      <h6 class="font-weight-bold text-dark mb-2">
-        <i class="fa fa-sticky-note-o mr-2 text-warning"></i>Catatan Pembeli:
-      </h6>
-      <p class="mb-0 text-muted italic">"{{ order.order_note }}"</p>
-    </div>
-    {% else %}
-    <div class="mt-4 p-3 bg-light rounded border-dashed" style="border: 1px dashed #ccc;">
-      <p class="mb-0 text-muted small text-center">Tidak ada catatan tambahan.</p>
-    </div>
     {% endif %}
-  </div>
-</div>
 
-    <div class="text-center mt-5">
-      <a href="{% url 'home' %}" class="primary-btn">Lanjutkan Belanja</a>
+    <!-- Info Pesanan & Pengiriman -->
+    <div class="row mt-4">
+      <div class="col-lg-6 col-md-6 mb-4">
+        <div class="details-card">
+          <h4><i class="fa fa-shopping-bag mr-2"></i>Info Pesanan</h4>
+          <ul class="list list-unstyled mb-0">
+            <li>
+              <span class="d-block font-weight-bold text-dark">Nomor Pesanan:</span>
+              <span class="text-muted">#{{ order.order_number }}</span>
+            </li>
+            <li>
+              <span class="d-block font-weight-bold text-dark">Tanggal:</span>
+              <span class="text-muted">{{ order.created_at|date:"d M Y" }}</span>
+            </li>
+            <li>
+              <span class="d-block font-weight-bold text-dark">Nama Lengkap:</span>
+              <span class="text-muted">{{ order.first_name }} {{ order.last_name }}</span>
+            </li>
+            <li>
+              <span class="d-block font-weight-bold text-dark">Telepon:</span>
+              <span class="text-muted">{{ order.phone }}</span>
+            </li>
+            <li>
+              <span class="d-block font-weight-bold text-dark">Email:</span>
+              <span class="text-muted">{{ order.email }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-lg-6 col-md-6 mb-4">
+        <div class="details-card">
+          <h4><i class="fa fa-truck mr-2"></i>Info Pengiriman</h4>
+          <ul class="list list-unstyled mb-0">
+            <li>
+              <span class="d-block font-weight-bold text-dark">Alamat Lengkap:</span>
+              <span class="text-muted">{{ order.address }}, Kode Pos: {{ order.postal_code }}</span>
+            </li>
+            <li>
+              <span class="d-block font-weight-bold text-dark">Kecamatan:</span>
+              <span class="text-muted">{{ order.district }}</span>
+            </li>
+            <li>
+              <span class="d-block font-weight-bold text-dark">Kabupaten/Kota:</span>
+              <span class="text-muted">{{ order.city }}</span>
+            </li>
+            <li>
+              <span class="d-block font-weight-bold text-dark">Provinsi:</span>
+              <span class="text-muted">{{ order.province }}</span>
+            </li>
+            <li>
+              <span class="d-block font-weight-bold text-dark">Jasa Kirim:</span>
+              <span class="text-muted">{{ order.shipping_service }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ringkasan Pesanan -->
+    <div class="summary-table mt-4">
+      <h4 class="text-center mb-4" style="color: #888da7;">Ringkasan Pesanan</h4>
+      <div class="table-responsive">
+        <table class="table table-borderless mb-0">
+          <tbody>
+            {% for item in order.orderproduct_set.all %}
+            <tr class="border-bottom">
+              <td class="text-left py-3">
+                <p class="mb-0 text-dark">
+                  <span class="font-weight-bold">{{ item.product.product_name }}</span> 
+                  <span class="text-muted ml-2">(x{{ item.quantity }})</span>
+                </p>
+              </td>
+              <td class="text-right py-3">
+                <p class="mb-0 font-weight-bold">Rp {% widthratio item.product_price 1 item.quantity %}</p>
+              </td>
+            </tr>
+            {% endfor %}
+
+            <tr>
+              <td class="text-left pt-4"><h5 class="text-muted">Subtotal</h5></td>
+              <td class="text-right pt-4"><h5>Rp {{ order.order_total|add:order.discount|floatformat:0|intcomma }}</h5></td>
+            </tr>
+            
+            {% if order.discount > 0 %}
+            <tr>
+              <td class="text-left"><h5 class="text-danger">Diskon</h5></td>
+              <td class="text-right"><h5 class="text-danger">- Rp {{ order.discount|floatformat:0|intcomma }}</h5></td>
+            </tr>
+            {% endif %}
+            
+            <tr>
+              <td class="text-left"><h5 class="text-muted">Ongkos Kirim</h5></td>
+              <td class="text-right"><h5>Rp {{ order.shipping_cost|floatformat:0|intcomma }}</h5></td>
+            </tr>
+            
+            <tr class="border-top mt-2">
+              <td class="text-left pt-3"><h3>Total Bayar</h3></td>
+              <td class="text-right pt-3">
+                <h3 style="color: #ffba00;" class="font-weight-bold">Rp {{ order.grand_total|floatformat:0|intcomma }}</h3>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        {% if order.order_note %}
+        <div class="mt-4 p-3 bg-light rounded border">
+          <h6 class="font-weight-bold text-dark mb-2">
+            <i class="fa fa-sticky-note-o mr-2 text-warning"></i>Catatan Pembeli:
+          </h6>
+          <p class="mb-0 text-muted">"{{ order.order_note }}"</p>
+        </div>
+        {% else %}
+        <div class="mt-4 p-3 bg-light rounded border" style="border: 1px dashed #ccc;">
+          <p class="mb-0 text-muted small text-center">Tidak ada catatan tambahan.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="text-center mt-5 mb-5">
+      <a href="{% url 'home' %}" class="btn-action" style="background: #888da7; color: white;">
+        <i class="fa fa-shopping-bag mr-1"></i> Lanjutkan Belanja
+      </a>
     </div>
   </div>
 </section>

@@ -36,6 +36,80 @@
     />
     <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}" />
     <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+    <style>
+      .menu_nav .dropdown-menu {
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 8px !important;
+        min-width: 200px !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.12) !important;
+        margin-top: 8px !important;
+        background: #fff !important;
+        animation: dropdownFade 0.2s ease;
+      }
+      @keyframes dropdownFade {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .menu_nav .dropdown-menu li {
+        list-style: none !important;
+      }
+      .menu_nav .dropdown-menu li a,
+      .menu_nav .dropdown-menu .nav-link {
+        color: #333 !important;
+        padding: 10px 16px !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        transition: all 0.15s ease !important;
+        display: block !important;
+        text-decoration: none !important;
+        border-bottom: none !important;
+      }
+      .menu_nav .dropdown-menu li a:hover,
+      .menu_nav .dropdown-menu .nav-link:hover {
+        background: #f5f5f7 !important;
+        color: #888da7 !important;
+        padding-left: 20px !important;
+        text-decoration: none !important;
+      }
+      .menu_nav .dropdown-menu li:first-child a,
+      .menu_nav .dropdown-menu li:first-child .nav-link {
+        color: #888da7 !important;
+        font-weight: 600 !important;
+        border-bottom: 1px solid #f0f0f0 !important;
+        margin-bottom: 4px !important;
+        padding-bottom: 12px !important;
+      }
+      .menu_nav .dropdown-menu li:first-child a:hover,
+      .menu_nav .dropdown-menu li:first-child .nav-link:hover {
+        background: transparent !important;
+        padding-left: 16px !important;
+        color: #2c2c3a !important;
+      }
+      .menu_nav .submenu > .dropdown-toggle::after {
+        content: '' !important;
+        display: none !important;
+      }
+      .banner-area .active-banner-slider .owl-nav {
+        bottom: 50% !important;
+        transform: translateY(50%);
+        right: 20px !important;
+        width: auto !important;
+      }
+      .banner-area .active-banner-slider .owl-nav .owl-prev,
+      .banner-area .active-banner-slider .owl-nav .owl-next {
+        background: transparent !important;
+        color: #fff !important;
+        font-size: 24px !important;
+        margin: 8px 0 !important;
+        opacity: 0.7 !important;
+      }
+      .banner-area .active-banner-slider .owl-nav .owl-prev:hover,
+      .banner-area .active-banner-slider .owl-nav .owl-next:hover {
+        opacity: 1 !important;
+      }
+    </style>
   </head>
 
   <body>
@@ -103,151 +177,124 @@
                 >
                   <a class="nav-link" href="{% url 'product' %}">Produk</a>
                 </li>
-                <li
-                  class="nav-item {% if request.resolver_match.url_name == 'contact' or request.resolver_match.url_name == 'search' %}active{% endif %}"
-                >
-                  <a class="nav-link" href="#">Kontak</a>
-                </li>
-                <li
-                  class="nav-item {% if request.resolver_match.url_name == 'sk' or request.resolver_match.url_name == 'search' %}active{% endif %}"
-                >
-                  <a class="nav-link" href="#">S&K</a>
-                </li>
 
                 <li class="nav-item submenu dropdown">
-                  {% if request.user.is_authenticated %}
-                  <div class="d-flex align-items-center">
-                    <a
-                      href="#"
-                      class="nav-link dropdown-toggle d-flex align-items-center"
-                      data-toggle="dropdown"
-                      role="button"
-                      aria-haspopup="true"
-                      aria-expanded="false"
-                    >
-                      <span
-                        class="lnr lnr-user"
-                        style="font-size: 1.2em; margin-right: 8px"
-                      ></span>
-                      <span style="font-weight: 500"
-                        >{{ request.user.first_name }}</span
-                      >
-
-                      <div
-                        class="ml-2 d-none d-lg-inline-block"
-                        style="
-                          width: 40px;
-                          background: #e9ecef;
-                          height: 6px;
-                          border-radius: 10px;
-                          overflow: hidden;
-                          border: 1px solid #ddd;
-                        "
-                      >
-                        <div
-                          class="bg-warning"
-                          style="height: 100%; width: {% widthratio user.loyalty_balance 200000 100 %}%"
-                        ></div>
-                      </div>
-                    </a>
-
-                    <ul
-                      class="dropdown-menu shadow border-0"
-                      style="
-                        min-width: 240px;
-                        padding: 12px;
-                        border-radius: 12px;
-                      "
-                    >
-                      <li
-                        class="px-3 py-2 mb-2"
-                        style="background: #fff9e6; border-radius: 10px"
-                      >
-                        <a
-                          href="{% url 'loyalty_program' %}"
-                          style="text-decoration: none"
-                        >
-                          <div
-                            class="d-flex justify-content-between align-items-center mb-1"
-                          >
-                            <small
-                              class="font-weight-bold"
-                              style="
-                                color: #ffba00;
-                                font-size: 10px;
-                                letter-spacing: 0.5px;
-                              "
-                              >PROGRAM LOYALITAS</small
-                            >
-                            <i class="lnr lnr-star" style="color: #ffba00"></i>
-                          </div>
-                          <div
-                            class="progress"
-                            style="
-                              height: 8px;
-                              border-radius: 5px;
-                              background-color: #ddd;
-                            "
-                          >
-                            <div
-                              class="progress-bar bg-warning progress-bar-striped"
-                              role="progressbar"
-                              style="width: {% widthratio user.loyalty_balance 200000 100 %}%"
-                            ></div>
-                          </div>
-                        </a>
-                      </li>
-
-                      <div
-                        class="dropdown-divider"
-                        style="border-top: 1px solid #f1f1f1"
-                      ></div>
-
-                      <li class="nav-item">
-                        <a
-                          class="nav-link py-2"
-                          href="{% url 'edit_profile' %}"
-                        >
-                          <i class="lnr lnr-user mr-2"></i> Profil saya
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link py-2" href="{% url 'my_orders' %}">
-                          <i class="lnr lnr-history mr-2"></i> Pesanan
-                        </a>
-                      </li>
-
-                      <div
-                        class="dropdown-divider"
-                        style="border-top: 1px solid #f1f1f1"
-                      ></div>
-
-                      <li class="nav-item">
-                        <a
-                          class="nav-link py-2"
-                          href="{% url 'logout' %}"
-                          style="color: #dc3545; font-weight: 500"
-                        >
-                          <i class="lnr lnr-exit mr-2"></i> Keluar
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {% else %}
                   <a
-                    href="{% url 'login' %}"
-                    class="nav-link d-flex align-items-center"
+                    href="#"
+                    class="nav-link dropdown-toggle"
+                    data-toggle="dropdown"
                     role="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
                   >
-                    <span
-                      class="lnr lnr-enter"
-                      style="margin-right: 5px"
-                    ></span>
+                    Kategori
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a class="nav-link" href="{% url 'product' %}">Semua Kategori</a>
+                    </li>
+                    {% for cat in links_category %}
+                    <li>
+                      <a class="nav-link" href="{% url 'products_by_category' cat.slug %}">{{ cat.category_name }}</a>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </li>
+
+
+                <li class="nav-item submenu dropdown">
+                  <a
+                    href="#"
+                    class="nav-link dropdown-toggle"
+                    data-toggle="dropdown"
+                    role="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    Kontak
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a class="nav-link" href="https://wa.me/6281234567890" target="_blank" rel="noopener">
+                        <i class="fa fa-whatsapp mr-2" style="color: #25d366;"></i>WhatsApp
+                      </a>
+                    </li>
+                    <li>
+                      <a class="nav-link" href="javascript:void(0);" onclick="if(typeof Tawk_API !== 'undefined'){Tawk_API.toggle();}else{alert('Live Chat sedang memuat, silakan tunggu sebentar.');}">
+                        <i class="fa fa-comments mr-2" style="color: #888da7;"></i>Live Chat
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'terms' %}">S&K</a>
+                </li>
+
+                {% if request.user.is_authenticated %}
+                <li class="nav-item submenu dropdown">
+                  <a
+                    href="#"
+                    class="nav-link dropdown-toggle d-flex align-items-center"
+                    data-toggle="dropdown"
+                    role="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    {% if request.user.profile_photo %}
+                      <img src="{{ request.user.profile_photo.url }}" alt="Profile" class="rounded-circle mr-2" style="width: 32px; height: 32px; object-fit: cover;">
+                    {% else %}
+                      <span class="lnr lnr-user" style="font-size: 1.2em; margin-right: 8px"></span>
+                    {% endif %}
+                    <span style="font-weight: 500">{{ request.user.first_name }}</span>
+                    <div class="ml-2 d-none d-lg-inline-block" style="width: 40px; background: rgba(255,255,255,0.15); height: 6px; border-radius: 10px; overflow: hidden;">
+                      <div style="height: 100%; width: {% widthratio user.loyalty_balance 200000 100 %}%; background: #ffba00; border-radius: 10px;"></div>
+                    </div>
+                  </a>
+
+                  <ul class="dropdown-menu shadow border-0" style="min-width: 240px; padding: 12px; border-radius: 12px; right: 0; left: auto;">
+                    <li class="px-3 py-2 mb-2" style="background: #fff9e6; border-radius: 10px">
+                      <a href="{% url 'loyalty_program' %}" style="text-decoration: none">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                          <small class="font-weight-bold" style="color: #ffba00; font-size: 10px; letter-spacing: 0.5px;">PROGRAM LOYALITAS</small>
+                          <i class="lnr lnr-star" style="color: #ffba00"></i>
+                        </div>
+                        <div class="progress" style="height: 8px; border-radius: 5px; background-color: #ddd;">
+                          <div class="progress-bar bg-warning progress-bar-striped" role="progressbar" style="width: {% widthratio user.loyalty_balance 200000 100 %}%"></div>
+                        </div>
+                      </a>
+                    </li>
+
+                    <div class="dropdown-divider" style="border-top: 1px solid #f1f1f1"></div>
+
+                    <li class="nav-item">
+                      <a class="nav-link py-2" href="{% url 'edit_profile' %}">
+                        <i class="lnr lnr-user mr-2"></i> Profil saya
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link py-2" href="{% url 'my_orders' %}">
+                        <i class="lnr lnr-history mr-2"></i> Pesanan
+                      </a>
+                    </li>
+
+                    <div class="dropdown-divider" style="border-top: 1px solid #f1f1f1"></div>
+
+                    <li class="nav-item">
+                      <a class="nav-link py-2" href="{% url 'logout' %}" style="color: #dc3545; font-weight: 500">
+                        <i class="lnr lnr-exit mr-2"></i> Keluar
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                  <a href="{% url 'login' %}" class="nav-link d-flex align-items-center" role="button">
+                    <span class="lnr lnr-enter" style="margin-right: 5px"></span>
                     Login
                   </a>
-                  {% endif %}
                 </li>
+                {% endif %}
               </ul>
               <ul class="nav navbar-nav navbar-right">
                 <li class="nav-item">
@@ -345,53 +392,54 @@
             </div>
           </div>
           
-          <!-- Kolom 2: Tautan Cepat -->
-          <div class="col-lg-2 col-md-6 col-sm-6">
-            <div class="single-footer-widget">
-              <h6>Tautan Cepat</h6>
-              <ul class="list-unstyled" style="line-height: 2.5;">
-                <li><a href="{% url 'home' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Beranda</a></li>
-                <li><a href="{% url 'product' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Produk Kami</a></li>
-                <li><a href="{% url 'my_orders' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Pesanan Saya</a></li>
-                <li><a href="{% url 'loyalty_program' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Program Loyalitas</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <!-- Kolom 3: Layanan Pelanggan -->
-          <div class="col-lg-3 col-md-6 col-sm-6">
-            <div class="single-footer-widget">
-              <h6>Layanan Pelanggan</h6>
-              <ul class="list-unstyled" style="line-height: 2.5;">
-                <li><a href="#" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Bantuan & FAQ</a></li>
-                <li><a href="{% url 'track_order' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Lacak Pesanan</a></li>
-                <li><a href="#" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Kebijakan Pengiriman</a></li>
-                <li><a href="#" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Pengembalian Barang</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <!-- Kolom 4: Buletin & Sosial Media -->
-          <div class="col-lg-4 col-md-6 col-sm-6">
-            <div class="single-footer-widget">
-              <h6>Ikuti Kami</h6>
-              <p style="color: #777777; margin-bottom: 15px;">Dapatkan info terbaru seputar diskon dan produk baru langsung dari kami.</p>
-              <div class="d-flex" style="gap: 15px;">
-                <a href="#" style="color: #777777; font-size: 20px; transition: color 0.3s;" title="Instagram">
-                  <i class="fa fa-instagram"></i>
-                </a>
-                <a href="#" style="color: #777777; font-size: 20px; transition: color 0.3s;" title="Facebook">
-                  <i class="fa fa-facebook"></i>
-                </a>
-                <a href="#" style="color: #777777; font-size: 20px; transition: color 0.3s;" title="WhatsApp">
-                  <i class="fa fa-whatsapp"></i>
-                </a>
-                <a href="#" style="color: #777777; font-size: 20px; transition: color 0.3s;" title="TikTok">
-                  <i class="fa fa-video-camera"></i>
-                </a>
-              </div>
-            </div>
-          </div>
+           <!-- Kolom 2: Tautan Cepat -->
+           <div class="col-lg-2 col-md-6 col-sm-6">
+             <div class="single-footer-widget">
+               <h6>Tautan Cepat</h6>
+               <ul class="list-unstyled" style="line-height: 2.5;">
+                 <li><a href="{% url 'home' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Beranda</a></li>
+                 <li><a href="{% url 'product' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Produk Kami</a></li>
+                 <li><a href="{% url 'my_orders' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Pesanan Saya</a></li>
+                 <li><a href="{% url 'loyalty_program' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Program Loyalitas</a></li>
+                 <li><a href="{% url 'terms' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Syarat & Ketentuan</a></li>
+               </ul>
+             </div>
+           </div>
+           
+           <!-- Kolom 3: Layanan Pelanggan -->
+           <div class="col-lg-3 col-md-6 col-sm-6">
+             <div class="single-footer-widget">
+               <h6>Layanan Pelanggan</h6>
+               <ul class="list-unstyled" style="line-height: 2.5;">
+                 <li><a href="https://wa.me/6281234567890" target="_blank" rel="noopener" style="color: #777777; transition: color 0.3s;"><i class="fa fa-whatsapp" style="font-size: 10px; margin-right: 5px; color: #25d366;"></i> WhatsApp</a></li>
+                 <li><a href="javascript:void(0);" onclick="if(typeof Tawk_API !== 'undefined'){Tawk_API.toggle();}return false;" style="color: #777777; transition: color 0.3s;"><i class="fa fa-comments" style="font-size: 10px; margin-right: 5px; color: #888da7;"></i> Live Chat</a></li>
+                 <li><a href="{% url 'terms' %}#pengiriman" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Kebijakan Pengiriman</a></li>
+                 <li><a href="{% url 'terms' %}#retur" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Retur & Refund</a></li>
+               </ul>
+             </div>
+           </div>
+           
+           <!-- Kolom 4: Sosial Media -->
+           <div class="col-lg-4 col-md-6 col-sm-6">
+             <div class="single-footer-widget">
+               <h6>Ikuti Kami</h6>
+               <p style="color: #777777; margin-bottom: 15px;">Dapatkan info terbaru seputar diskon dan produk baru langsung dari kami.</p>
+               <div class="d-flex" style="gap: 15px;">
+                 <a href="#" style="color: #777777; font-size: 20px; transition: color 0.3s;" title="Instagram">
+                   <i class="fa fa-instagram"></i>
+                 </a>
+                 <a href="#" style="color: #777777; font-size: 20px; transition: color 0.3s;" title="Facebook">
+                   <i class="fa fa-facebook"></i>
+                 </a>
+                 <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" style="color: #777777; font-size: 20px; transition: color 0.3s;" title="WhatsApp">
+                   <i class="fa fa-whatsapp"></i>
+                 </a>
+                 <a href="#" style="color: #777777; font-size: 20px; transition: color 0.3s;" title="TikTok">
+                   <i class="fa fa-video-camera"></i>
+                 </a>
+               </div>
+             </div>
+           </div>
         </div>
         
         <div class="footer-bottom d-flex justify-content-center align-items-center flex-wrap" style="margin-top: 50px; border-top: 1px solid #eeeeee; padding-top: 20px;">

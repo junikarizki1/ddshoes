@@ -1,10 +1,17 @@
-from django.shortcuts import render, redirect
-from .models import Account
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Account, Address
 from django.contrib import messages
 from .forms import RegistrationForm
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from order.models import Coupon
+import requests
+import base64
+from django.core.files.base import ContentFile
+import io
+
+KOMERCE_API_KEY = '94obP28b5833ab1b737da714qz6kbIcd'
+MAX_ADDRESSES = 3
 
 # ==========================================
 # 1. FUNGSI LOGIN
@@ -113,18 +120,140 @@ def loyalty_program(request):
 def edit_profile(request):
     user = request.user
     if request.method == 'POST':
-        # Ambil data dari form
         user.first_name = request.POST.get('first_name')
         user.last_name = request.POST.get('last_name')
         user.phone_number = request.POST.get('phone_number')
         
-        # Update shoe_size (Penting untuk algoritma rekomendasi)
         new_size = request.POST.get('shoe_size')
         if new_size:
             user.shoe_size = int(new_size)
+        
+        if request.POST.get('remove_photo') == '1':
+            if user.profile_photo:
+                user.profile_photo.delete(save=False)
+            user.profile_photo = None
+        else:
+            cropped_data = request.POST.get('profile_photo_cropped')
+            if cropped_data and cropped_data.startswith('data:image'):
+                format, imgstr = cropped_data.split(';base64,')
+                ext = format.split('/')[-1]
+                data = base64.b64decode(imgstr)
+                user.profile_photo.save(f'profile_{user.id}.{ext}', ContentFile(data), save=False)
+            elif 'profile_photo' in request.FILES:
+                user.profile_photo = request.FILES['profile_photo']
         
         user.save()
         messages.success(request, 'Profil berhasil diperbarui!')
         return redirect('edit_profile')
 
     return render(request, 'account/edit_profile.html', {'user': user})
+
+
+# ==========================================
+# 6. ADDRESS MANAGEMENT
+# ==========================================
+@login_required(login_url='login')
+def address_list(request):
+    addresses = Address.objects.filter(user=request.user).order_by('-is_default', '-created_at')
+    return render(request, 'account/address_list.html', {'addresses': addresses})
+
+
+@login_required(login_url='login')
+def add_address(request):
+    if Address.objects.filter(user=request.user).count() >= MAX_ADDRESSES:
+        messages.error(request, f'Maksimal {MAX_ADDRESSES} alamat tersimpan. Hapus alamat lama untuk menambah baru.')
+        return redirect('address_list')
+
+    provinces = []
+    try:
+        url = "https://rajaongkir.komerce.id/api/v1/destination/province"
+        headers = {'key': KOMERCE_API_KEY}
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            provinces = response.json().get('data', [])
+    except Exception:
+        pass
+
+    if request.method == 'POST':
+        address = Address.objects.create(
+            user=request.user,
+            label=request.POST.get('label', 'Alamat Baru'),
+            province_id=request.POST.get('province_id'),
+            province_name=request.POST.get('province'),
+            city_id=request.POST.get('city_id'),
+            city_name=request.POST.get('city'),
+            district_id=request.POST.get('district_id'),
+            district_name=request.POST.get('district'),
+            subdistrict_id=request.POST.get('subdistrict_id'),
+            subdistrict_name=request.POST.get('subdistrict'),
+            postal_code=request.POST.get('postal_code'),
+            address=request.POST.get('address'),
+            shipping_service=request.POST.get('shipping_service', ''),
+            shipping_cost=float(request.POST.get('shipping_cost', 0)),
+        )
+        messages.success(request, 'Alamat berhasil ditambahkan!')
+        return redirect('address_list')
+
+    return render(request, 'account/address_form.html', {
+        'provinces': provinces,
+        'title': 'Tambah Alamat Baru',
+        'is_edit': False,
+    })
+
+
+@login_required(login_url='login')
+def edit_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+
+    provinces = []
+    try:
+        url = "https://rajaongkir.komerce.id/api/v1/destination/province"
+        headers = {'key': KOMERCE_API_KEY}
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            provinces = response.json().get('data', [])
+    except Exception:
+        pass
+
+    if request.method == 'POST':
+        address.label = request.POST.get('label', 'Alamat Baru')
+        address.province_id = request.POST.get('province_id')
+        address.province_name = request.POST.get('province')
+        address.city_id = request.POST.get('city_id')
+        address.city_name = request.POST.get('city')
+        address.district_id = request.POST.get('district_id')
+        address.district_name = request.POST.get('district')
+        address.subdistrict_id = request.POST.get('subdistrict_id')
+        address.subdistrict_name = request.POST.get('subdistrict')
+        address.postal_code = request.POST.get('postal_code')
+        address.address = request.POST.get('address')
+        address.shipping_service = request.POST.get('shipping_service', '')
+        address.shipping_cost = float(request.POST.get('shipping_cost', 0))
+        address.save()
+        messages.success(request, 'Alamat berhasil diperbarui!')
+        return redirect('address_list')
+
+    return render(request, 'account/address_form.html', {
+        'provinces': provinces,
+        'address': address,
+        'title': 'Edit Alamat',
+        'is_edit': True,
+    })
+
+
+@login_required(login_url='login')
+def delete_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    address.delete()
+    messages.success(request, 'Alamat berhasil dihapus.')
+    return redirect('address_list')
+
+
+@login_required(login_url='login')
+def set_default_address(request, address_id):
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    Address.objects.filter(user=request.user).update(is_default=False)
+    address.is_default = True
+    address.save()
+    messages.success(request, 'Alamat default berhasil diubah.')
+    return redirect('address_list')

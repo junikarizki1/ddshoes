@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from cart.models import CartItem 
 from .models import Order, OrderProduct, Coupon
+from account.models import Address
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse 
 import midtransclient
@@ -34,31 +35,51 @@ def checkout(request, total=0, quantity=0, cart_items=None):
             total += float(cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
             
-            discount = float(request.session.get('discount_amount', 0))
-            total = total - discount
+        discount = float(request.session.get('discount_amount', 0))
+        total = total - discount
     except ObjectDoesNotExist:
         pass
         
     if quantity <= 0:
         return redirect('product')
-        
-    provinces = []
-    try:
-        url = "https://rajaongkir.komerce.id/api/v1/destination/province"
-        headers = {'key': KOMERCE_API_KEY}
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            data = response.json()
-            provinces = data.get('data', []) 
-    except Exception as e:
-        print(f"ERROR SYSTEM: {e}")
-        
+    
+    # Cache provinsi di session untuk menghemat API call
+    if 'rajaongkir_provinces' not in request.session:
+        provinces = []
+        try:
+            url = "https://rajaongkir.komerce.id/api/v1/destination/province"
+            headers = {'key': KOMERCE_API_KEY}
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                provinces = data.get('data', [])
+                request.session['rajaongkir_provinces'] = provinces
+        except Exception as e:
+            print(f"ERROR SYSTEM: {e}")
+    else:
+        provinces = request.session['rajaongkir_provinces']
+    
+    # Pass semua alamat user ke template
+    user = request.user
+    user_addresses = Address.objects.filter(user=user).order_by('-is_default', '-created_at')
+    default_address = user_addresses.filter(is_default=True).first()
+    
+    # Ambil voucher user yang belum dipakai
+    available_coupons = Coupon.objects.filter(user=user, is_used=False).order_by('-created_at')
+    active_coupon_id = request.session.get('coupon_id')
+    
     context = {
         'total': total,
         'discount': discount,
+        'grand_total': total,
         'quantity': quantity,
         'cart_items': cart_items,
-        'provinces': provinces, 
+        'provinces': provinces,
+        'user_addresses': user_addresses,
+        'default_address': default_address,
+        'has_saved_address': user_addresses.exists(),
+        'available_coupons': available_coupons,
+        'active_coupon_id': active_coupon_id,
     }
     return render(request, 'order/checkout.html', context)
 
@@ -130,8 +151,13 @@ def get_shipping_cost(request):
         }
         try:
             response = requests.post(url, headers=headers, data=payload)
+            print(f"Komerce API Status: {response.status_code}")
+            print(f"Komerce API Response: {response.text[:200]}")
             if response.status_code == 200:
                 results = response.json().get('data', [])
+                print(f"Parsed results count: {len(results)}")
+            else:
+                print(f"Komerce API Error: {response.text}")
         except Exception as e:
             print(f"Exception Shipping: {e}")
             
@@ -207,6 +233,37 @@ def place_order(request, total=0, quantity=0):
                 voucher.save()
             except Coupon.DoesNotExist:
                 pass
+
+        # 5b. Handle Alamat: Gunakan alamat tersimpan atau simpan baru
+        selected_address_id = request.POST.get('selected_address_id')
+        if selected_address_id:
+            # User memilih alamat tersimpan
+            try:
+                selected_addr = Address.objects.get(id=selected_address_id, user=current_user)
+            except Address.DoesNotExist:
+                selected_addr = None
+        else:
+            selected_addr = None
+
+        if request.POST.get('save_address') == 'on' and not selected_addr:
+            # User ingin simpan alamat baru (dan tidak memilih alamat tersimpan)
+            if Address.objects.filter(user=current_user).count() < 3:
+                Address.objects.create(
+                    user=current_user,
+                    label=request.POST.get('address_label', 'Alamat Baru'),
+                    province_id=request.POST.get('province_id', ''),
+                    province_name=request.POST.get('province', ''),
+                    city_id=request.POST.get('city_id', ''),
+                    city_name=request.POST.get('city', ''),
+                    district_id=request.POST.get('district_id', ''),
+                    district_name=request.POST.get('district', ''),
+                    subdistrict_id=request.POST.get('subdistrict_id', ''),
+                    subdistrict_name=request.POST.get('subdistrict', ''),
+                    postal_code=request.POST.get('postal_code', ''),
+                    address=request.POST.get('address', ''),
+                    shipping_service=request.POST.get('shipping_service', ''),
+                    shipping_cost=shipping_cost,
+                )
 
         # 6. Pindahkan Item ke OrderProduct & Update Stok
         for item in cart_items:
@@ -331,7 +388,10 @@ def confirmation(request):
         # Jangan tanya Midtrans, jangan jalankan kode di bawahnya. 
         # Ini menghormati keputusan Admin.
         if order.status in ['Cancelled', 'Completed', 'Returned']:
-            context = {'order': order}
+            has_reviewed = False
+            if order.status == 'Completed':
+                has_reviewed = ReviewRating.objects.filter(order=order).exists()
+            context = {'order': order, 'has_reviewed': has_reviewed}
             return render(request, 'order/confirmation.html', context)
         # -------------------------
 
@@ -508,37 +568,6 @@ def my_orders(request):
 #             return HttpResponse(status=404)
         
 
-#Tracking Pesanan
-def track_order(request):
-    tracking_result = None
-    error_message = None
-    
-    # Ambil data baik dari POST (form) maupun GET (link otomatis)
-    resi = request.POST.get('no_resi') or request.GET.get('no_resi')
-    kurir = request.POST.get('kurir') or request.GET.get('kurir')
-    
-    if resi and kurir:
-        api_key = '9b016bd8ee7f7dadb64abc91f2fcead58f54abc72bf212f9f18de93f721522d1'
-        url = f"https://api.binderbyte.com/v1/track?api_key={api_key}&courier={kurir}&awb={resi}"
-        
-        try:
-            response = requests.get(url)
-            data = response.json()
-            if data['status'] == 200:
-                tracking_result = data['data']
-            else:
-                error_message = data['message']
-        except Exception as e:
-            error_message = "Terjadi gangguan koneksi."
-
-    return render(request, 'order/track.html', {
-        'tracking_result': tracking_result, 
-        'error_message': error_message,
-        'resi': resi, # Kirim balik agar tampil di input box
-        'kurir': kurir
-    })
-    
-
 # =========================================================
 # FUNGSI CETAK INVOICE PDF
 # =========================================================    
@@ -595,12 +624,15 @@ def order_complete(request, order_number):
         if order is None:
             return redirect('home')
 
-        # Memeriksa apakah transaksi ini sudah ada datanya di tabel ReviewRating
+        if order.status != 'Completed':
+            order.status = 'Completed'
+            order.save()
+
         has_reviewed = ReviewRating.objects.filter(order=order).exists()
 
         context = {
             'order': order,
-            'has_reviewed': has_reviewed, # Variabel penentu form muncul atau tidak
+            'has_reviewed': has_reviewed,
         }
         return render(request, 'order/confirmation.html', context)
     except Exception as e:
@@ -647,32 +679,43 @@ def submit_return(request, order_id):
 #Voucher
 def apply_coupon(request):
     if request.method == 'POST':
+        coupon_id = request.POST.get('coupon_id')
         code = request.POST.get('coupon_code')
         
-        # --- PERBAIKAN: Hapus diskon lama sebelum cek yang baru ---
         if 'coupon_id' in request.session:
             del request.session['coupon_id']
         if 'discount_amount' in request.session:
             del request.session['discount_amount']
             
         try:
-            # Cek kupon baru
-            coupon = Coupon.objects.get(code=code, user=request.user, is_used=False)
+            if coupon_id:
+                coupon = Coupon.objects.get(id=coupon_id, user=request.user, is_used=False)
+            else:
+                coupon = Coupon.objects.get(code=code, user=request.user, is_used=False)
             
             request.session['coupon_id'] = coupon.id
             request.session['discount_amount'] = coupon.discount_value
-            messages.success(request, f"Kupon {code} berhasil digunakan!")
+            
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'discount': coupon.discount_value})
+            
+            messages.success(request, f"Kupon {coupon.code} berhasil digunakan!")
             
         except Coupon.DoesNotExist:
-            messages.error(request, "Kupon tidak valid, sudah dipakai, atau salah ketik.")
-            # Karena sudah dihapus di atas, maka jika salah, diskon otomatis jadi 0
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': 'Voucher tidak valid'})
+            messages.error(request, "Voucher tidak valid, sudah dipakai, atau salah ketik.")
             
-    return redirect('cart')
+    return redirect(request.META.get('HTTP_REFERER', 'cart'))
 
 def reset_coupon(request):
     if 'coupon_id' in request.session:
         del request.session['coupon_id']
     if 'discount_amount' in request.session:
         del request.session['discount_amount']
-    return redirect('cart')
+    
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'success': True})
+        
+    return redirect(request.META.get('HTTP_REFERER', 'cart'))
 

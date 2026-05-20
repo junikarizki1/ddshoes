@@ -1,4 +1,118 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} {% load static %} {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+<style>
+  .crop-modal {
+    display: none !important;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+  }
+  .crop-modal.active { display: flex !important; }
+  .crop-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .crop-container h5 { margin-bottom: 10px; flex-shrink: 0; }
+  .crop-image-wrapper {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .crop-container img {
+    max-width: 100%;
+    max-height: 350px;
+    display: block;
+  }
+  .crop-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #888da7;
+    margin: 0 auto 10px;
+    flex-shrink: 0;
+  }
+  .crop-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-shrink: 0;
+    padding-top: 5px;
+  }
+  .crop-actions button {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .btn-crop-save { background: #888da7; color: #fff; }
+  .btn-crop-save:hover { background: #6b6f8a; }
+  .btn-crop-cancel { background: #e9ecef; color: #333; }
+  .btn-crop-cancel:hover { background: #dee2e6; }
+
+  .photo-upload-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px dashed #ccc;
+  }
+  .photo-upload-area .preview-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #888da7;
+    flex-shrink: 0;
+  }
+  .photo-upload-area .upload-info {
+    flex: 1;
+  }
+  .photo-upload-area .upload-info small {
+    display: block;
+    color: #666;
+    margin-top: 4px;
+  }
+  .btn-edit-photo {
+    padding: 6px 16px;
+    background: #888da7;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .btn-edit-photo:hover { background: #6b6f8a; }
+  .btn-remove-photo {
+    padding: 6px 12px;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+</style>
+
 <section class="section_gap">
   <div class="container" style="max-width: 600px; margin-top: 70px">
     <div class="billing_details">
@@ -6,12 +120,55 @@
         <div class="col-lg-12">
           <h3 class="mb-30">Account Profile</h3>
           {% include 'alerts.html' %}
+          
+          <div class="text-center mb-4">
+            {% if user.profile_photo %}
+              <img src="{{ user.profile_photo.url }}" alt="Profile Photo" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #888da7;">
+            {% else %}
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 120px; height: 120px; background: #e9ecef; border: 3px solid #888da7;">
+                <i class="lnr lnr-user" style="font-size: 3em; color: #888da7;"></i>
+              </div>
+            {% endif %}
+          </div>
+          
           <form
             class="row contact_form"
             action="{% url 'edit_profile' %}"
             method="POST"
+            enctype="multipart/form-data"
+            id="profileForm"
           >
             {% csrf_token %}
+            
+            <div class="col-md-12 form-group">
+              <label>Foto Profil</label>
+              
+              <!-- Current photo display -->
+              <div class="photo-upload-area" id="photoUploadArea">
+                {% if user.profile_photo %}
+                  <img src="{{ user.profile_photo.url }}" class="preview-thumb" id="currentPreview" alt="Current Photo">
+                {% else %}
+                  <div class="preview-thumb d-flex align-items-center justify-content-center" id="currentPreview" style="background: #e9ecef;">
+                    <i class="lnr lnr-user" style="font-size: 1.5em; color: #888da7;"></i>
+                  </div>
+                {% endif %}
+                <div class="upload-info">
+                  <strong id="fileName">{% if user.profile_photo %}Foto profil saat ini{% else %}Belum ada foto{% endif %}</strong>
+                  <small>Format: JPG, PNG. Maks: 2MB</small>
+                </div>
+                <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;" />
+                <button type="button" class="btn-edit-photo" id="btnChangePhoto">
+                  {% if user.profile_photo %}Edit{% else %}Upload{% endif %}
+                </button>
+                {% if user.profile_photo %}
+                <button type="button" class="btn-remove-photo" id="btnRemovePhoto">Hapus</button>
+                {% endif %}
+              </div>
+              
+              <input type="hidden" name="profile_photo_cropped" id="profilePhotoCropped" />
+              <input type="hidden" name="remove_photo" id="removePhotoInput" value="" />
+            </div>
+            
             <div class="col-md-6 form-group p_star">
               <label>First Name</label>
               <input
@@ -83,9 +240,188 @@
               </button>
             </div>
           </form>
+
+          <hr class="my-4">
+
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fa fa-map-marker mr-2" style="color: #888da7;"></i>Alamat Tersimpan</h5>
+            <a href="{% url 'address_list' %}" class="primary-btn btn-sm" style="border-radius: 50px;">
+              <i class="fa fa-list mr-1"></i>Kelola Alamat
+            </a>
+          </div>
+          <p class="text-muted small mt-2 mb-0">
+            Kelola hingga 3 alamat pengiriman untuk mempercepat proses checkout.
+          </p>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Crop Modal -->
+<div class="crop-modal" id="cropModal">
+  <div class="crop-container">
+    <h5 class="text-center mb-2">Sesuaikan Foto Profil</h5>
+    <div class="crop-image-wrapper">
+      <img id="cropImage" src="" alt="Crop Image">
+    </div>
+    <div class="crop-preview" id="cropPreview"></div>
+    <div class="crop-actions">
+      <button type="button" class="btn-crop-cancel" onclick="cancelCrop()">Batal</button>
+      <button type="button" class="btn-crop-save" onclick="saveCrop()">Simpan & Potong</button>
+    </div>
+  </div>
+</div>
+<script>
+  let cropper = null;
+  let selectedFile = null;
+  let hasUnsavedChange = false;
+  
+  const profilePhotoInput = document.getElementById('profilePhotoInput');
+  const cropModal = document.getElementById('cropModal');
+  const cropImage = document.getElementById('cropImage');
+  const cropPreview = document.getElementById('cropPreview');
+  const profilePhotoCropped = document.getElementById('profilePhotoCropped');
+  const btnChangePhoto = document.getElementById('btnChangePhoto');
+  const currentPreview = document.getElementById('currentPreview');
+  const fileName = document.getElementById('fileName');
+  const removePhotoInput = document.getElementById('removePhotoInput');
+
+  // Click button → if no file selected, open file picker. If file selected, open crop
+  btnChangePhoto.addEventListener('click', function() {
+    if (!hasUnsavedChange) {
+      profilePhotoInput.click();
+    } else {
+      openCropModal();
+    }
+  });
+
+  function openCropModal() {
+    const previewSrc = document.getElementById('currentPreview').src;
+    if (!previewSrc || previewSrc === window.location.href) return;
+    
+    cropImage.src = previewSrc;
+    cropModal.classList.add('active');
+
+    if (cropper) {
+      cropper.destroy();
+    }
+
+    cropper = new Cropper(cropImage, {
+      aspectRatio: 1,
+      viewMode: 1,
+      preview: '#cropPreview',
+      responsive: true,
+      autoCropArea: 0.8,
+    });
+  }
+
+  // File selected → show preview, enable edit button
+  profilePhotoInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Ukuran file maksimal 2MB');
+      return;
+    }
+
+    selectedFile = file;
+    hasUnsavedChange = true;
+    
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const previewEl = document.getElementById('currentPreview');
+      if (previewEl.tagName === 'IMG') {
+        previewEl.src = event.target.result;
+      } else {
+        const img = document.createElement('img');
+        img.src = event.target.result;
+        img.className = 'preview-thumb';
+        img.id = 'currentPreview';
+        previewEl.replaceWith(img);
+      }
+      fileName.textContent = file.name;
+      btnChangePhoto.textContent = 'Edit';
+      
+      // Add remove button if not exists
+      let removeBtn = document.getElementById('btnRemovePhoto');
+      if (!removeBtn) {
+        removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove-photo';
+        removeBtn.id = 'btnRemovePhoto';
+        removeBtn.textContent = 'Hapus';
+        btnChangePhoto.parentNode.appendChild(removeBtn);
+        removeBtn.addEventListener('click', removePhoto);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function removePhoto() {
+    if (confirm('Hapus foto profil?')) {
+      removePhotoInput.value = '1';
+      profilePhotoCropped.value = '';
+      selectedFile = null;
+      hasUnsavedChange = false;
+      
+      const previewContainer = document.getElementById('photoUploadArea');
+      const oldPreview = document.getElementById('currentPreview');
+      const newPreview = document.createElement('div');
+      newPreview.className = 'preview-thumb d-flex align-items-center justify-content-center';
+      newPreview.id = 'currentPreview';
+      newPreview.style.background = '#e9ecef';
+      newPreview.innerHTML = '<i class="lnr lnr-user" style="font-size: 1.5em; color: #888da7;"></i>';
+      oldPreview.replaceWith(newPreview);
+      
+      fileName.textContent = 'Belum ada foto';
+      btnChangePhoto.textContent = 'Upload';
+      profilePhotoInput.value = '';
+      
+      const removeBtn = document.getElementById('btnRemovePhoto');
+      if (removeBtn) removeBtn.remove();
+    }
+  }
+
+  function cancelCrop() {
+    cropModal.classList.remove('active');
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+  }
+
+  function saveCrop() {
+    if (!cropper) return;
+
+    const canvas = cropper.getCroppedCanvas({
+      width: 300,
+      height: 300,
+      imageSmoothingEnabled: true,
+      imageSmoothingQuality: 'high',
+    });
+
+    canvas.toBlob(function(blob) {
+      const reader = new FileReader();
+      reader.onloadend = function() {
+        profilePhotoCropped.value = reader.result;
+        cropModal.classList.remove('active');
+        if (cropper) {
+          cropper.destroy();
+          cropper = null;
+        }
+        document.getElementById('currentPreview').src = reader.result;
+        document.getElementById('profileForm').submit();
+      };
+      reader.readAsDataURL(blob);
+    }, 'image/jpeg', 0.9);
+  }
+
+  // Bind remove button if exists on page load
+  const existingRemoveBtn = document.getElementById('btnRemovePhoto');
+  if (existingRemoveBtn) {
+    existingRemoveBtn.addEventListener('click', removePhoto);
+  }
+</script>
 {% endblock %}

@@ -198,37 +198,6 @@
             {% endfor %}
             <!-- End Cart Items -->
 
-            <!-- Coupon Row -->
-            <tr class="bottom_button">
-              <td></td>
-              <td></td>
-              <td colspan="2">
-                <div
-                  class="cupon_text d-flex align-items-center justify-content-end"
-                >
-                  <form
-                    action="{% url 'apply_coupon' %}"
-                    method="POST"
-                    class="d-flex"
-                  >
-                    {% csrf_token %}
-                    <input
-                      type="text"
-                      name="coupon_code"
-                      placeholder="Kode Voucher"
-                      required
-                    />
-                    <button type="submit" class="primary-btn border-0">
-                      Gunakan
-                    </button>
-                    <a class="gray_btn" href="{% url 'reset_coupon' %}"
-                      >Hapus</a
-                    >
-                  </form>
-                </div>
-              </td>
-            </tr>
-
             <!-- Subtotal Row -->
             <tr>
               <td></td>

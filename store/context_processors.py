@@ -1,12 +1,12 @@
-from .models import Brand, Product
+from .models import Brand, Category, Product
 
 def menu_links_brand(request):
-    # Mengambil semua data brand untuk ditampilkan di sidebar
     links_brand = Brand.objects.all()
-    # Menghitung semua produk untuk opsi "Semua Brand"
+    links_category = Category.objects.all()
     all_products_count = Product.objects.filter(is_available=True).count()
     
     return {
         'links_brand': links_brand,
+        'links_category': links_category,
         'all_products_count': all_products_count,
     }

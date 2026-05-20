@@ -1,4 +1,331 @@
 {% extends 'base.html' %} {% load static %} {% load humanize %}{% block content %}
+<style>
+  .section-title h1,
+  .section-title h2 {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+  .section-title h1::after,
+  .section-title h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: #ffba00;
+    border-radius: 2px;
+  }
+  .section-title p {
+    color: #888;
+    font-size: 15px;
+    max-width: 600px;
+    margin: 16px auto 0;
+  }
+  .category-area .single-deal {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+    position: relative;
+    background: #fff;
+  }
+  .category-area .single-deal:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+  }
+  .category-area .single-deal:hover .category-img-container img {
+    transform: scale(1.05);
+  }
+  .category-rank-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #fff;
+    color: #2c2c3a;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 0 6px;
+  }
+  .category-rank-badge .rank-hash {
+    color: #888da7;
+    margin-right: 1px;
+    font-size: 11px;
+  }
+  .category-name-top {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255,255,255,0.95);
+    color: #2c2c3a;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    text-transform: uppercase;
+  }
+  .category-img-container {
+    height: 260px;
+    overflow: hidden;
+    background-color: #f5f5f7;
+    position: relative;
+  }
+  .category-img-container img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .deal-details {
+    padding: 16px 20px;
+    text-align: center;
+  }
+  .deal-details .category-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #888da7;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  .single-deal:hover .deal-details .category-link {
+    color: #2c2c3a;
+    gap: 8px;
+  }
+  .deal-details .category-link i {
+    transition: transform 0.2s ease;
+  }
+  .single-deal:hover .deal-details .category-link i {
+    transform: translateX(3px);
+  }
+  .single-product-item {
+    border: 1px solid #f0f0f0;
+    padding: 16px;
+    border-radius: 16px;
+    background: #fff;
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .single-product-item:hover {
+    border-color: #ffba00;
+    box-shadow: 0 8px 25px rgba(255,186,0,0.12);
+    transform: translateY(-4px);
+  }
+  .single-product-item .product-img-wrap {
+    height: 250px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #f8f9fa;
+  }
+  .single-product-item .product-img-wrap img {
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .single-product-item:hover .product-img-wrap img {
+    transform: scale(1.05);
+  }
+  .single-product-item .product-info {
+    margin-top: 16px;
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .single-product-item .product-info h6 {
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    color: #2c2c3a;
+    line-height: 1.4;
+  }
+  .single-product-item .product-info h5 {
+    color: #ffba00;
+    font-weight: 800;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  .single-product-item .product-info .product-meta {
+    font-size: 12px;
+    color: #999;
+  }
+  .single-brand-item {
+    transition: all 0.3s ease;
+  }
+  .single-brand-item:hover {
+    transform: translateY(-6px);
+  }
+  .single-brand-item:hover .brand-logo-wrapper {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    border-color: #ffba00;
+  }
+  .brand-logo-wrapper {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+  .brand-logo-wrapper img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .single-brand-item h6 {
+    margin-top: 12px;
+    color: #2c2c3a;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .single-brand-item .badge {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 50px;
+    background: #fff8e1;
+    color: #ffba00;
+    font-weight: 600;
+  }
+  .testimonial-card {
+    border: none;
+    border-radius: 16px;
+    padding: 28px;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+    height: 100%;
+  }
+  .testimonial-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+  }
+  .testimonial-card .review-stars {
+    color: #ffc107;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .testimonial-card .review-subject {
+    font-weight: 700;
+    color: #2c2c3a;
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+  .testimonial-card .review-text {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.7;
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+  .testimonial-card .reviewer-name {
+    font-weight: 600;
+    color: #888da7;
+    font-size: 13px;
+  }
+  .testimonial-card .review-date {
+    font-size: 11px;
+    color: #bbb;
+  }
+  .rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border-radius: 12px;
+    border: 1px solid #eee;
+  }
+  .rating-badge h1 {
+    color: #ffc107;
+    font-weight: 800;
+    margin: 0;
+    font-size: 28px;
+  }
+  .btn-shop-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2c2c3a;
+    color: #fff;
+    padding: 14px 32px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  .btn-shop-all:hover {
+    background: #1a1a2e;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  }
+  .banner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #888da7 0%, #6b6f8a 100%);
+    color: #fff;
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(136,141,167,0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .banner-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(136,141,167,0.4);
+    color: #fff;
+  }
+  .banner-btn:active {
+    transform: translateY(-1px);
+  }
+  .banner-btn i {
+    font-size: 18px;
+    transition: transform 0.2s ease;
+  }
+  .banner-btn:hover i {
+    transform: translateX(4px);
+  }
+  .banner-btn .btn-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+
 <!-- start banner Area -->
 <section class="banner-area">
     <div class="container">
@@ -31,12 +358,10 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="quantity" value="1">
                                     
-                                    <div class="add-bag d-flex align-items-center">
-                                        <button type="submit" class="add-btn border-0" style="background: #ffba00; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                                            <span class="ti-bag" style="font-weight: bold; color: white;"></span>
-                                        </button>
-                                        <span class="add-text text-uppercase" style="font-weight: 600; margin-left: 15px; color: #222;">Tambah ke Keranjang</span>
-                                    </div>
+                                    <button type="submit" class="banner-btn">
+                                        <span class="btn-icon"><i class="ti-bag"></i></span>
+                                        Tambah ke Keranjang <i class="fa fa-arrow-right"></i>
+                                    </button>
                                 </form>
                             </div>
                         </div>
@@ -65,7 +390,7 @@
     <div class="container">
         <div class="row features-inner">
             <!-- single features -->
-            <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="col-lg col-md-6 col-sm-6">
                 <div class="single-features">
                     <div class="f-icon">
                         <img src="{% static 'img/features/f-icon1.png' %}" alt="" />
@@ -75,7 +400,7 @@
                 </div>
             </div>
             <!-- single features -->
-            <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="col-lg col-md-6 col-sm-6">
                 <div class="single-features">
                     <div class="f-icon">
                         <img src="{%static 'img/features/f-icon2.png' %}" alt="" />
@@ -85,7 +410,7 @@
                 </div>
             </div>
             <!-- single features -->
-            <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="col-lg col-md-6 col-sm-6">
                 <div class="single-features">
                     <div class="f-icon">
                         <img src="{%static 'img/features/f-icon3.png' %}" alt="" />
@@ -95,13 +420,23 @@
                 </div>
             </div>
             <!-- single features -->
-            <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="col-lg col-md-6 col-sm-6">
                 <div class="single-features">
                     <div class="f-icon">
                         <img src="{%static 'img/features/f-icon4.png' %}" alt="" />
                     </div>
                     <h6>Secure Payment</h6>
                     <p>Tersedia Berbagai Metode Pembayaran</p>
+                </div>
+            </div>
+            <!-- single features -->
+            <div class="col-lg col-md-6 col-sm-6">
+                <div class="single-features">
+                    <div class="f-icon">
+                        <i class="fa fa-star-o" style="font-size: 32px; color: #222222;"></i>
+                    </div>
+                    <h6>Loyalty Program</h6>
+                    <p>Kumpulkan Saldo &amp; Dapatkan Voucher</p>
                 </div>
             </div>
         </div>
@@ -112,12 +447,11 @@
 <!-- Start category Area -->
 <section class="category-area section_gap_bottom" style="margin-top: 50px;">
     <div class="container">
-        <!-- Judul Seksi -->
         <div class="row justify-content-center">
             <div class="col-lg-8 text-center">
                 <div class="section-title">
                     <h1 style="font-weight: 700;">Top Kategori</h1>
-                    <p style="color: #777;">Temukan koleksi sepatu terbaik berdasarkan tren penjualan terbanyak di DD Shoes Store.</p>
+                    <p>Temukan koleksi sepatu terbaik berdasarkan tren penjualan terbanyak di DD Shoes Store.</p>
                 </div>
             </div>
         </div>
@@ -125,31 +459,24 @@
         <div class="row">
             {% for category in top_categories %}
             <div class="col-lg-4 col-md-6">
-                <div class="single-deal" style="position: relative; overflow: hidden; border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                    
-                    <!-- Angka Urutan Eksklusif -->
-                    <div class="category-rank-badge">
-                        <span class="rank-hash">#</span>{{ forloop.counter }}
-                    </div>
-                    
-                    <!-- Container Gambar dengan Ukuran Seragam -->
-                    <div class="category-img-container" style="height: 250px; overflow: hidden; background-color: #f8f9fa;">
-                        <img class="img-fluid w-100" 
-                             src="{{ category.cat_image.url }}" 
-                             alt="{{ category.category_name }}"
-                             style="height: 100%; width: 100%; object-fit: cover; transition: transform 0.5s ease;">
-                    </div>
-
-                    <!-- Overlay Link & Nama Kategori -->
-                    <a href="{{ category.get_url }}">
-                        <div class="deal-details" style="background: rgba(0,0,0,0.4); padding: 20px; transition: background 0.3s ease;">
-                            <h4 class="text-white" style="margin: 0; font-weight: 600; letter-spacing: 1px;">
-                                {{ category.category_name|upper }}
-                            </h4>
-                            <p class="text-white-50" style="margin-top: 5px; font-size: 12px;">Lihat Semua Produk <i class="fa fa-arrow-right"></i></p>
+                <a href="{{ category.get_url }}" style="text-decoration: none; color: inherit;">
+                    <div class="single-deal">
+                        <div class="category-rank-badge">
+                            <span class="rank-hash">#</span>{{ forloop.counter }}
                         </div>
-                    </a>
-                </div>
+                        <div class="category-name-top">{{ category.category_name }}</div>
+                        <div class="category-img-container">
+                            <img class="img-fluid w-100" 
+                                 src="{{ category.cat_image.url }}" 
+                                 alt="{{ category.category_name }}">
+                        </div>
+                        <div class="deal-details">
+                            <span class="category-link">
+                                Lihat Koleksi <i class="fa fa-arrow-right"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
             </div>
             {% endfor %}
         </div>
@@ -159,39 +486,28 @@
 <!-- start product Area -->
 <section class="section_gap_bottom">
     <div class="container">
-        <!-- Judul Section -->
         <div class="row justify-content-center">
             <div class="col-lg-6 text-center">
                 <div class="section-title" style="margin-bottom: 30px;">
                     <h1 style="font-weight: 700;">Rekomendasi Produk</h1>
-                    <p>
-                        Berdasarkan preferensimu, ini adalah produk rekomendasi dari kami.
-                    </p>
+                    <p>Berdasarkan preferensimu, ini adalah produk rekomendasi dari kami.</p>
                 </div>
             </div>
         </div>
         <div class="row">
             {% for product in recommended_products %}
             <div class="col-lg-4 col-md-6 mb-2">
-                <div class="single-product-item" style="
-                    border: 1px solid #eee; 
-                    padding: 15px; 
-                    border-radius: 12px; 
-                    background: #fff;
-                    transition: all 0.3s ease;">
-                    
+                <div class="single-product-item">
                     <a href="{{ product.get_url }}">
-                        <div style="height: 250px; overflow: hidden; border-radius: 8px;">
-                            <img class="img-fluid w-100" src="{{ product.images.url }}" alt="{{ product.product_name }}" 
-                                 style="height: 100%; object-fit: cover;">
+                        <div class="product-img-wrap">
+                            <img class="img-fluid w-100" src="{{ product.images.url }}" alt="{{ product.product_name }}">
                         </div>
                     </a>
-
-                    <div class="product-info mt-3 text-center">
-                        <h6 style="margin-bottom: 5px; font-weight: 600;">{{ product.product_name }}</h6>
-                        <h5 style="color: #ffba00; font-weight: 700;">Rp {{ product.price|intcomma }}</h5>
-                        <div style="margin-top: 10px;">
-                            <small class="text-muted">Size: {{ product.size }} | {{ product.brand.brand_name }} | {{ product.category.category_name }}</small>
+                    <div class="product-info">
+                        <h6>{{ product.product_name }}</h6>
+                        <h5>Rp {{ product.price|intcomma }}</h5>
+                        <div class="product-meta">
+                            Size: {{ product.size }} | {{ product.brand.brand_name }} | {{ product.category.category_name }}
                         </div>
                     </div>
                 </div>
@@ -203,17 +519,10 @@
             {% endfor %}
         </div>
 
-        <!-- Tombol Lihat Semua Produk -->
         <div class="row justify-content-center mt-4">
             <div class="col-lg-4 text-center">
-                <a href="{% url 'product' %}" class="primary-btn" style="
-                    width: 100%; 
-                    padding: 0 30px; 
-                    line-height: 50px; 
-                    border-radius: 5px; 
-                    text-transform: uppercase; 
-                    font-weight: 600;">
-                    Lihat Semua Produk <i class="fa fa-arrow-right ml-2"></i>
+                <a href="{% url 'product' %}" class="btn-shop-all">
+                    Lihat Semua Produk <i class="fa fa-arrow-right"></i>
                 </a>
             </div>
         </div>
@@ -235,24 +544,14 @@
         <div class="row justify-content-center align-items-center">
             {% for brand in top_brands %}
             <div class="col-lg-2 col-md-4 col-sm-6 text-center mb-4">
-                <div class="single-brand-item" style="transition: all 0.3s ease;">
+                <div class="single-brand-item">
                     <a href="{{ brand.get_url }}">
-                        <div class="brand-logo-wrapper" style="
-                            height: 100px; 
-                            display: flex; 
-                            align-items: center; 
-                            justify-content: center;
-                            background: #fff;
-                            border-radius: 10px;
-                            padding: 15px;
-                            box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                            
+                        <div class="brand-logo-wrapper">
                             <img src="{{ brand.brand_image.url }}" 
-                                 alt="{{ brand.brand_name }}" 
-                                 style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                                 alt="{{ brand.brand_name }}">
                         </div>
-                        <h6 class="mt-3" style="color: #222; font-weight: 600;">{{ brand.brand_name }}</h6>
-                        <span class="badge badge-warning" style="font-size: 10px;">{{ brand.brand_sales }} Terjual</span>
+                        <h6>{{ brand.brand_name }}</h6>
+                        <span class="badge">{{ brand.brand_sales }} Terjual</span>
                     </a>
                 </div>
             </div>
@@ -268,8 +567,8 @@
                 <h2 style="color: #888da7; font-weight: 700;">Apa Kata Mereka Tentang Kami</h2>
                 <p class="text-muted">Ulasan nyata dari pelanggan setia DD Shoes Store</p>
                 
-                <div class="d-inline-flex align-items-center mt-3 p-3 bg-white shadow-sm rounded" style="gap: 15px; border: 1px solid #eee;">
-                    <h1 style="color: #ffc107; font-weight: 800; margin: 0;">⭐ {{ average_rating }}</h1>
+                <div class="rating-badge mt-3">
+                    <h1>⭐ {{ average_rating }}</h1>
                     <div class="text-left">
                         <p class="mb-0 font-weight-bold text-dark" style="font-size: 14px;">Rating Keseluruhan</p>
                         <small class="text-muted">Based on {{ total_reviews }} ulasan pelanggan</small>
@@ -282,8 +581,8 @@
             {% if reviews %}
                 {% for review in reviews %}
                 <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card h-100 border-0 shadow-sm p-4 bg-white" style="border-radius: 15px;">
-                        <div class="mb-2" style="color: #ffc107; font-size: 16px;">
+                    <div class="testimonial-card">
+                        <div class="review-stars">
                             {% if review.rating == 5 %}⭐⭐⭐⭐⭐
                             {% elif review.rating == 4 %}⭐⭐⭐⭐
                             {% elif review.rating == 3 %}⭐⭐⭐
@@ -291,20 +590,18 @@
                             {% else %}⭐{% endif %}
                         </div>
                         
-                        <h5 class="font-weight-bold text-dark mb-2">{{ review.subject }}</h5>
-                        <p class="text-muted small mb-3" style="line-height: 1.6; font-style: italic;">
-                            "{{ review.review }}"
-                        </p>
+                        <h5 class="review-subject">{{ review.subject }}</h5>
+                        <p class="review-text">"{{ review.review }}"</p>
                         
-                        <div class="mt-auto border-top pt-3 d-flex justify-content-between align-items-center">
-                            <span class="font-weight-bold small" style="color: #888da7;">
+                        <div class="border-top pt-3 d-flex justify-content-between align-items-center">
+                            <span class="reviewer-name">
                                 {% if review.is_anonymous %}
                                     {{ review.masked_username }}
                                 {% else %}
                                     {{ review.user.username }}
                                 {% endif %}
                             </span>
-                            <small class="text-muted" style="font-size: 11px;">
+                            <small class="review-date">
                                 {{ review.created_at|date:"d M Y" }}
                             </small>
                         </div>
@@ -312,8 +609,8 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="col-12 text-center py-4">
-                    <p class="text-muted italic">Belum ada ulasan yang ditampilkan.</p>
+                <div class="col-12 text-center">
+                    <div class="alert alert-light">Belum ada ulasan untuk ditampilkan.</div>
                 </div>
             {% endif %}
         </div>
