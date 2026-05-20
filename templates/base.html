@@ -109,6 +109,37 @@
       .banner-area .active-banner-slider .owl-nav .owl-next:hover {
         opacity: 1 !important;
       }
+      .logo-text {
+        font-family: 'Montserrat', 'Segoe UI', sans-serif;
+        line-height: 1;
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+      }
+      .logo-dd {
+        font-weight: 900;
+        font-size: 24px;
+        color: #888da7;
+        letter-spacing: 2px;
+        position: relative;
+      }
+      .logo-dd::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #ffba00;
+        border-radius: 2px;
+      }
+      .logo-shoes {
+        font-weight: 400;
+        font-size: 18px;
+        color: #2c2c3a;
+        letter-spacing: 0.5px;
+        opacity: 0.85;
+      }
     </style>
   </head>
 
@@ -129,22 +160,9 @@
                 style="max-height: 45px; width: auto; object-fit: contain"
               />
 
-              <!-- Teks Nama Toko dengan Styling Langsung -->
-              <span
-                class="ml-2 d-inline-block"
-                style="
-                  font-family: 'Montserrat', 'Segoe UI', sans-serif;
-                  font-weight: 800;
-                  font-size: 22px;
-                  letter-spacing: 1.5px;
-                  color: var(--primary-color);
-                  text-transform: uppercase;
-                  line-height: 1;
-                  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
-                "
-              >
-                DD
-                <span style="font-weight: 300; opacity: 0.8">Shoes</span>
+              <!-- Teks Nama Toko dengan Styling -->
+              <span class="ml-2 d-inline-block logo-text">
+                <span class="logo-dd">DD</span><span class="logo-shoes">Shoes</span>
               </span>
             </a>
             <button

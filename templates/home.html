@@ -39,29 +39,6 @@
   .category-area .single-deal:hover .category-img-container img {
     transform: scale(1.05);
   }
-  .category-rank-badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: #fff;
-    color: #2c2c3a;
-    min-width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 14px;
-    z-index: 2;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    padding: 0 6px;
-  }
-  .category-rank-badge .rank-hash {
-    color: #888da7;
-    margin-right: 1px;
-    font-size: 11px;
-  }
   .category-name-top {
     position: absolute;
     top: 12px;
@@ -88,29 +65,6 @@
     width: 100%;
     object-fit: cover;
     transition: transform 0.4s ease;
-  }
-  .deal-details {
-    padding: 16px 20px;
-    text-align: center;
-  }
-  .deal-details .category-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: #888da7;
-    font-weight: 600;
-    transition: all 0.2s ease;
-  }
-  .single-deal:hover .deal-details .category-link {
-    color: #2c2c3a;
-    gap: 8px;
-  }
-  .deal-details .category-link i {
-    transition: transform 0.2s ease;
-  }
-  .single-deal:hover .deal-details .category-link i {
-    transform: translateX(3px);
   }
   .single-product-item {
     border: 1px solid #f0f0f0;
@@ -461,19 +415,11 @@
             <div class="col-lg-4 col-md-6">
                 <a href="{{ category.get_url }}" style="text-decoration: none; color: inherit;">
                     <div class="single-deal">
-                        <div class="category-rank-badge">
-                            <span class="rank-hash">#</span>{{ forloop.counter }}
-                        </div>
                         <div class="category-name-top">{{ category.category_name }}</div>
                         <div class="category-img-container">
                             <img class="img-fluid w-100" 
                                  src="{{ category.cat_image.url }}" 
                                  alt="{{ category.category_name }}">
-                        </div>
-                        <div class="deal-details">
-                            <span class="category-link">
-                                Lihat Koleksi <i class="fa fa-arrow-right"></i>
-                            </span>
                         </div>
                     </div>
                 </a>
@@ -630,48 +576,14 @@
         margin-bottom: -15px;
     }
 
-    /* Styling Badge Peringkat */
-    .category-rank-badge {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        background: linear-gradient(45deg, #ffba00, #ff9000);
-        color: #fff;
-        padding: 8px 18px;
-        border-radius: 30px;
-        font-weight: 800;
-        font-size: 20px;
-        z-index: 10;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-    
-    .rank-hash {
-        font-size: 14px;
-        margin-right: 2px;
-        opacity: 0.8;
-    }
-
     /* Efek Hover */
     .single-deal:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.1);
     }
 
     .single-deal:hover img {
-        transform: scale(1.1);
-    }
-
-    .single-deal:hover .deal-details {
-        background: rgba(255, 186, 0, 0.8) !important; /* Berubah ke warna tema saat hover */
-    }
-
-    /* Memastikan detail teks muncul dengan baik */
-    .deal-details {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        text-align: center;
+        transform: scale(1.05);
     }
 
     .single-brand-item:hover {
