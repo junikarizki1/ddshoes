@@ -26,7 +26,7 @@ RUN SECRET_KEY=dummy-build-secret python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
-    CMD curl -f http://localhost:8000/ || exit 1
+HEALTHCHECK --interval=30s --timeout=15s --start-period=60s --retries=3 \
+    CMD curl -f -H "Host: localhost" http://localhost:8000/admin/login/ || exit 1
 
 CMD ["sh", "entrypoint.sh"]
