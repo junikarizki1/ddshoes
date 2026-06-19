@@ -10,13 +10,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-qjl7*cx^#v*fq8@a3=&vre61typp(moi-c1i7l@(842a2#s(4^')
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-ALLOWED_HOSTS += ['up.railway.app', '.ngrok-free.dev']
 
 
 # Application definition
@@ -50,7 +49,7 @@ JAZZMIN_SETTINGS = {
     "user_avatar": None, # Bisa diisi 'image' jika model Account punya field foto
 
     # -- Pencarian --
-    "search_model": "my_account.Account",
+    "search_model": "account.Account",
 
     # -- Menu Atas --
     "topmenu_links": [
@@ -63,13 +62,13 @@ JAZZMIN_SETTINGS = {
     "navigation_expanded": True,
     "hide_apps": [],
     "hide_models": [],
-    "order_with_respect_to": ["store", "order", "my_account", "auth"],
+    "order_with_respect_to": ["store", "order", "account", "auth"],
 
     # -- Ikon (Sangat penting agar dashboard tidak 'jelek') --
     "icons": {
         "auth": "fas fa-users-cog",
         "auth.Group": "fas fa-users",
-        "my_account.Account": "fas fa-user-shield",
+        "account.Account": "fas fa-user-shield",
         "store.Brand": "fas fa-tag",
         "store.Category": "fas fa-list-ul",
         "store.Product": "fas fa-shoe-prints",
@@ -146,6 +145,25 @@ TEMPLATES = [
     },
 ]
 
+ROOT_URLCONF = 'ddshoes.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': ['templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'cart.context_processors.cart_count',
+                'store.context_processors.menu_links_brand',
+            ],
+        },
+    },
+]
+
 WSGI_APPLICATION = 'ddshoes.wsgi.application'
 
 
@@ -154,7 +172,7 @@ WSGI_APPLICATION = 'ddshoes.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'postgres://postgres:root@localhost:5432/ddshoes'),
+        default=os.environ.get('DATABASE_URL', 'sqlite:///db.sqlite3'),
         conn_max_age=600,
     )
 }
@@ -205,7 +223,7 @@ STATICFILES_DIRS = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.environ.get('MEDIA_ROOT', '/app/media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -216,8 +234,8 @@ AUTH_USER_MODEL = 'account.Account'
 
 
 
-MIDTRANS_CLIENT_KEY = os.environ.get('MIDTRANS_CLIENT_KEY', 'Mid-client-vWPcASXDMnfQq180')
-MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY', 'Mid-server-gaoPXRvg5eN3D9zid5oNEJbk')
+MIDTRANS_CLIENT_KEY = os.environ.get('MIDTRANS_CLIENT_KEY', '')
+MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY', '')
 
 
 #Notifikasi Gmail
@@ -225,8 +243,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'tguys894@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'hnxj ysny kdfj dhdw')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = 'DD Shoes Store'
 
 
@@ -234,4 +252,6 @@ CSRF_TRUSTED_ORIGINS = os.environ.get(
     'CSRF_TRUSTED_ORIGINS', 
     'https://localhost,https://127.0.0.1'
 ).split(',')
-CSRF_TRUSTED_ORIGINS += ['https://ddshoes.up.railway.app', 'https://*.up.railway.app']
+
+# API Komerce RajaOngkir
+KOMERCE_API_KEY = os.environ.get('KOMERCE_API_KEY', '')

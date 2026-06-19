@@ -9,5 +9,4 @@ dist/
 build/
 venv/
 .env
-media/
 staticfiles/
