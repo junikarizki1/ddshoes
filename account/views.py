@@ -9,8 +9,9 @@ import requests
 import base64
 from django.core.files.base import ContentFile
 import io
+from django.conf import settings
 
-KOMERCE_API_KEY = '94obP28b5833ab1b737da714qz6kbIcd'
+KOMERCE_API_KEY = settings.KOMERCE_API_KEY
 MAX_ADDRESSES = 3
 
 # ==========================================

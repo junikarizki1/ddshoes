@@ -36,17 +36,54 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
     returns = ReturnRequest.objects.all()
     now = timezone.now()
 
-    # Logika Filter Tanggal (Bebas / Shortcut)
+    # Logika Filter Tanggal (Bebas / Shortcut) untuk Order dan Retur
     if start_custom and end_custom:
         orders = orders.filter(created_at__date__range=[start_custom, end_custom])
+        returns = returns.filter(created_at__date__range=[start_custom, end_custom])
     elif period == 'today':
         orders = orders.filter(created_at__date=now.date())
+        returns = returns.filter(created_at__date=now.date())
     elif period == 'week':
         orders = orders.filter(created_at__gte=now - timedelta(days=7))
+        returns = returns.filter(created_at__gte=now - timedelta(days=7))
     elif period == 'month':
         orders = orders.filter(created_at__year=now.year, created_at__month=now.month)
+        returns = returns.filter(created_at__year=now.year, created_at__month=now.month)
     elif period == 'year':
         orders = orders.filter(created_at__year=now.year)
+        returns = returns.filter(created_at__year=now.year)
+
+    # Filter Model Lain (UserAccount, Coupon, ReviewRating, UserInterest) dengan rentang yang sama
+    users_qs = UserAccount.objects.all()
+    coupons_filtered = Coupon.objects.all()
+    reviews_filtered = ReviewRating.objects.all()
+    interests_filtered = UserInterest.objects.all()
+
+    if start_custom and end_custom:
+        users_qs = users_qs.filter(date_joined__date__range=[start_custom, end_custom])
+        coupons_filtered = coupons_filtered.filter(created_at__date__range=[start_custom, end_custom])
+        reviews_filtered = reviews_filtered.filter(created_at__date__range=[start_custom, end_custom])
+        interests_filtered = interests_filtered.filter(last_action__date__range=[start_custom, end_custom])
+    elif period == 'today':
+        users_qs = users_qs.filter(date_joined__date=now.date())
+        coupons_filtered = coupons_filtered.filter(created_at__date=now.date())
+        reviews_filtered = reviews_filtered.filter(created_at__date=now.date())
+        interests_filtered = interests_filtered.filter(last_action__date=now.date())
+    elif period == 'week':
+        users_qs = users_qs.filter(date_joined__gte=now - timedelta(days=7))
+        coupons_filtered = coupons_filtered.filter(created_at__gte=now - timedelta(days=7))
+        reviews_filtered = reviews_filtered.filter(created_at__gte=now - timedelta(days=7))
+        interests_filtered = interests_filtered.filter(last_action__gte=now - timedelta(days=7))
+    elif period == 'month':
+        users_qs = users_qs.filter(date_joined__year=now.year, date_joined__month=now.month)
+        coupons_filtered = coupons_filtered.filter(created_at__year=now.year, created_at__month=now.month)
+        reviews_filtered = reviews_filtered.filter(created_at__year=now.year, created_at__month=now.month)
+        interests_filtered = interests_filtered.filter(last_action__year=now.year, last_action__month=now.month)
+    elif period == 'year':
+        users_qs = users_qs.filter(date_joined__year=now.year)
+        coupons_filtered = coupons_filtered.filter(created_at__year=now.year)
+        reviews_filtered = reviews_filtered.filter(created_at__year=now.year)
+        interests_filtered = interests_filtered.filter(last_action__year=now.year)
     
     # Hitung Statistik
     revenue = orders.filter(status='Completed').aggregate(Sum('order_total'))['order_total__sum'] or 0
@@ -73,7 +110,7 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
     # --- HITUNG STATISTIK RETUR ---
     retur_pending = returns.filter(status='Pending').count()
     retur_proses  = returns.filter(status='Approved').count()
-    retur_selesai = returns.filter(status='Refunded').count()
+    retur_selesai = max(returns.filter(status='Refunded').count(), orders.filter(status='Returned').count())
     retur_ditolak = returns.filter(status='Rejected').count()
     
     # --- DATA GRAFIK PENJUALAN (REAL DATA) ---
@@ -158,11 +195,8 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
             chart_revenue_data.append(daily_data[d]['revenue'])
             d += timedelta(days=1)
     
-    # --- DATA METODE PEMBAYARAN ---
-    # Dihapus, diganti dengan Brand & Category
-    
-    # --- DATA 5 PRODUK TERLARIS ---
-    top_products = OrderProduct.objects.values('product__product_name').annotate(
+    # --- DATA 5 PRODUK TERLARIS (TERFILTER) ---
+    top_products = OrderProduct.objects.filter(order__in=orders).values('product__product_name').annotate(
         total_sold=Sum('quantity')
     ).order_by('-total_sold')[:5]
     top_products_labels = []
@@ -178,8 +212,8 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
         top_products_labels = ['Belum ada data']
         top_products_data = [0]
     
-    # --- DATA BRAND TERLARIS ---
-    top_brands = OrderProduct.objects.values(
+    # --- DATA BRAND TERLARIS (TERFILTER) ---
+    top_brands = OrderProduct.objects.filter(order__in=orders).values(
         'product__brand__brand_name'
     ).annotate(
         total_sold=Sum('quantity')
@@ -195,8 +229,8 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
         brand_labels = ['Belum ada data']
         brand_data = [0]
     
-    # --- DATA CATEGORY TERLARIS ---
-    top_categories = OrderProduct.objects.values(
+    # --- DATA CATEGORY TERLARIS (TERFILTER) ---
+    top_categories = OrderProduct.objects.filter(order__in=orders).values(
         'product__category__category_name'
     ).annotate(
         total_sold=Sum('quantity')
@@ -212,19 +246,19 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
         category_labels = ['Belum ada data']
         category_data = [0]
     
-    # --- DATA REGISTRASI USER ---
+    # --- DATA REGISTRASI USER (TERFILTER) ---
     user_chart_labels = []
     user_chart_data = []
     
     if period == 'today':
         for hour in range(24):
             label = f"{hour:02d}:00"
-            count = UserAccount.objects.filter(date_joined__hour=hour).count()
+            count = users_qs.filter(date_joined__hour=hour).count()
             user_chart_labels.append(label)
             user_chart_data.append(count)
     elif period == 'week' or (start_custom and end_custom and (datetime.strptime(end_custom, '%Y-%m-%d') - datetime.strptime(start_custom, '%Y-%m-%d')).days <= 14):
         daily_users = defaultdict(int)
-        for user in UserAccount.objects.all():
+        for user in users_qs:
             day_key = user.date_joined.date()
             daily_users[day_key] += 1
         
@@ -241,7 +275,7 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
             d += timedelta(days=1)
     elif period == 'month':
         daily_users = defaultdict(int)
-        for user in UserAccount.objects.all():
+        for user in users_qs:
             day_key = user.date_joined.date()
             daily_users[day_key] += 1
         
@@ -253,7 +287,7 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
             user_chart_data.append(daily_users[d])
     elif period == 'year':
         monthly_users = defaultdict(int)
-        for user in UserAccount.objects.all():
+        for user in users_qs:
             month_key = user.date_joined.month
             monthly_users[month_key] += 1
         
@@ -262,8 +296,10 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
             user_chart_labels.append(month_names[m-1])
             user_chart_data.append(monthly_users[m])
     else:
+        # Default: 7 hari terakhir
         daily_users = defaultdict(int)
-        for user in UserAccount.objects.all():
+        fallback_users = UserAccount.objects.filter(date_joined__gte=now - timedelta(days=7))
+        for user in fallback_users:
             day_key = user.date_joined.date()
             daily_users[day_key] += 1
         
@@ -274,9 +310,9 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
             user_chart_data.append(daily_users[d])
             d += timedelta(days=1)
     
-    # --- DATA PENGGUNAAN VOUCHER ---
-    voucher_used = Coupon.objects.filter(is_used=True).count()
-    voucher_unused = Coupon.objects.filter(is_used=False).count()
+    # --- DATA PENGGUNAAN VOUCHER (TERFILTER) ---
+    voucher_used = coupons_filtered.filter(is_used=True).count()
+    voucher_unused = coupons_filtered.filter(is_used=False).count()
     voucher_labels = ['Sudah Dipakai', 'Belum Dipakai']
     voucher_data = [voucher_used, voucher_unused]
     
@@ -284,9 +320,9 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
     voucher_type_labels = []
     voucher_type_data = []
     
-    unique_values = Coupon.objects.values_list('discount_value', flat=True).distinct()
+    unique_values = coupons_filtered.values_list('discount_value', flat=True).distinct()
     for val in sorted(unique_values):
-        count = Coupon.objects.filter(discount_value=val).count()
+        count = coupons_filtered.filter(discount_value=val).count()
         voucher_type_labels.append(f'Voucher Rp {val:,}'.replace(',', '.'))
         voucher_type_data.append(count)
     
@@ -295,22 +331,22 @@ def get_dashboard_data(period=None, start_custom=None, end_custom=None):
         voucher_type_data = [0]
     
     # Total nilai diskon yang sudah diberikan
-    total_discount_given = Coupon.objects.filter(is_used=True).aggregate(Sum('discount_value'))['discount_value__sum'] or 0
+    total_discount_given = coupons_filtered.filter(is_used=True).aggregate(Sum('discount_value'))['discount_value__sum'] or 0
     
-    # --- DATA RATING DISTRIBUTION ---
+    # --- DATA RATING DISTRIBUTION (TERFILTER) ---
     rating_labels = ['⭐ 1', '⭐⭐ 2', '⭐⭐⭐ 3', '⭐⭐⭐⭐ 4', '⭐⭐⭐⭐⭐ 5']
     rating_data = []
     for i in range(1, 6):
-        count = ReviewRating.objects.filter(rating=i).count()
+        count = reviews_filtered.filter(rating=i).count()
         rating_data.append(count)
     
     # Average rating
-    avg_rating = ReviewRating.objects.aggregate(Avg('rating'))['rating__avg']
+    avg_rating = reviews_filtered.aggregate(Avg('rating'))['rating__avg']
     avg_rating = round(avg_rating, 1) if avg_rating else 0
-    total_reviews = ReviewRating.objects.count()
+    total_reviews = reviews_filtered.count()
     
-    # --- DATA USER INTEREST (TOP 5 BRAND/KATEGORI) ---
-    interest_data = UserInterest.objects.values('brand__brand_name', 'category__category_name').annotate(
+    # --- DATA USER INTEREST (TERFILTER) ---
+    interest_data = interests_filtered.values('brand__brand_name', 'category__category_name').annotate(
         total_score=Sum('score')
     ).order_by('-total_score')[:5]
     interest_labels = []
@@ -391,11 +427,30 @@ class OrderProductInline(admin.TabularInline):
     extra = 0
 
 class OrderAdmin(admin.ModelAdmin):
-    # Ganti 'status' menjadi 'status_display' di list_display
-    list_display = ['order_number', 'full_name','order_total', 'grand_total', 'status_display', 'cetak_invoice', 'created_at']
-    list_filter = [
-        'status',TrackingFilter       
-    ]
+    list_display = ['order_number', 'full_name', 'order_total', 'grand_total', 'status_display', 'aksi_tombol', 'created_at']
+    list_filter = ['status', TrackingFilter]
+    search_fields = ('order_number', 'first_name', 'last_name', 'phone', 'email', 'tracking_number')
+    list_per_page = 20
+    readonly_fields = ('order_number', 'snap_token', 'created_at', 'order_total', 'grand_total', 'discount')
+    inlines = [OrderProductInline]
+    
+    fieldsets = (
+        ('Informasi Transaksi', {
+            'fields': ('order_number', 'snap_token', 'status', 'is_ordered', 'created_at')
+        }),
+        ('Informasi Pelanggan', {
+            'fields': ('user', 'first_name', 'last_name', 'phone', 'email')
+        }),
+        ('Alamat Pengiriman', {
+            'fields': ('address', 'province', 'city', 'district', 'postal_code')
+        }),
+        ('Rincian Biaya', {
+            'fields': ('order_total', 'shipping_service', 'shipping_cost', 'discount', 'grand_total')
+        }),
+        ('Catatan & Pelacakan', {
+            'fields': ('order_note', 'tracking_number')
+        }),
+    )
 
     def status_display(self, obj):
         if obj.status == 'New':
@@ -414,22 +469,25 @@ class OrderAdmin(admin.ModelAdmin):
 
     status_display.short_description = 'Status Pesanan'
     
-#INVOICE PDF    
-    def cetak_invoice(self, obj):
-        # Membuat tombol hijau kecil di tabel admin
-        url = reverse('admin_order_pdf', args=[obj.id])
-        return format_html('<a class="button" href="{}" target="_blank" style="background-color: #28a745; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none;">Cetak PDF</a>', url)
-    
-    cetak_invoice.short_description = 'Invoice'
+    def aksi_tombol(self, obj):
+        pdf_url = reverse('admin_order_pdf', args=[obj.id])
+        edit_url = reverse('admin:order_order_change', args=[obj.id])
+        return format_html(
+            '<a class="button" href="{}" style="background-color: #007bff; color: white; padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 11px; margin-right: 5px;">Detail</a>'
+            '<a class="button" href="{}" target="_blank" style="background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 11px;">Cetak PDF</a>',
+            edit_url, pdf_url
+        )
+    aksi_tombol.short_description = 'Aksi'
 
 admin.site.register(Order, OrderAdmin)
+
 admin.site.register(OrderProduct)
 
 
 #RETUR PRODUK
 @admin.register(ReturnRequest)
 class ReturnRequestAdmin(admin.ModelAdmin):
-    list_display = ['order', 'status', 'bank_name', 'created_at']
+    list_display = ['order', 'status', 'bank_name', 'created_at', 'aksi_tombol']
     list_filter = ['status', 'created_at']
     readonly_fields = ['order', 'reason', 'image_proof', 'bank_name', 'bank_account_number', 'bank_account_name', 'created_at']
     
@@ -438,8 +496,12 @@ class ReturnRequestAdmin(admin.ModelAdmin):
 
     # Fungsi opsional: Agar foto bukti bisa langsung intip di admin
     def view_proof(self, obj):
-        from django.utils.html import format_html
         return format_html('<img src="{}" width="150" />'.format(obj.image_proof.url))
+
+    def aksi_tombol(self, obj):
+        edit_url = reverse('admin:order_returnrequest_change', args=[obj.id])
+        return format_html('<a class="button" href="{}" style="background-color: #007bff; color: white; padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 11px;">Kelola</a>', edit_url)
+    aksi_tombol.short_description = 'Aksi'
     
     
 #Voucher
@@ -447,12 +509,18 @@ class ReturnRequestAdmin(admin.ModelAdmin):
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
     # Kolom apa saja yang mau ditampilkan di daftar tabel
-    list_display = ('code', 'user', 'discount_value', 'is_used', 'created_at')
+    list_display = ('code', 'user', 'discount_value', 'is_used', 'created_at', 'aksi_tombol')
     
     # Fitur filter di samping kanan
     list_filter = ('is_used', 'created_at')
     
     # Fitur pencarian berdasarkan kode atau email user
     search_fields = ('code', 'user__email')
+
+    def aksi_tombol(self, obj):
+        edit_url = reverse('admin:order_coupon_change', args=[obj.id])
+        return format_html('<a class="button" href="{}" style="background-color: #007bff; color: white; padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 11px;">Ubah</a>', edit_url)
+    aksi_tombol.short_description = 'Aksi'
+
     
     

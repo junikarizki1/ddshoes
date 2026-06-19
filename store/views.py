@@ -121,14 +121,14 @@ def product(request, category_slug=None, brand_slug=None):
     if category_slug is not None:
         # Jika URL memiliki slug kategori (misal: /store/category/sneakers/)
         current_category = get_object_or_404(Category, slug=category_slug)
-        products = Product.objects.filter(category=current_category, is_available=True)
+        products = Product.objects.filter(category=current_category, is_available=True, stock__gt=0).order_by('-created_date')
     elif brand_slug != None:
         # Filter berdasarkan brand
         brands = get_object_or_404(Brand, slug=brand_slug)
-        products = Product.objects.filter(brand=brands, is_available=True)
+        products = Product.objects.filter(brand=brands, is_available=True, stock__gt=0).order_by('-created_date')
     else:
         # Jika URL polos (/product/ atau /store/), tampilkan semua produk
-        products = Product.objects.filter(is_available=True).order_by('id')
+        products = Product.objects.filter(is_available=True, stock__gt=0).order_by('-created_date')
 
 
     # --- C. Logika Filter Brand ---
@@ -149,7 +149,7 @@ def product(request, category_slug=None, brand_slug=None):
     product_count = products.count()
     all_categories = Category.objects.all()
     all_brands = Brand.objects.all()
-    all_products_count = Product.objects.filter(is_available=True).count()
+    all_products_count = Product.objects.filter(is_available=True, stock__gt=0).count()
 
     # Gabungkan semua data ke dalam satu context agar tidak tertimpa
     context = {

@@ -9,7 +9,6 @@ from django.conf import settings
 
 
 class Order(models.Model):
-    snap_token = models.CharField(max_length=100, blank=True, null=True)
     STATUS = (
         ('New', 'New'),
         ('Pending', 'Pending'), 

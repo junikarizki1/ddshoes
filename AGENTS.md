@@ -1,77 +1,79 @@
-# DD Shoes - AGENTS.md
+# DD Shoes — AGENTS.md
 
-## Project Overview
-Django 5.2 e-commerce store for shoes ("DD Shoes Store Pontianak"). Indonesian locale (`id-id`), timezone `Asia/Jakarta`. Python 3.12, PostgreSQL 16.
+Django 5.2 e-commerce for shoes (Pontianak, Indonesia). Python 3.12, PostgreSQL 16.
 
-## Apps & Architecture
-- **account** - Custom user model (`Account`), email-based auth (`USERNAME_FIELD = 'email'`), loyalty system
-- **store** - Products, categories, brands, reviews, user interest tracking
-- **cart** - Session + user-based cart with `Cart` and `CartItem`
-- **order** - Orders, order items, return requests, coupons, Midtrans payment integration
-- **ddshoes/** - Project config (settings, urls, wsgi, asgi)
+## Apps & Entrypoints
+- `ddshoes/` — project config, `AUTH_USER_MODEL = 'account.Account'`
+- `account/` — custom user (`Account`), email-based auth (`USERNAME_FIELD='email'`), multi-address support
+- `store/` — products, categories, brands, reviews, `UserInterest` personalization
+- `cart/` — session + user-based cart (`CartItem` linked to `Account`)
+- `order/` — orders, items, return requests, coupons, Midtrans payments, invoice PDFs
 
-URL routing: `store` at `/`, `cart` at `/cart/`, `order` at `/order/`, `account` at `/account/`, admin at `/admin/`.
+URLs: `/` store, `/cart/` cart, `/order/` order, `/account/` account, `/admin/` admin.
 
-## Deployment
-- Deployed on **Railway** (see `ALLOWED_HOSTS` / `CSRF_TRUSTED_ORIGINS` for `*.up.railway.app`)
-- `Procfile` → `start.sh`: runs migrations, auto-creates superuser (`admin@gmail.com` / `admin`), collects static, then starts gunicorn
-- Gunicorn binds to `$PORT` (default 8000), 2 workers, 2 threads, 120s timeout
-
-## Key Commands
+## Commands
 ```
-python manage.py runserver          # Start dev server
-python manage.py makemigrations     # Generate migrations
-python manage.py migrate            # Apply migrations
-python manage.py createsuperuser    # Create admin user
-python manage.py test               # Run tests (all empty stubs)
-docker compose up                   # Full stack: PostgreSQL 16 + web on :8000
+python manage.py runserver
+python manage.py makemigrations
+python manage.py migrate
+docker compose up          # Full stack: PostgreSQL 16 + web on :8000
 ```
+
+No test suite exists (all `tests.py` are empty stubs). No linter/formatter/typecheck config.
 
 ## Setup
-1. Copy `.env.example` to `.env` and fill in credentials
-2. Database env vars: `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PORT` (also accepts `PG*` variants)
-3. Default dev DB: `ddshoes` / `postgres` / `root` / `localhost:5432`
-4. Docker: `docker compose up` (builds from Dockerfile, includes `libcairo2-dev` for xhtml2pdf PDF generation)
+1. Copy `.env.example` → `.env`, fill in credentials
+2. `docker compose up` or set up PostgreSQL manually
+3. DB env vars: `DATABASE_URL` (preferred) or `DB_HOST/DB_NAME/DB_USER/DB_PASSWORD/DB_PORT` (also `PG*` variants)
+4. Docker includes `libcairo2-dev` (required by xhtml2pdf PDF gen)
 
-## Database
-- PostgreSQL, custom user model: `AUTH_USER_MODEL = 'account.Account'`
-- `Account` has extra fields: `loyalty_balance` (float), `shoe_size` (int), `is_superadmin`
-- `USERNAME_FIELD = 'email'` but model also has a `username` field (required for superuser creation)
+## Non-obvious Conventions
+- **`Product.slug`** is overwritten on every `save()` via `slugify(product_name)` — manual slugs never stick.
+- **`Order.save()`** reads old status from DB first; restores stock if status changes to `Cancelled`.
+- **`ReturnRequest.save()`** forces `Order.status='Returned'` and restores stock when status becomes `Refunded`.
+- **Order number** is `YYYYMMDD + order.id`, generated inline in `order/views.py:place_order()` (not a signal).
+- **`order_total`** stores *net* revenue (product total minus discount), not gross. `grand_total` = net + shipping.
+- **Coupon** auto-generation from loyalty: every 200k accumulated from completed orders → `LOYAL-XXXXX` coupon (5k discount). Reversed on cancellation. Defined in `order/signals.py:handle_loyalty_logic`.
+- **`update_user_interest`** is duplicated: a standalone copy lives in `store/views.py:227` (the one actually called from `product_detail`), and an identical copy in `store/signals.py` (not wired as a Django signal).
+- **`order/signals.py` IS wired** via `order/apps.py.ready()` — handles pre-save status capture and post-save loyalty.
+- **Midtrans webhook is commented out** — payment status syncs via polling in `confirmation()` and `my_orders()` views calling Midtrans Core API directly. Sandbox mode (`is_production=False`).
+- **Stock restored in 4 places**: `Order.save()`, `ReturnRequest.save()`, `my_orders()` view (Midtrans cancel/expire/deny), and `place_order()` (decrement on creation).
+- **Hardcoded API keys** (not loaded from env): `KOMERCE_API_KEY` set independently in both `order/views.py:28` and `account/views.py:13`. Settings also has hardcoded fallback Midtrans/Gmail credentials.
+- **Jazzmin `search_model`** references `my_account.Account` but app is named `account` — known quirk, may silently fail in admin search.
+- **`MAX_ADDRESSES = 3`** hardcoded in `account/views.py` (enforced in place_order and address management).
+- **Shipping cost** uses RajaOngkir via Komerce API; provinces cached in session. Courier tracking URLs stored in `order/templatetags/courier_tags.py`.
+- **Custom user model**: `USERNAME_FIELD='email'`, but `username` is still a required field for superuser creation.
+- **Context processors**: `cart.context_processors.cart_count` and `store.context_processors.menu_links_brand`.
 
-## Important Conventions
-- `Product.slug` is auto-generated from `product_name` via `slugify()` on every `save()` — manual slugs are overwritten
-- `Order.save()` restores stock when status changes to `Cancelled` (reads old status from DB before save)
-- `ReturnRequest.save()` sets order status to `Returned` and restores stock when status is `Refunded`
-- Order number is generated in `order/views.py` as `YYYYMMDD + order.id` (NOT in signals)
-- Loyalty signal (`order/signals.py`): every 200k accumulated from completed orders → auto-generates `LOYAL-XXXXX` coupon (5k discount). Reverses on cancellation.
-- `store.signals.update_user_interest()` exists but is NOT wired as a Django signal — called manually from views. `store/apps.py` does not import signals.
-- `order/signals.py` IS wired via `order/apps.py` `ready()` — handles `capture_old_status` and `handle_loyalty_logic`
-- **Midtrans webhook is commented out** — payment status sync happens via polling in `confirmation()` and `my_orders()` views by calling Midtrans API directly
-- **Midtrans runs in sandbox mode** (`is_production=False` in `payments()` view)
-- Stock is restored in **multiple places**: `Order.save()`, `ReturnRequest.save()`, `my_orders()` view (Midtrans cancel/expire/deny), and `place_order()` view (decrements on order creation)
-- `Order.order_total` stores **net revenue** (product total minus discount), NOT gross total — this is what loyalty calculations use
-- Jazzmin `search_model` references `my_account.Account` but the app is named `account` — this is a known quirk that may cause search to fail in admin
-- Hardcoded API keys exist in `order/views.py`: `KOMERCE_API_KEY` (RajaOngkir shipping) and binderbyte API key (tracking) — not loaded from env
+This configuration is universally compatible across AI environments (AGENTS.md, CLAUDE.md, GEMINI.md).
 
-## External Integrations
-- **Midtrans** payment gateway (snap token stored on Order model)
-- **Gmail SMTP** for email notifications (shipping confirmations via signal)
-- **Ngrok** allowed in `ALLOWED_HOSTS` for tunneling
-- **Jazzmin** for customized admin dashboard (theme: flatly, sidebar: dark primary)
-- **xhtml2pdf** for PDF invoice generation
-- **WhiteNoise** for static file serving in production
+As an AI agent, you must navigate the gap between probabilistic LLM reasoning and the strict, deterministic logic required for real-world applications. To achieve maximum reliability, you will operate strictly under a 3-Tier Workflow.
 
-## Testing
-- All `tests.py` files are empty stubs. No test suite exists.
+The 3-Tier Workflow
+Tier 1: The Blueprint (Directives)
 
-## Template & Static Structure
-- Global templates in `templates/` (base.html, home.html, alerts.html, admin/)
-- App-specific templates in `<app>/templates/<app>/`
-- Static files: `static/` → collected to `staticfiles/` by WhiteNoise
-- Media uploads: `media/photos/` (categories, brands, products, returns, refund_proofs)
-- Context processors: `cart_count`, `menu_links_brand`
+Located in the directives/ folder as Markdown files.
+These are your standard operating procedures (SOPs). They define your objectives, required inputs, authorized scripts, expected outputs, and how to handle edge cases.
+Treat these as clear, natural-language instructions from a human manager.
+Tier 2: The Brain (Orchestration)
 
-## Security Notes
-- `DEBUG` defaults to `True` via env fallback
-- `ALLOWED_HOSTS` defaults to `localhost,127.0.0.1`
-- Settings has hardcoded fallback credentials for Midtrans and Gmail — replace before production
+This is your primary role: intelligent delegation and routing.
+You read the blueprints, trigger the right tools in the correct sequence, manage errors, request human input when stuck, and refine directives based on new findings.
+You are the bridge. Instead of executing complex tasks (like web scraping) directly, you parse the directive and trigger the corresponding script (e.g., execution/web_scraper.py).
+Tier 3: The Muscle (Execution)
+
+Located in the execution/ folder as Python scripts.
+These are deterministic, hard-coded tools.
+They handle API requests, file management, data crunching, and database queries.
+They must be fast, heavily commented, and reliable. All sensitive keys reside in .env.
+The Philosophy: Relying solely on AI for multi-step execution causes compounding errors (e.g., 90% accuracy over 5 steps drops to 59% success rate). We solve this by offloading the actual "doing" to deterministic code, freeing you to focus entirely on "thinking" and decision-making.
+
+Core Rules of Engagement
+1. Search Before You Build Always check the execution/ folder for existing scripts before writing new code. Avoid redundant tool creation.
+
+2. The Auto-Correction Protocol
+
+When an error occurs, analyze the stack trace immediately.
+Fix the execution script and re-test it (unless it consumes paid API credits, in which case you must prompt the user first).
+If you hit constraints (e.g., rate limits), adapt the script, test it, and document the solution.
+3. Evolve the Blueprints Directives are living documents. Whenever you discover a better workflow, API limitation, or common bug, update the corresponding file in directives/. However, never overwrite or delete a directive entirely without explicit permission. Your instructions must be preserved and improved over time.

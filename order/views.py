@@ -25,7 +25,7 @@ from store.models import ReviewRating
 # =========================================================
 # API KEY KOMERCE ANDA
 # =========================================================
-KOMERCE_API_KEY = '94obP28b5833ab1b737da714qz6kbIcd' 
+KOMERCE_API_KEY = settings.KOMERCE_API_KEY 
 
 @login_required(login_url='login')
 def checkout(request, total=0, quantity=0, cart_items=None):
@@ -234,7 +234,7 @@ def place_order(request, total=0, quantity=0):
             except Coupon.DoesNotExist:
                 pass
 
-        # 5b. Handle Alamat: Gunakan alamat tersimpan atau simpan baru
+        # 5b. Handle Alamat: Gunakan alamat tersimpan atau simpan baru secara otomatis
         selected_address_id = request.POST.get('selected_address_id')
         if selected_address_id:
             # User memilih alamat tersimpan
@@ -245,8 +245,8 @@ def place_order(request, total=0, quantity=0):
         else:
             selected_addr = None
 
-        if request.POST.get('save_address') == 'on' and not selected_addr:
-            # User ingin simpan alamat baru (dan tidak memilih alamat tersimpan)
+        if not selected_addr:
+            # Otomatis simpan alamat baru (dan tidak memilih alamat tersimpan)
             if Address.objects.filter(user=current_user).count() < 3:
                 Address.objects.create(
                     user=current_user,

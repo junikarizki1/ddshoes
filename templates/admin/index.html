@@ -27,161 +27,170 @@
   })();
 </script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600;700&display=swap');
   
   * { font-family: 'Inter', sans-serif; }
+  h1, h2, h3, h4, h5, h6 { font-family: 'Nunito Sans', sans-serif; }
   
   input[type="date"]::-webkit-datetime-edit { color: transparent; }
   input[type="date"]:focus::-webkit-datetime-edit,
-  input[type="date"]:valid::-webkit-datetime-edit { color: white !important; }
+  input[type="date"]:valid::-webkit-datetime-edit { color: #0f172a !important; }
 
-  .dashboard-wrapper { padding: 20px 0; }
+  .dashboard-wrapper { 
+    padding: 24px; 
+    background-color: #f8fafc; /* light modern background */
+    border-radius: 12px;
+  }
 
   .filter-bar {
-    background: linear-gradient(135deg, #2c2c3a 0%, #1a1a2e 100%);
+    background: #ffffff;
     border-radius: 16px;
     padding: 20px 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
   }
   .filter-bar h5 {
     font-size: 18px;
     font-weight: 700;
-    background: linear-gradient(135deg, #ffba00, #ff9500);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #0f172a;
+    margin: 0;
   }
   .filter-bar .icon-circle {
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #ffba00, #ff9500);
+    background: #eff6ff;
+    color: #2563eb;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(255, 186, 0, 0.3);
   }
   .filter-input {
-    background: rgba(255,255,255,0.08) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
     border-radius: 10px !important;
-    color: white !important;
+    color: #0f172a !important;
     padding: 8px 14px !important;
     font-size: 13px !important;
     transition: all 0.2s;
   }
   .filter-input:focus {
-    background: rgba(255,255,255,0.12) !important;
-    border-color: #ffba00 !important;
-    box-shadow: 0 0 0 3px rgba(255, 186, 0, 0.15);
+    background: #ffffff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
   }
   .filter-btn {
-    background: linear-gradient(135deg, #ffba00, #ff9500) !important;
+    background: #0f172a !important;
     border: none !important;
     border-radius: 10px !important;
-    color: #1a1a2e !important;
+    color: #ffffff !important;
     font-weight: 600 !important;
     padding: 8px 18px !important;
     font-size: 13px !important;
     transition: all 0.2s;
-    box-shadow: 0 4px 12px rgba(255, 186, 0, 0.25);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
   }
   .filter-btn:hover {
+    background: #1e293b !important;
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(255, 186, 0, 0.35);
+  }
+  .filter-btn.no-print {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+  .filter-btn.no-print:hover {
+    background: #f1f5f9 !important;
   }
   .quick-filter {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
     border-radius: 8px !important;
-    color: #a0a0b0 !important;
+    color: #64748b !important;
     font-weight: 500 !important;
     font-size: 12px !important;
     padding: 6px 14px !important;
     transition: all 0.2s;
   }
   .quick-filter:hover {
-    background: rgba(255,255,255,0.1) !important;
-    color: white !important;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
   }
   .quick-filter.active {
-    background: linear-gradient(135deg, #ffba00, #ff9500) !important;
-    border-color: #ffba00 !important;
-    color: #1a1a2e !important;
+    background: #eff6ff !important;
+    border-color: #bfdbfe !important;
+    color: #1d4ed8 !important;
     font-weight: 600 !important;
   }
 
   .stat-card {
+    background: #ffffff !important;
     border-radius: 16px;
-    border: none;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     transition: all 0.3s ease;
     position: relative;
   }
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  }
   .stat-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.25) !important;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    border-color: #cbd5e1;
   }
-  .stat-card .inner { padding: 24px 20px 55px; }
+  .stat-card .inner { padding: 24px 24px 20px; }
   .stat-card .inner h3 {
     font-size: 32px;
     font-weight: 800;
     margin: 0;
     line-height: 1;
+    color: #0f172a !important;
   }
   .stat-card .inner p {
-    font-size: 13px;
+    font-size: 14px;
     margin: 8px 0 0;
-    opacity: 0.8;
-    font-weight: 500;
+    color: #64748b !important;
+    font-weight: 600;
   }
   .stat-card .icon {
     position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 52px;
-    opacity: 0.15;
+    right: 24px;
+    top: 24px;
+    font-size: 32px;
+    opacity: 1;
   }
   .stat-card .card-footer {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 12px 20px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    text-align: center;
     text-decoration: none;
-    background: rgba(0,0,0,0.15);
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    color: #475569 !important;
     transition: all 0.2s;
-    letter-spacing: 0.3px;
   }
   .stat-card .card-footer:hover {
-    background: rgba(0,0,0,0.25);
+    background: #f1f5f9;
+    color: #0369a1 !important;
   }
 
-  .bg-gradient-info { background: linear-gradient(135deg, #17a2b8, #138496); }
-  .bg-gradient-warning { background: linear-gradient(135deg, #ffc107, #e0a800); }
-  .bg-gradient-primary { background: linear-gradient(135deg, #888da7, #6b7094); }
-  .bg-gradient-success { background: linear-gradient(135deg, #28a745, #218838); }
-  .bg-gradient-dark { background: linear-gradient(135deg, #343a40, #23272b); }
-  .bg-gradient-teal { background: linear-gradient(135deg, #20c997, #1aa179); }
-  .bg-gradient-secondary { background: linear-gradient(135deg, #6c757d, #5a6268); }
-  .bg-gradient-danger { background: linear-gradient(135deg, #dc3545, #c82333); }
+  /* Override gradient classes with colored icons instead */
+  .bg-gradient-info .icon { color: #0284c7; }
+  .bg-gradient-warning .icon { color: #d97706; }
+  .bg-gradient-primary .icon { color: #4f46e5; }
+  .bg-gradient-success .icon { color: #16a34a; }
+  .bg-gradient-dark .icon { color: #334155; }
+  .bg-gradient-teal .icon { color: #0d9488; }
+  .bg-gradient-secondary .icon { color: #64748b; }
+  .bg-gradient-danger .icon { color: #dc2626; }
 
   .section-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #ffffff;
-    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 24px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -190,25 +199,26 @@
     content: '';
     width: 4px;
     height: 20px;
-    background: linear-gradient(180deg, #ffba00, #ff9500);
-    border-radius: 2px;
+    background: #0ea5e9; /* Sky 500 */
+    border-radius: 4px;
   }
 
   .retur-card {
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
     overflow: hidden;
     transition: all 0.3s ease;
-    background: linear-gradient(135deg, #2c2c3a, #252538);
+    background: #ffffff;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   }
   .retur-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
-    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1) !important;
+    border-color: #cbd5e1;
   }
-  .retur-card .card-body { padding: 20px; }
-  .retur-card .text-xs { font-size: 11px; letter-spacing: 0.5px; font-weight: 600; text-transform: uppercase; }
-  .retur-card .h5 { font-size: 28px; font-weight: 800; }
+  .retur-card .card-body { padding: 20px 24px; }
+  .retur-card .text-xs { font-size: 12px; letter-spacing: 0.5px; font-weight: 700; text-transform: uppercase; color: #64748b !important; }
+  .retur-card .h5 { font-size: 28px; font-weight: 800; color: #0f172a !important; margin-top: 4px; }
   .retur-card .icon-box {
     width: 48px;
     height: 48px;
@@ -218,52 +228,55 @@
     justify-content: center;
     font-size: 20px;
   }
+  
+  /* Retur card icons based on link */
+  a[href*="Pending"] .icon-box { background: #fef3c7; color: #d97706; }
+  a[href*="Approved"] .icon-box { background: #e0f2fe; color: #0284c7; }
+  a[href*="Refunded"] .icon-box { background: #dcfce7; color: #16a34a; }
+  a[href*="Rejected"] .icon-box { background: #fee2e2; color: #dc2626; }
 
   .chart-card {
     border-radius: 16px;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid #e2e8f0;
     overflow: hidden;
-    background: linear-gradient(135deg, #2c2c3a 0%, #252538 100%);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    background: #ffffff;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   }
   .chart-card .card-header {
-    background: transparent;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    padding: 18px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 20px 24px;
   }
   .chart-card .card-header h3 {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
-    color: #ffffff;
+    color: #0f172a;
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
   }
   .chart-card .card-header h3 i {
-    color: #ffba00;
+    color: #0ea5e9;
   }
-  .chart-card .card-body { padding: 20px 24px 24px; }
+  .chart-card .card-body { padding: 24px; }
 
   .discount-badge {
-    background: linear-gradient(135deg, rgba(255, 186, 0, 0.15), rgba(255, 149, 0, 0.1));
-    border: 1px solid rgba(255, 186, 0, 0.2);
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
     padding: 24px;
     text-align: center;
   }
   .discount-badge h2 {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 800;
-    background: linear-gradient(135deg, #ffba00, #ff9500);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #0369a1;
   }
   .discount-badge p {
-    font-size: 12px;
-    color: #a0a0b0;
-    font-weight: 500;
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 600;
   }
 
   @keyframes fadeInUp {
@@ -281,7 +294,7 @@
   @media print {
     body, .container-fluid, .dashboard-wrapper {
       background: white !important;
-      color: #1a1a2e !important;
+      color: #0f172a !important;
     }
     .filter-bar {
       background: #f8f9fa !important;
@@ -289,22 +302,20 @@
       box-shadow: none !important;
     }
     .filter-bar h5 {
-      background: none !important;
-      -webkit-text-fill-color: #1a1a2e !important;
-      color: #1a1a2e !important;
+      color: #0f172a !important;
     }
     .icon-circle {
-      background: #ffba00 !important;
+      background: #eff6ff !important;
       box-shadow: none !important;
     }
     .filter-input {
       background: white !important;
       border: 1px solid #ced4da !important;
-      color: #1a1a2e !important;
+      color: #0f172a !important;
     }
     .filter-btn {
-      background: #ffba00 !important;
-      box-shadow: none !important;
+      background: #0f172a !important;
+      color: #ffffff !important;
     }
     .quick-filter {
       background: white !important;
@@ -312,72 +323,45 @@
       color: #495057 !important;
     }
     .quick-filter.active {
-      background: #ffba00 !important;
-      color: #1a1a2e !important;
+      background: #eff6ff !important;
+      color: #1d4ed8 !important;
     }
-    .stat-card {
+    .stat-card, .retur-card, .chart-card {
       background: white !important;
       border: 1px solid #dee2e6 !important;
       box-shadow: none !important;
       break-inside: avoid;
     }
-    .stat-card::before { display: none; }
-    .stat-card:hover { transform: none !important; box-shadow: none !important; }
-    .bg-gradient-info { background: #e3f2fd !important; }
-    .bg-gradient-warning { background: #fff8e1 !important; }
-    .bg-gradient-primary { background: #e8eaf6 !important; }
-    .bg-gradient-success { background: #e8f5e9 !important; }
-    .bg-gradient-dark { background: #f5f5f5 !important; }
-    .bg-gradient-teal { background: #e0f2f1 !important; }
-    .bg-gradient-secondary { background: #f5f5f5 !important; }
-    .bg-gradient-danger { background: #ffebee !important; }
-    .stat-card .inner h3, .stat-card .inner p { color: #1a1a2e !important; }
+    .stat-card:hover, .retur-card:hover { transform: none !important; box-shadow: none !important; }
+    .stat-card .inner h3, .stat-card .inner p { color: #0f172a !important; }
     .stat-card .card-footer {
       background: #f8f9fa !important;
       color: #495057 !important;
     }
-    .section-title { color: #1a1a2e !important; }
-    .section-title::before { background: #ffba00 !important; }
-    .retur-card {
-      background: white !important;
-      border: 1px solid #dee2e6 !important;
-      box-shadow: none !important;
-      break-inside: avoid;
-    }
-    .retur-card:hover { transform: none !important; box-shadow: none !important; }
-    .retur-card .h5, .retur-card .text-xs { color: #1a1a2e !important; }
-    .chart-card {
-      background: white !important;
-      border: 1px solid #dee2e6 !important;
-      box-shadow: none !important;
-      break-inside: avoid;
-    }
+    .section-title { color: #0f172a !important; }
+    .retur-card .h5, .retur-card .text-xs { color: #0f172a !important; }
     .chart-card .card-header { border-bottom-color: #dee2e6 !important; }
-    .chart-card .card-header h3 { color: #1a1a2e !important; }
-    .chart-card .card-header h3 i { color: #ffba00 !important; }
+    .chart-card .card-header h3 { color: #0f172a !important; }
     .discount-badge {
-      background: #fff8e1 !important;
-      border-color: #ffba00 !important;
+      background: #f8f9fa !important;
+      border-color: #dee2e6 !important;
     }
     .discount-badge h2 {
-      background: none !important;
-      -webkit-text-fill-color: #ff9500 !important;
-      color: #ff9500 !important;
+      color: #0369a1 !important;
     }
     .discount-badge p { color: #495057 !important; }
     .animate-in { animation: none !important; opacity: 1 !important; transform: none !important; }
-    .icon-box { color: #1a1a2e !important; }
+    .icon-box { color: #0f172a !important; }
     a { color: #495057 !important; text-decoration: none !important; }
     .fa-arrow-right { display: none !important; }
     .row { break-inside: avoid; }
-  .no-print { display: none !important; }
-  form .filter-input, form .filter-btn { display: none !important; }
-  form .quick-filter { display: none !important; }
-  
-  /* Hide default Django admin app list */
-  #content-main > .module, #content-main > .app-list, .module caption, .module table, #content-main > hr { display: none !important; }
-  #content-main > div:not(.dashboard-wrapper) { display: none !important; }
-  .app-list, .module { display: none !important; }
+    .no-print { display: none !important; }
+    form .filter-input, form .filter-btn { display: none !important; }
+    form .quick-filter { display: none !important; }
+    
+    #content-main > .module, #content-main > .app-list, .module caption, .module table, #content-main > hr { display: none !important; }
+    #content-main > div:not(.dashboard-wrapper) { display: none !important; }
+    .app-list, .module { display: none !important; }
     
     #content-main > h1, #content > h1, .breadcrumbs + h1, #content-main h1:first-child, h1:contains("Dashboard") {
       display: none !important;
@@ -404,8 +388,7 @@
       box-shadow: none !important;
       border: 1px solid #dee2e6 !important;
     }
-    body.print-charts-only .chart-card .card-header h3 { color: #1a1a2e !important; }
-    body.print-charts-only .chart-card .card-header h3 i { color: #ffba00 !important; }
+    body.print-charts-only .chart-card .card-header h3 { color: #0f172a !important; }
     body.print-charts-only .dashboard-wrapper { padding: 0 !important; }
   }
 </style>
@@ -418,7 +401,7 @@
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
           <div class="d-flex align-items-center">
             <div class="icon-circle mr-3">
-              <i class="fas fa-chart-line" style="color: #1a1a2e;"></i>
+              <i class="fas fa-chart-line"></i>
             </div>
             <h5 class="m-0">Dashboard DD Shoes</h5>
           </div>
@@ -459,11 +442,11 @@
     <div class="col-lg-3 col-6 animate-in delay-2">
       <div class="stat-card bg-gradient-warning shadow">
         <div class="inner">
-          <h3 style="color: #1a1a2e">{{ to_ship }}</h3>
-          <p style="color: rgba(26,26,46,0.7)">Siap Dikirim</p>
+          <h3>{{ to_ship }}</h3>
+          <p>Siap Dikirim</p>
         </div>
         <div class="icon"><i class="fas fa-box"></i></div>
-        <a href="/admin/order/order/?status__exact=Accepted&resi=empty" class="card-footer" style="color: #1a1a2e">Proses Sekarang <i class="fas fa-arrow-right ml-1"></i></a>
+        <a href="/admin/order/order/?status__exact=Accepted&resi=empty" class="card-footer">Proses Sekarang <i class="fas fa-arrow-right ml-1"></i></a>
       </div>
     </div>
     <div class="col-lg-3 col-6 animate-in delay-3">
@@ -543,7 +526,7 @@
             <div class="d-flex align-items-center justify-content-between">
               <div>
                 <div class="text-xs text-warning mb-1">Menunggu Persetujuan</div>
-                <div class="h5 mb-0" style="color: #ffffff">{{ retur_pending }}</div>
+                <div class="h5 mb-0">{{ retur_pending }}</div>
               </div>
               <div class="icon-box" style="background: rgba(255, 193, 7, 0.15); color: #ffc107;">
                 <i class="fas fa-exclamation-circle"></i>
@@ -560,7 +543,7 @@
             <div class="d-flex align-items-center justify-content-between">
               <div>
                 <div class="text-xs text-info mb-1">Sedang Diproses</div>
-                <div class="h5 mb-0" style="color: #ffffff">{{ retur_proses }}</div>
+                <div class="h5 mb-0">{{ retur_proses }}</div>
               </div>
               <div class="icon-box" style="background: rgba(23, 162, 184, 0.15); color: #17a2b8;">
                 <i class="fas fa-box-open"></i>
@@ -577,7 +560,7 @@
             <div class="d-flex align-items-center justify-content-between">
               <div>
                 <div class="text-xs text-success mb-1">Retur Berhasil</div>
-                <div class="h5 mb-0" style="color: #ffffff">{{ retur_selesai }}</div>
+                <div class="h5 mb-0">{{ retur_selesai }}</div>
               </div>
               <div class="icon-box" style="background: rgba(40, 167, 69, 0.15); color: #28a745;">
                 <i class="fas fa-check-double"></i>
@@ -594,7 +577,7 @@
             <div class="d-flex align-items-center justify-content-between">
               <div>
                 <div class="text-xs text-danger mb-1">Retur Ditolak</div>
-                <div class="h5 mb-0" style="color: #ffffff">{{ retur_ditolak }}</div>
+                <div class="h5 mb-0">{{ retur_ditolak }}</div>
               </div>
               <div class="icon-box" style="background: rgba(220, 53, 69, 0.15); color: #dc3545;">
                 <i class="fas fa-times-circle"></i>
@@ -716,43 +699,43 @@
         <div class="card-body" style="min-height: 280px;">
           <div class="text-center mb-3">
             <h2 class="mb-0" style="color: #ffba00; font-weight: 800; font-size: 32px;">{{ avg_rating }}</h2>
-            <p class="mb-0" style="color: #a0a0b0; font-size: 12px;">Rata-rata dari {{ total_reviews }} ulasan</p>
+            <p class="mb-0" style="color: #64748b; font-size: 12px;">Rata-rata dari {{ total_reviews }} ulasan</p>
           </div>
           <div class="px-2">
             <div class="d-flex align-items-center mb-2">
-              <span style="width: 45px; font-size: 13px; color: #a0a0b0;">⭐ 5</span>
-              <div class="flex-grow-1 mx-2" style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+              <span style="width: 45px; font-size: 13px; color: #64748b;">⭐ 5</span>
+              <div class="flex-grow-1 mx-2" style="height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px; overflow: hidden;">
                 <div style="height: 100%; width: {% widthratio rating_data.4 total_reviews 100 %}%; background: #ffba00;"></div>
               </div>
-              <span style="width: 20px; text-align: right; font-size: 12px; color: white;">{{ rating_data.4 }}</span>
+              <span style="width: 20px; text-align: right; font-size: 12px; color: #1a1a2e;">{{ rating_data.4 }}</span>
             </div>
             <div class="d-flex align-items-center mb-2">
-              <span style="width: 45px; font-size: 13px; color: #a0a0b0;">⭐ 4</span>
-              <div class="flex-grow-1 mx-2" style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+              <span style="width: 45px; font-size: 13px; color: #64748b;">⭐ 4</span>
+              <div class="flex-grow-1 mx-2" style="height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px; overflow: hidden;">
                 <div style="height: 100%; width: {% widthratio rating_data.3 total_reviews 100 %}%; background: #20c997;"></div>
               </div>
-              <span style="width: 20px; text-align: right; font-size: 12px; color: white;">{{ rating_data.3 }}</span>
+              <span style="width: 20px; text-align: right; font-size: 12px; color: #1a1a2e;">{{ rating_data.3 }}</span>
             </div>
             <div class="d-flex align-items-center mb-2">
-              <span style="width: 45px; font-size: 13px; color: #a0a0b0;">⭐ 3</span>
-              <div class="flex-grow-1 mx-2" style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+              <span style="width: 45px; font-size: 13px; color: #64748b;">⭐ 3</span>
+              <div class="flex-grow-1 mx-2" style="height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px; overflow: hidden;">
                 <div style="height: 100%; width: {% widthratio rating_data.2 total_reviews 100 %}%; background: #ffc107;"></div>
               </div>
-              <span style="width: 20px; text-align: right; font-size: 12px; color: white;">{{ rating_data.2 }}</span>
+              <span style="width: 20px; text-align: right; font-size: 12px; color: #1a1a2e;">{{ rating_data.2 }}</span>
             </div>
             <div class="d-flex align-items-center mb-2">
-              <span style="width: 45px; font-size: 13px; color: #a0a0b0;">⭐ 2</span>
-              <div class="flex-grow-1 mx-2" style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+              <span style="width: 45px; font-size: 13px; color: #64748b;">⭐ 2</span>
+              <div class="flex-grow-1 mx-2" style="height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px; overflow: hidden;">
                 <div style="height: 100%; width: {% widthratio rating_data.1 total_reviews 100 %}%; background: #fd7e14;"></div>
               </div>
-              <span style="width: 20px; text-align: right; font-size: 12px; color: white;">{{ rating_data.1 }}</span>
+              <span style="width: 20px; text-align: right; font-size: 12px; color: #1a1a2e;">{{ rating_data.1 }}</span>
             </div>
             <div class="d-flex align-items-center mb-2">
-              <span style="width: 45px; font-size: 13px; color: #a0a0b0;">⭐ 1</span>
-              <div class="flex-grow-1 mx-2" style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+              <span style="width: 45px; font-size: 13px; color: #64748b;">⭐ 1</span>
+              <div class="flex-grow-1 mx-2" style="height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px; overflow: hidden;">
                 <div style="height: 100%; width: {% widthratio rating_data.0 total_reviews 100 %}%; background: #dc3545;"></div>
               </div>
-              <span style="width: 20px; text-align: right; font-size: 12px; color: white;">{{ rating_data.0 }}</span>
+              <span style="width: 20px; text-align: right; font-size: 12px; color: #1a1a2e;">{{ rating_data.0 }}</span>
             </div>
           </div>
         </div>
@@ -970,12 +953,16 @@
             labels: { usePointStyle: true, padding: 20, font: { size: 12, weight: '500' } },
           },
           tooltip: {
-            backgroundColor: "rgba(26, 26, 46, 0.95)",
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
             titleFont: { size: 13, weight: "600" },
             bodyFont: { size: 12 },
             padding: 14,
             cornerRadius: 10,
-            borderColor: "rgba(255,255,255,0.1)",
+            borderColor: "#e2e8f0",
             borderWidth: 1,
             callbacks: {
               label: function(context) {
@@ -997,7 +984,7 @@
             display: true,
             position: "left",
             title: { display: true, text: "Jumlah Order", font: { size: 11, weight: '500' } },
-            grid: { color: "rgba(255,255,255,0.04)" },
+            grid: { color: "rgba(0,0,0,0.04)" },
             ticks: { font: { size: 11 }, stepSize: 1 },
           },
           y1: {
@@ -1071,7 +1058,7 @@
             y: {
               type: "linear", display: true, position: "left",
               title: { display: true, text: "Jumlah Order", font: { size: 11 } },
-              grid: { color: "rgba(0,0,0,0.06)" },
+              grid: { color: "rgba(0,0,0,0.04)" },
               ticks: { font: { size: 11 }, stepSize: 1 },
             },
             y1: {
@@ -1110,10 +1097,14 @@
             labels: { usePointStyle: true, padding: 16, font: { size: 11, weight: '500' } },
           },
           tooltip: {
-            backgroundColor: "rgba(26, 26, 46, 0.95)",
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
             padding: 12,
             cornerRadius: 10,
-            borderColor: "rgba(255,255,255,0.1)",
+            borderColor: "#e2e8f0",
             borderWidth: 1,
             callbacks: {
               label: function(context) {
@@ -1175,10 +1166,14 @@
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: "rgba(26, 26, 46, 0.95)",
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
             padding: 12,
             cornerRadius: 10,
-            borderColor: "rgba(255,255,255,0.1)",
+            borderColor: "#e2e8f0",
             borderWidth: 1,
             callbacks: {
               label: function(context) {
@@ -1189,7 +1184,7 @@
         },
         scales: {
           x: {
-            grid: { color: "rgba(255,255,255,0.04)" },
+            grid: { color: "rgba(0,0,0,0.04)" },
             ticks: { font: { size: 11 }, stepSize: 1 },
           },
           y: {
@@ -1222,7 +1217,7 @@
           maintainAspectRatio: false,
           plugins: { legend: { display: false }, tooltip: { enabled: false } },
           scales: {
-            x: { grid: { color: "rgba(0,0,0,0.06)" }, ticks: { font: { size: 11 }, stepSize: 1 } },
+            x: { grid: { color: "rgba(0,0,0,0.04)" }, ticks: { font: { size: 11 }, stepSize: 1 } },
             y: { grid: { display: false }, ticks: { font: { size: 11 } } },
           },
         },
@@ -1253,10 +1248,14 @@
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: "rgba(26, 26, 46, 0.95)",
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
             padding: 12,
             cornerRadius: 10,
-            borderColor: "rgba(255,255,255,0.1)",
+            borderColor: "#e2e8f0",
             borderWidth: 1,
             callbacks: {
               label: function(context) {
@@ -1267,7 +1266,7 @@
         },
         scales: {
           x: {
-            grid: { color: "rgba(255,255,255,0.04)" },
+            grid: { color: "rgba(0,0,0,0.04)" },
             ticks: { font: { size: 11 }, stepSize: 1 },
           },
           y: {
@@ -1300,7 +1299,7 @@
           maintainAspectRatio: false,
           plugins: { legend: { display: false }, tooltip: { enabled: false } },
           scales: {
-            x: { grid: { color: "rgba(0,0,0,0.06)" }, ticks: { font: { size: 11 }, stepSize: 1 } },
+            x: { grid: { color: "rgba(0,0,0,0.04)" }, ticks: { font: { size: 11 }, stepSize: 1 } },
             y: { grid: { display: false }, ticks: { font: { size: 11 } } },
           },
         },
@@ -1336,10 +1335,14 @@
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: "rgba(26, 26, 46, 0.95)",
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
             padding: 12,
             cornerRadius: 10,
-            borderColor: "rgba(255,255,255,0.1)",
+            borderColor: "#e2e8f0",
             borderWidth: 1,
             callbacks: {
               label: function(context) {
@@ -1354,7 +1357,7 @@
             ticks: { font: { size: 11 } },
           },
           y: {
-            grid: { color: "rgba(255,255,255,0.04)" },
+            grid: { color: "rgba(0,0,0,0.04)" },
             ticks: { font: { size: 11 }, stepSize: 1 },
           },
         },
@@ -1388,7 +1391,7 @@
           plugins: { legend: { display: false }, tooltip: { enabled: false } },
           scales: {
             x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-            y: { grid: { color: "rgba(0,0,0,0.06)" }, ticks: { font: { size: 11 }, stepSize: 1 } },
+            y: { grid: { color: "rgba(0,0,0,0.04)" }, ticks: { font: { size: 11 }, stepSize: 1 } },
           },
         },
       }
@@ -1419,10 +1422,14 @@
             labels: { usePointStyle: true, padding: 16, font: { size: 11, weight: '500' } },
           },
           tooltip: {
-            backgroundColor: "rgba(26, 26, 46, 0.95)",
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
             padding: 12,
             cornerRadius: 10,
-            borderColor: "rgba(255,255,255,0.1)",
+            borderColor: "#e2e8f0",
             borderWidth: 1,
             callbacks: {
               label: function(context) {
@@ -1482,10 +1489,14 @@
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: "rgba(26, 26, 46, 0.95)",
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
             padding: 12,
             cornerRadius: 10,
-            borderColor: "rgba(255,255,255,0.1)",
+            borderColor: "#e2e8f0",
             borderWidth: 1,
             callbacks: {
               label: function(context) {
@@ -1500,7 +1511,7 @@
             ticks: { font: { size: 11 } },
           },
           y: {
-            grid: { color: "rgba(255,255,255,0.04)" },
+            grid: { color: "rgba(0,0,0,0.04)" },
             ticks: { font: { size: 11 }, stepSize: 1 },
           },
         },
@@ -1528,7 +1539,7 @@
           plugins: { legend: { display: false }, tooltip: { enabled: false } },
           scales: {
             x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-            y: { grid: { color: "rgba(0,0,0,0.06)" }, ticks: { font: { size: 11 }, stepSize: 1 } },
+            y: { grid: { color: "rgba(0,0,0,0.04)" }, ticks: { font: { size: 11 }, stepSize: 1 } },
           },
         },
       }
@@ -1559,10 +1570,14 @@
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: "rgba(26, 26, 46, 0.95)",
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
+            titleColor: "#0f172a",
+            bodyColor: "#475569",
             padding: 12,
             cornerRadius: 10,
-            borderColor: "rgba(255,255,255,0.1)",
+            borderColor: "#e2e8f0",
             borderWidth: 1,
             callbacks: {
               label: function(context) {
@@ -1573,7 +1588,7 @@
         },
         scales: {
           x: {
-            grid: { color: "rgba(255,255,255,0.04)" },
+            grid: { color: "rgba(0,0,0,0.04)" },
             ticks: { font: { size: 11 }, stepSize: 1 },
           },
           y: {
@@ -1606,7 +1621,7 @@
           maintainAspectRatio: false,
           plugins: { legend: { display: false }, tooltip: { enabled: false } },
           scales: {
-            x: { grid: { color: "rgba(0,0,0,0.06)" }, ticks: { font: { size: 11 }, stepSize: 1 } },
+            x: { grid: { color: "rgba(0,0,0,0.04)" }, ticks: { font: { size: 11 }, stepSize: 1 } },
             y: { grid: { display: false }, ticks: { font: { size: 11 } } },
           },
         },
