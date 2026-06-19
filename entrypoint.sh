@@ -13,6 +13,27 @@ else
     echo "==> Media volume already populated — skipping seed."
 fi
 
+echo "==> Checking database fixtures..."
+# Check if any Product exists — if not, load store seed data
+PRODUCT_COUNT=$(python manage.py shell -c "from store.models import Product; print(Product.objects.count())" 2>/dev/null || echo "0")
+if [ "$PRODUCT_COUNT" = "0" ]; then
+    echo "==> No products found — loading store fixtures (categories, brands, products, gallery)..."
+    python manage.py loaddata fixtures/seed_store.json
+    echo "==> Store fixtures loaded."
+else
+    echo "==> Products already exist ($PRODUCT_COUNT items) — skipping store fixtures."
+fi
+
+# Check if any superuser/admin account exists — if not, load account fixtures
+ADMIN_COUNT=$(python manage.py shell -c "from account.models import Account; print(Account.objects.filter(is_superadmin=True).count())" 2>/dev/null || echo "0")
+if [ "$ADMIN_COUNT" = "0" ]; then
+    echo "==> No admin account found — loading account fixtures..."
+    python manage.py loaddata fixtures/seed_superuser.json
+    echo "==> Account fixtures loaded."
+else
+    echo "==> Admin account already exists — skipping account fixtures."
+fi
+
 echo "==> Starting Gunicorn..."
 exec gunicorn ddshoes.wsgi:application \
     --bind 0.0.0.0:8000 \

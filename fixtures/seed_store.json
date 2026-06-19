@@ -1,0 +1,254 @@
+[
+{
+  "model": "store.category",
+  "pk": 2,
+  "fields": {
+    "category_name": "Sneakers",
+    "slug": "sneakers",
+    "description": "",
+    "cat_image": "photos/categories/6a1341e60abca853f84424f406e888bb.jpg_720x720q80.jpg"
+  }
+},
+{
+  "model": "store.category",
+  "pk": 3,
+  "fields": {
+    "category_name": "Formal",
+    "slug": "formal",
+    "description": "",
+    "cat_image": "photos/categories/65ab24c6d5114.png"
+  }
+},
+{
+  "model": "store.category",
+  "pk": 4,
+  "fields": {
+    "category_name": "Sport",
+    "slug": "sport",
+    "description": "",
+    "cat_image": "photos/categories/c2.jpg"
+  }
+},
+{
+  "model": "store.brand",
+  "pk": 1,
+  "fields": {
+    "brand_name": "Adidas",
+    "slug": "adidas",
+    "brand_image": "photos/brands/Logo_Adidas.jpg.jpeg"
+  }
+},
+{
+  "model": "store.brand",
+  "pk": 2,
+  "fields": {
+    "brand_name": "Nike",
+    "slug": "nike",
+    "brand_image": "photos/brands/Logo_Nike.jpg.jpeg"
+  }
+},
+{
+  "model": "store.brand",
+  "pk": 3,
+  "fields": {
+    "brand_name": "Vantela",
+    "slug": "vantella",
+    "brand_image": "photos/brands/Logo_Ventela1.jpg.jpeg"
+  }
+},
+{
+  "model": "store.brand",
+  "pk": 4,
+  "fields": {
+    "brand_name": "New Balance",
+    "slug": "new-balance",
+    "brand_image": "photos/brands/Logo_NB.jpg.jpeg"
+  }
+},
+{
+  "model": "store.brand",
+  "pk": 5,
+  "fields": {
+    "brand_name": "Puma",
+    "slug": "puma",
+    "brand_image": "photos/brands/Logo_Puma.jpg.jpeg"
+  }
+},
+{
+  "model": "store.brand",
+  "pk": 6,
+  "fields": {
+    "brand_name": "Converse All Star",
+    "slug": "converse-all-star",
+    "brand_image": "photos/brands/Logo_Converse.jpg.jpeg"
+  }
+},
+{
+  "model": "store.brand",
+  "pk": 7,
+  "fields": {
+    "brand_name": "Reebok",
+    "slug": "reebok",
+    "brand_image": "photos/brands/Logo_Reebok.jpg.jpeg"
+  }
+},
+{
+  "model": "store.brand",
+  "pk": 8,
+  "fields": {
+    "brand_name": "Vans",
+    "slug": "vans",
+    "brand_image": "photos/brands/Logo_Vans.jpg.jpeg"
+  }
+},
+{
+  "model": "store.product",
+  "pk": 2,
+  "fields": {
+    "product_name": "Adidas New",
+    "slug": "adidas-new",
+    "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop p",
+    "price": 150000,
+    "images": "photos/products/p1_BPdIBUC.jpg",
+    "stock": 3,
+    "is_available": true,
+    "category": 4,
+    "brand": 1,
+    "size": 40,
+    "created_date": "2026-04-29T17:58:55.143Z",
+    "modified_date": "2026-05-06T10:58:45.503Z"
+  }
+},
+{
+  "model": "store.product",
+  "pk": 3,
+  "fields": {
+    "product_name": "Nike  New",
+    "slug": "nike-new",
+    "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop p",
+    "price": 200000,
+    "images": "photos/products/p2_8Zu5iVc.jpg",
+    "stock": 1,
+    "is_available": true,
+    "category": 4,
+    "brand": 2,
+    "size": 40,
+    "created_date": "2026-04-29T18:00:35.548Z",
+    "modified_date": "2026-05-18T14:09:22.737Z"
+  }
+},
+{
+  "model": "store.product",
+  "pk": 4,
+  "fields": {
+    "product_name": "Vans New",
+    "slug": "vans-new",
+    "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop p",
+    "price": 150000,
+    "images": "photos/products/p3.jpg",
+    "stock": 4,
+    "is_available": true,
+    "category": 3,
+    "brand": 8,
+    "size": 41,
+    "created_date": "2026-04-29T18:01:33.414Z",
+    "modified_date": "2026-05-11T05:18:26.486Z"
+  }
+},
+{
+  "model": "store.product",
+  "pk": 5,
+  "fields": {
+    "product_name": "New Balance",
+    "slug": "new-balance",
+    "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop p",
+    "price": 200000,
+    "images": "photos/products/p4.jpg",
+    "stock": 4,
+    "is_available": true,
+    "category": 2,
+    "brand": 4,
+    "size": 39,
+    "created_date": "2026-04-29T18:02:27.290Z",
+    "modified_date": "2026-05-18T14:10:33.814Z"
+  }
+},
+{
+  "model": "store.product",
+  "pk": 7,
+  "fields": {
+    "product_name": "Reebok New",
+    "slug": "reebok-new",
+    "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop p",
+    "price": 200000,
+    "images": "photos/products/p6.jpg",
+    "stock": 1,
+    "is_available": true,
+    "category": 4,
+    "brand": 7,
+    "size": 39,
+    "created_date": "2026-04-29T18:48:59.814Z",
+    "modified_date": "2026-04-29T18:48:59.814Z"
+  }
+},
+{
+  "model": "store.product",
+  "pk": 8,
+  "fields": {
+    "product_name": "Puma Girl",
+    "slug": "puma-girl",
+    "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop p",
+    "price": 150000,
+    "images": "photos/products/p7.jpg",
+    "stock": 0,
+    "is_available": true,
+    "category": 2,
+    "brand": 5,
+    "size": 39,
+    "created_date": "2026-04-29T18:49:34.258Z",
+    "modified_date": "2026-05-07T11:19:25.698Z"
+  }
+},
+{
+  "model": "store.product",
+  "pk": 9,
+  "fields": {
+    "product_name": "Puma Classic",
+    "slug": "puma-classic",
+    "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop p",
+    "price": 150000,
+    "images": "photos/products/p7_66cDzEs.jpg",
+    "stock": 1,
+    "is_available": true,
+    "category": 2,
+    "brand": 5,
+    "size": 40,
+    "created_date": "2026-05-07T11:26:25.647Z",
+    "modified_date": "2026-05-10T10:48:58.833Z"
+  }
+},
+{
+  "model": "store.productgallery",
+  "pk": 1,
+  "fields": {
+    "product": 8,
+    "image": "store/products/Logo_Puma.jpg.jpeg"
+  }
+},
+{
+  "model": "store.productgallery",
+  "pk": 7,
+  "fields": {
+    "product": 9,
+    "image": "store/products/Logo_Nike_nNRuMH1.jpg.jpeg"
+  }
+},
+{
+  "model": "store.productgallery",
+  "pk": 8,
+  "fields": {
+    "product": 9,
+    "image": "store/products/Logo_Vans_PhKgzvz.jpg.jpeg"
+  }
+}
+]
