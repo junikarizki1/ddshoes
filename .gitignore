@@ -61,3 +61,6 @@ htmlcov/
 # Backup files
 *.bak
 *.backup
+
+# Database dumps (contains hashed passwords and personal data)
+datadump.json
