@@ -5,6 +5,10 @@ from django.utils.text import slugify
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 
 # 1. MODEL KATEGORI (Untuk Sidebar "Browse Categories")
 class Category(models.Model):
@@ -119,3 +123,55 @@ class ReviewRating(models.Model):
 
     def __str__(self):
         return f"Review {self.user.username} - Order #{self.order.order_number}"
+
+
+# =========================================================
+# SIGNAL: Broadcast email ke pelanggan saat produk baru diupload
+# Hanya kirim ke user yang pernah beli brand/kategori yang sama
+# =========================================================
+@receiver(post_save, sender=Product)
+def broadcast_new_product_email(sender, instance, created, **kwargs):
+    if not created:
+        return  # Hanya untuk produk baru, bukan edit
+
+    try:
+        from order.models import OrderProduct
+
+        # Cari user yang pernah beli produk dengan brand ATAU category yang sama
+        matched_user_ids = OrderProduct.objects.filter(
+            order__is_ordered=True
+        ).filter(
+            models.Q(product__brand=instance.brand) |
+            models.Q(product__category=instance.category)
+        ).values_list('user_id', flat=True).distinct()
+
+        if not matched_user_ids:
+            return
+
+        recipients = Account.objects.filter(
+            id__in=matched_user_ids,
+            is_active=True
+        ).exclude(email='')
+
+        for user in recipients:
+            try:
+                subject = f'Koleksi Baru untuk Kamu — {instance.product_name}'
+                message = render_to_string('store/new_product_email.html', {
+                    'first_name': user.first_name or user.username,
+                    'product': instance,
+                    'product_url': f"https://{settings.ALLOWED_HOSTS[0]}{instance.get_url()}",
+                })
+                email = EmailMessage(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email]
+                )
+                email.content_subtype = 'html'
+                email.send()
+                print(f"Broadcast terkirim ke {user.email}")
+            except Exception as e:
+                print(f"Gagal kirim ke {user.email}: {e}")
+
+    except Exception as e:
+        print(f"Error broadcast signal: {e}")
