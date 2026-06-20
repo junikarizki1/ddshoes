@@ -1,0 +1,1695 @@
+[
+  {
+    "model": "store.category",
+    "pk": 2,
+    "fields": {
+      "category_name": "Sport",
+      "slug": "sport",
+      "description": "",
+      "cat_image": "photos/categories/c2_IABR4df.jpg"
+    }
+  },
+  {
+    "model": "store.category",
+    "pk": 3,
+    "fields": {
+      "category_name": "Sneakers",
+      "slug": "sneakers",
+      "description": "",
+      "cat_image": "photos/categories/c3_uzhgpEW.jpg"
+    }
+  },
+  {
+    "model": "store.category",
+    "pk": 4,
+    "fields": {
+      "category_name": "Formal",
+      "slug": "formal",
+      "description": "",
+      "cat_image": "photos/categories/65ab24c6d5114_6jefqUL.png"
+    }
+  },
+  {
+    "model": "store.brand",
+    "pk": 1,
+    "fields": {
+      "brand_name": "Addidas",
+      "slug": "addidas",
+      "brand_image": "photos/brands/Logo_Adidas_W2OnuXD.jpg.jpeg"
+    }
+  },
+  {
+    "model": "store.brand",
+    "pk": 2,
+    "fields": {
+      "brand_name": "Nike",
+      "slug": "nike",
+      "brand_image": "photos/brands/Logo_Nike_6KnS4fe.jpg.jpeg"
+    }
+  },
+  {
+    "model": "store.brand",
+    "pk": 3,
+    "fields": {
+      "brand_name": "New Balance",
+      "slug": "new-balance",
+      "brand_image": "photos/brands/Logo_NB_vJdlfx7.jpg.jpeg"
+    }
+  },
+  {
+    "model": "store.brand",
+    "pk": 4,
+    "fields": {
+      "brand_name": "Reebok",
+      "slug": "reebok",
+      "brand_image": "photos/brands/Logo_Reebok_gSgohUL.jpg.jpeg"
+    }
+  },
+  {
+    "model": "store.brand",
+    "pk": 5,
+    "fields": {
+      "brand_name": "Puma",
+      "slug": "puma",
+      "brand_image": "photos/brands/Logo_Puma_liLfTEW.jpg.jpeg"
+    }
+  },
+  {
+    "model": "store.brand",
+    "pk": 6,
+    "fields": {
+      "brand_name": "Vantela",
+      "slug": "vantela",
+      "brand_image": "photos/brands/Logo_Ventela1_io6HH4h.jpg.jpeg"
+    }
+  },
+  {
+    "model": "store.brand",
+    "pk": 7,
+    "fields": {
+      "brand_name": "Vans",
+      "slug": "vans",
+      "brand_image": "photos/brands/Logo_Vans_Qa3q3Db.jpg.jpeg"
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 2,
+    "fields": {
+      "product_name": "New Balance Pink",
+      "slug": "new-balance-pink",
+      "description": "Sepatu terbaik disini",
+      "price": 195000,
+      "images": "photos/products/Screenshot_2026-05-19_164950-removebg-preview.png",
+      "stock": 5,
+      "is_available": true,
+      "category": 2,
+      "brand": 3,
+      "size": 40,
+      "created_date": "2026-05-19T16:38:16.202Z",
+      "modified_date": "2026-06-18T20:30:56.832Z"
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 3,
+    "fields": {
+      "product_name": "Nike  Mars Yard",
+      "slug": "nike-mars-yard",
+      "description": "[PREMIUM] NikeCraft Mars Yard x Tom Sachs Sneaker Pria & Wanita\r\n\r\nBACA DESKRIPSI SEBELUM MEMBELI!\r\n\r\nSempurnakan gaya urban dan street style Anda dengan NikeCraft Mars Yard, salah satu kolaborasi sneaker paling ikonis dan dicari di dunia. Hasil karya seniman Tom Sachs bersama Nike ini memadukan estetika luar angkasa NASA dengan kenyamanan maksimal untuk penggunaan harian.",
+      "price": 175000,
+      "images": "photos/products/image-removebg-preview.png",
+      "stock": 3,
+      "is_available": true,
+      "category": 3,
+      "brand": 2,
+      "size": 42,
+      "created_date": "2026-05-19T16:38:48.891Z",
+      "modified_date": "2026-05-30T16:29:11.575Z"
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 4,
+    "fields": {
+      "product_name": "New Balance 5000",
+      "slug": "new-balance-5000",
+      "description": "Sepatu terbaik disini",
+      "price": 200000,
+      "images": "photos/products/Screenshot_2026-05-19_163412-removebg-preview.png",
+      "stock": 4,
+      "is_available": true,
+      "category": 4,
+      "brand": 3,
+      "size": 39,
+      "created_date": "2026-05-19T16:39:19.288Z",
+      "modified_date": "2026-06-18T20:30:15.575Z"
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 5,
+    "fields": {
+      "product_name": "Adidas Climacool Vent",
+      "slug": "adidas-climacool-vent",
+      "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop p",
+      "price": 160000,
+      "images": "photos/products/Screenshot_2026-05-19_160931-removebg-preview.png",
+      "stock": 4,
+      "is_available": true,
+      "category": 2,
+      "brand": 1,
+      "size": 40,
+      "created_date": "2026-05-22T15:46:33.619Z",
+      "modified_date": "2026-06-18T20:28:49.459Z"
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 6,
+    "fields": {
+      "product_name": "Nike Bermuda",
+      "slug": "nike-bermuda",
+      "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop p",
+      "price": 170000,
+      "images": "photos/products/Screenshot_2026-05-19_162636-removebg-preview.png",
+      "stock": 4,
+      "is_available": true,
+      "category": 2,
+      "brand": 2,
+      "size": 41,
+      "created_date": "2026-05-22T15:48:30.999Z",
+      "modified_date": "2026-06-18T20:28:20.839Z"
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 7,
+    "fields": {
+      "product_name": "Nike Classic",
+      "slug": "nike-classic",
+      "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop p",
+      "price": 200000,
+      "images": "photos/products/Screenshot_2026-05-19_163747-removebg-preview.png",
+      "stock": 4,
+      "is_available": true,
+      "category": 3,
+      "brand": 2,
+      "size": 42,
+      "created_date": "2026-05-22T15:49:28.973Z",
+      "modified_date": "2026-06-18T20:27:19.993Z"
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 8,
+    "fields": {
+      "product_name": "Vantela Formal",
+      "slug": "vantela-formal",
+      "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop p",
+      "price": 220000,
+      "images": "photos/products/Screenshot_2026-05-19_162143-removebg-preview.png",
+      "stock": 1,
+      "is_available": true,
+      "category": 4,
+      "brand": 6,
+      "size": 43,
+      "created_date": "2026-05-22T15:50:37.921Z",
+      "modified_date": "2026-06-19T18:05:10.819Z"
+    }
+  },
+  {
+    "model": "store.product",
+    "pk": 9,
+    "fields": {
+      "product_name": "Nike Formal",
+      "slug": "nike-formal",
+      "description": "",
+      "price": 150000,
+      "images": "photos/products/Logo_Nike.jpg.jpeg",
+      "stock": 0,
+      "is_available": true,
+      "category": 4,
+      "brand": 2,
+      "size": 40,
+      "created_date": "2026-06-19T13:43:46.715Z",
+      "modified_date": "2026-06-19T18:04:52.714Z"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 1,
+    "fields": {
+      "product": 3,
+      "image": "store/products/Screenshot_2026-05-19_160526.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 2,
+    "fields": {
+      "product": 3,
+      "image": "store/products/Screenshot_2026-05-19_160539.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 3,
+    "fields": {
+      "product": 3,
+      "image": "store/products/Screenshot_2026-05-19_160549.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 4,
+    "fields": {
+      "product": 8,
+      "image": "store/products/Screenshot_2026-05-19_162152.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 5,
+    "fields": {
+      "product": 8,
+      "image": "store/products/Screenshot_2026-05-19_162204.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 6,
+    "fields": {
+      "product": 8,
+      "image": "store/products/Screenshot_2026-05-19_162212.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 7,
+    "fields": {
+      "product": 7,
+      "image": "store/products/Screenshot_2026-05-19_163757.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 8,
+    "fields": {
+      "product": 7,
+      "image": "store/products/Screenshot_2026-05-19_163807.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 9,
+    "fields": {
+      "product": 7,
+      "image": "store/products/Screenshot_2026-05-19_163818.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 10,
+    "fields": {
+      "product": 6,
+      "image": "store/products/Screenshot_2026-05-19_162646.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 11,
+    "fields": {
+      "product": 6,
+      "image": "store/products/Screenshot_2026-05-19_162655.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 12,
+    "fields": {
+      "product": 6,
+      "image": "store/products/Screenshot_2026-05-19_163439.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 13,
+    "fields": {
+      "product": 5,
+      "image": "store/products/Screenshot_2026-05-19_160947.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 14,
+    "fields": {
+      "product": 5,
+      "image": "store/products/Screenshot_2026-05-19_160959.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 15,
+    "fields": {
+      "product": 5,
+      "image": "store/products/Screenshot_2026-05-19_161010.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 16,
+    "fields": {
+      "product": 4,
+      "image": "store/products/Screenshot_2026-05-19_163419.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 17,
+    "fields": {
+      "product": 4,
+      "image": "store/products/Screenshot_2026-05-19_163429.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 18,
+    "fields": {
+      "product": 4,
+      "image": "store/products/Screenshot_2026-05-19_163439_lAYO02B.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 19,
+    "fields": {
+      "product": 2,
+      "image": "store/products/Screenshot_2026-05-19_164959.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 20,
+    "fields": {
+      "product": 2,
+      "image": "store/products/Screenshot_2026-05-19_165008.png"
+    }
+  },
+  {
+    "model": "store.productgallery",
+    "pk": 21,
+    "fields": {
+      "product": 2,
+      "image": "store/products/Screenshot_2026-05-19_165016.png"
+    }
+  },
+  {
+    "model": "account.account",
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$922tj0PmQhcEVWLPmGV7Hz$YDXW5eSGQVu102GEe3061YPMpeYlkd+zIUtfpv2r/ok=",
+      "is_superuser": true,
+      "first_name": "admin",
+      "last_name": "admin",
+      "username": "admin",
+      "email": "admin@admin.com",
+      "phone_number": "",
+      "profile_photo": "",
+      "loyalty_balance": 0.0,
+      "shoe_size": null,
+      "date_joined": "2026-05-18T15:46:04.437Z",
+      "last_login": "2026-05-18T15:46:26.394Z",
+      "is_admin": true,
+      "is_staff": true,
+      "is_active": true,
+      "is_superadmin": true,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "account.account",
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$dPqWL1OEgB8OaZcOCn8Yjh$NKx8FN77YEEfbuuMAmoTX4y95B23knkaQrgIvjgZo48=",
+      "is_superuser": true,
+      "first_name": "admin",
+      "last_name": "rizki",
+      "username": "adminrizki",
+      "email": "adminrizki@gmail.com",
+      "phone_number": "123456789012",
+      "profile_photo": "profile_photos/profile_3.jpeg",
+      "loyalty_balance": 95000.0,
+      "shoe_size": null,
+      "date_joined": "2026-05-19T16:31:47.153Z",
+      "last_login": "2026-06-18T10:21:42.086Z",
+      "is_admin": true,
+      "is_staff": true,
+      "is_active": true,
+      "is_superadmin": true,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "account.account",
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$gVOylGzwA0VuVUxBNbze2o$qJUCEiIJDUX54yKczEZg1MEp3zzIHlh36QVBqTISepo=",
+      "is_superuser": false,
+      "first_name": "mariska",
+      "last_name": "juan",
+      "username": "mariska",
+      "email": "mariska@gmail.com",
+      "phone_number": "123456789012",
+      "profile_photo": "",
+      "loyalty_balance": 0.0,
+      "shoe_size": null,
+      "date_joined": "2026-05-26T10:40:20.921Z",
+      "last_login": "2026-05-26T10:41:27.729Z",
+      "is_admin": false,
+      "is_staff": false,
+      "is_active": true,
+      "is_superadmin": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "account.account",
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$AxPfJ5aED0fPa6JYfDEHbN$EwOmSukC4IKhgjdRyjRjHYFvBJqPhimjGltNOzoGOyw=",
+      "is_superuser": false,
+      "first_name": "Surya",
+      "last_name": "Agata",
+      "username": "surya",
+      "email": "surya@gmail.com",
+      "phone_number": "081231231234",
+      "profile_photo": "",
+      "loyalty_balance": 150000.0,
+      "shoe_size": 40,
+      "date_joined": "2026-05-26T11:26:03.888Z",
+      "last_login": "2026-05-30T17:40:29.387Z",
+      "is_admin": false,
+      "is_staff": false,
+      "is_active": true,
+      "is_superadmin": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "account.account",
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$8KY3dY39PdCYNhuvBFMDz8$+rz4MAAKBxPP7r4/5kSnBOr88O5Lx/PKqM9ayMf4tHE=",
+      "is_superuser": false,
+      "first_name": "Irvan",
+      "last_name": "Susanto",
+      "username": "irvan",
+      "email": "irvan@gmail.com",
+      "phone_number": "123456789012",
+      "profile_photo": "",
+      "loyalty_balance": 0.0,
+      "shoe_size": null,
+      "date_joined": "2026-06-18T10:58:09.626Z",
+      "last_login": "2026-06-18T10:58:18.379Z",
+      "is_admin": false,
+      "is_staff": false,
+      "is_active": true,
+      "is_superadmin": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "account.account",
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$Zt6qqI9yrpHHzfuC9BMenI$ETm2nSmxFO8ZrQtHpqgW4mSPwkUgn2KfjCSU+gqC3q0=",
+      "is_superuser": false,
+      "first_name": "Mas",
+      "last_name": "Geng",
+      "username": "garengnggeng",
+      "email": "garengnggeng@gmail.com",
+      "phone_number": "082312435698",
+      "profile_photo": "",
+      "loyalty_balance": 20000.0,
+      "shoe_size": null,
+      "date_joined": "2026-06-19T13:23:50.532Z",
+      "last_login": "2026-06-19T13:38:09.503Z",
+      "is_admin": false,
+      "is_staff": false,
+      "is_active": true,
+      "is_superadmin": false,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "account.address",
+    "pk": 1,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "label": "Rumah",
+      "province_id": "15",
+      "province_name": "KALIMANTAN BARAT",
+      "city_id": "524",
+      "city_name": "MELAWI",
+      "district_id": "5022",
+      "district_name": "NANGA PINOH",
+      "subdistrict_id": "59157",
+      "subdistrict_name": "SIDO MULYO",
+      "postal_code": "79672",
+      "address": "BTN Mala Indah",
+      "shipping_service": "",
+      "shipping_cost": 0.0,
+      "is_default": false,
+      "created_at": "2026-05-20T17:01:39.288Z"
+    }
+  },
+  {
+    "model": "account.address",
+    "pk": 2,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "label": "Mama",
+      "province_id": "15",
+      "province_name": "BALI",
+      "city_id": "204",
+      "city_name": "BANGLI",
+      "district_id": "2187",
+      "district_name": "KINTAMANI",
+      "subdistrict_id": "26167",
+      "subdistrict_name": "BATUR UTARA",
+      "postal_code": "80652",
+      "address": "Bali",
+      "shipping_service": "",
+      "shipping_cost": 0.0,
+      "is_default": false,
+      "created_at": "2026-05-20T17:34:41.201Z"
+    }
+  },
+  {
+    "model": "account.address",
+    "pk": 3,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "label": "Alamat Baru",
+      "province_id": "28",
+      "province_name": "KALIMANTAN BARAT",
+      "city_id": "513",
+      "city_name": "PONTIANAK",
+      "district_id": "4911",
+      "district_name": "PONTIANAK KOTA",
+      "subdistrict_id": "57851",
+      "subdistrict_name": "TENGAH",
+      "postal_code": "78111",
+      "address": "Kantor kejaksaan jalan alianyang",
+      "shipping_service": "DSE DARAT2023",
+      "shipping_cost": 9000.0,
+      "is_default": false,
+      "created_at": "2026-05-26T11:34:51.052Z"
+    }
+  },
+  {
+    "model": "account.address",
+    "pk": 5,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "label": "Rumah",
+      "province_id": "15",
+      "province_name": "BALI",
+      "city_id": "212",
+      "city_name": "BADUNG",
+      "district_id": "2226",
+      "district_name": "ABIANSEMAL",
+      "subdistrict_id": "26704",
+      "subdistrict_name": "ABIANSEMAL",
+      "postal_code": "80352",
+      "address": "Gang Madyosari 3 no 13 Tata Kost",
+      "shipping_service": "WAHANA Express",
+      "shipping_cost": 20000.0,
+      "is_default": false,
+      "created_at": "2026-05-26T11:52:32.832Z"
+    }
+  },
+  {
+    "model": "account.address",
+    "pk": 6,
+    "fields": {
+      "user": [
+        "irvan@gmail.com"
+      ],
+      "label": "Rumah",
+      "province_id": "15",
+      "province_name": "BALI",
+      "city_id": "212",
+      "city_name": "BADUNG",
+      "district_id": "2226",
+      "district_name": "ABIANSEMAL",
+      "subdistrict_id": "26704",
+      "subdistrict_name": "ABIANSEMAL",
+      "postal_code": "80352",
+      "address": "Bali megantara",
+      "shipping_service": "WAHANA Express",
+      "shipping_cost": 20000.0,
+      "is_default": false,
+      "created_at": "2026-06-18T11:10:39.311Z"
+    }
+  },
+  {
+    "model": "account.address",
+    "pk": 7,
+    "fields": {
+      "user": [
+        "garengnggeng@gmail.com"
+      ],
+      "label": "Rumah",
+      "province_id": "28",
+      "province_name": "KALIMANTAN BARAT",
+      "city_id": "524",
+      "city_name": "MELAWI",
+      "district_id": "5022",
+      "district_name": "NANGA PINOH",
+      "subdistrict_id": "59157",
+      "subdistrict_name": "SIDO MULYO",
+      "postal_code": "79672",
+      "address": "Gang Madyosari 3 no 13 Tata Kost",
+      "shipping_service": "ANTERAJA REG",
+      "shipping_cost": 60000.0,
+      "is_default": false,
+      "created_at": "2026-06-19T13:33:53.213Z"
+    }
+  },
+  {
+    "model": "order.coupon",
+    "pk": 1,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "code": "LOYAL-ZIOKZ",
+      "discount_value": 5000,
+      "is_used": true,
+      "created_at": "2026-05-20T18:13:30.273Z"
+    }
+  },
+  {
+    "model": "order.coupon",
+    "pk": 2,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "code": "HAHAHA",
+      "discount_value": 5000,
+      "is_used": true,
+      "created_at": "2026-05-20T18:29:50.430Z"
+    }
+  },
+  {
+    "model": "order.coupon",
+    "pk": 3,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "code": "LOYAL-G55IS",
+      "discount_value": 5000,
+      "is_used": false,
+      "created_at": "2026-05-20T18:31:57.104Z"
+    }
+  },
+  {
+    "model": "order.coupon",
+    "pk": 4,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "code": "LOYAL-0BEKS",
+      "discount_value": 5000,
+      "is_used": false,
+      "created_at": "2026-05-20T18:53:21.988Z"
+    }
+  },
+  {
+    "model": "order.coupon",
+    "pk": 5,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "code": "LOYAL-E8KPS",
+      "discount_value": 5000,
+      "is_used": true,
+      "created_at": "2026-05-20T20:33:11.330Z"
+    }
+  },
+  {
+    "model": "order.coupon",
+    "pk": 6,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "code": "LOYAL-E8KPK",
+      "discount_value": 5000,
+      "is_used": true,
+      "created_at": "2026-05-30T16:21:30.329Z"
+    }
+  },
+  {
+    "model": "order.coupon",
+    "pk": 7,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "code": "LOYAL-Y9KFK",
+      "discount_value": 5000,
+      "is_used": false,
+      "created_at": "2026-05-30T16:59:33.673Z"
+    }
+  },
+  {
+    "model": "order.coupon",
+    "pk": 8,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "code": "LOYAL-ZIOKT",
+      "discount_value": 5000,
+      "is_used": false,
+      "created_at": "2026-05-30T17:00:08.390Z"
+    }
+  },
+  {
+    "model": "order.coupon",
+    "pk": 9,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "code": "LOYAL-E8KPT",
+      "discount_value": 5000,
+      "is_used": false,
+      "created_at": "2026-05-30T17:00:22.192Z"
+    }
+  },
+  {
+    "model": "order.coupon",
+    "pk": 10,
+    "fields": {
+      "user": [
+        "garengnggeng@gmail.com"
+      ],
+      "code": "LOYAL-0K75P",
+      "discount_value": 5000,
+      "is_used": false,
+      "created_at": "2026-06-19T13:38:09.483Z"
+    }
+  },
+  {
+    "model": "order.order",
+    "pk": 1,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "order_number": "202605201",
+      "first_name": "admin",
+      "last_name": "rizki",
+      "phone": "123456789012",
+      "email": "adminrizki@gmail.com",
+      "address": "pontianak",
+      "province": "BALI",
+      "city": "BADUNG",
+      "district": "ABIANSEMAL",
+      "postal_code": "80352",
+      "order_note": "catatan",
+      "order_total": 150000.0,
+      "shipping_service": "WAHANA Express",
+      "shipping_cost": 20000.0,
+      "grand_total": 170000.0,
+      "status": "Completed",
+      "tracking_number": "",
+      "is_ordered": false,
+      "created_at": "2026-05-19T17:18:50.928Z",
+      "snap_token": "e49ef0fc-fd94-4647-9dfe-57af58a84d96",
+      "discount": 0.0
+    }
+  },
+  {
+    "model": "order.order",
+    "pk": 2,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "order_number": "202605202",
+      "first_name": "admin",
+      "last_name": "rizki",
+      "phone": "123456789012",
+      "email": "adminrizki@gmail.com",
+      "address": "pontianak",
+      "province": "BALI",
+      "city": "BADUNG",
+      "district": "ABIANSEMAL",
+      "postal_code": "80352",
+      "order_note": "mantap",
+      "order_total": 150000.0,
+      "shipping_service": "WAHANA Express",
+      "shipping_cost": 20000.0,
+      "grand_total": 170000.0,
+      "status": "Returned",
+      "tracking_number": "123",
+      "is_ordered": false,
+      "created_at": "2026-05-20T16:04:41.915Z",
+      "snap_token": "49edd6fc-2f3e-4f28-b7f9-99c59c36dd7a",
+      "discount": 0.0
+    }
+  },
+  {
+    "model": "order.order",
+    "pk": 3,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "order_number": "202605203",
+      "first_name": "admin",
+      "last_name": "rizki",
+      "phone": "123456789012",
+      "email": "adminrizki@gmail.com",
+      "address": "pontianak",
+      "province": "BALI",
+      "city": "BADUNG",
+      "district": "ABIANSEMAL",
+      "postal_code": "80352",
+      "order_note": "",
+      "order_total": 150000.0,
+      "shipping_service": "WAHANA Express",
+      "shipping_cost": 0.0,
+      "grand_total": 150000.0,
+      "status": "Cancelled",
+      "tracking_number": "",
+      "is_ordered": false,
+      "created_at": "2026-05-20T16:18:35.448Z",
+      "snap_token": "e527c559-f8ef-4392-9444-fc52ab286715",
+      "discount": 0.0
+    }
+  },
+  {
+    "model": "order.order",
+    "pk": 4,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "order_number": "202605204",
+      "first_name": "admin",
+      "last_name": "rizki",
+      "phone": "123456789012",
+      "email": "adminrizki@gmail.com",
+      "address": "BTN Mala Indah",
+      "province": "KALIMANTAN BARAT",
+      "city": "MELAWI",
+      "district": "NANGA PINOH",
+      "postal_code": "79672",
+      "order_note": "Cepat ya kak",
+      "order_total": 200000.0,
+      "shipping_service": "ANTERAJA REG",
+      "shipping_cost": 60000.0,
+      "grand_total": 260000.0,
+      "status": "New",
+      "tracking_number": "",
+      "is_ordered": false,
+      "created_at": "2026-05-20T16:21:12.760Z",
+      "snap_token": "0e5f08e3-3b41-46d6-9b9b-5053d733ddc8",
+      "discount": 0.0
+    }
+  },
+  {
+    "model": "order.order",
+    "pk": 7,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "order_number": "202605217",
+      "first_name": "admin",
+      "last_name": "rizki",
+      "phone": "123456789012",
+      "email": "adminrizki@gmail.com",
+      "address": "Bali",
+      "province": "BALI",
+      "city": "BANGLI",
+      "district": "KINTAMANI",
+      "postal_code": "80652",
+      "order_note": "",
+      "order_total": 150000.0,
+      "shipping_service": "JNT EZ",
+      "shipping_cost": 36000.0,
+      "grand_total": 186000.0,
+      "status": "Completed",
+      "tracking_number": "123",
+      "is_ordered": false,
+      "created_at": "2026-05-20T18:41:27.839Z",
+      "snap_token": "2f308c3f-581b-40e5-9685-82f095a2c831",
+      "discount": 0.0
+    }
+  },
+  {
+    "model": "order.order",
+    "pk": 8,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "order_number": "202605268",
+      "first_name": "Surya",
+      "last_name": "Agata",
+      "phone": "081231231234",
+      "email": "surya@gmail.com",
+      "address": "Gang Madyosari 3 no 13 Tata Kost",
+      "province": "KALIMANTAN BARAT",
+      "city": "PONTIANAK",
+      "district": "PONTIANAK KOTA",
+      "postal_code": "78112",
+      "order_note": "Tolong dikemas baik ya",
+      "order_total": 200000.0,
+      "shipping_service": "DSE DARAT2023",
+      "shipping_cost": 9000.0,
+      "grand_total": 209000.0,
+      "status": "Returned",
+      "tracking_number": "",
+      "is_ordered": false,
+      "created_at": "2026-05-26T11:31:27.791Z",
+      "snap_token": "5ab4b8fd-c0fe-4678-8a9e-9d357dc5bbcc",
+      "discount": 0.0
+    }
+  },
+  {
+    "model": "order.order",
+    "pk": 9,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "order_number": "202605269",
+      "first_name": "admin",
+      "last_name": "rizki",
+      "phone": "123456789012",
+      "email": "adminrizki@gmail.com",
+      "address": "Kantor kejaksaan jalan alianyang",
+      "province": "KALIMANTAN BARAT",
+      "city": "PONTIANAK",
+      "district": "PONTIANAK KOTA",
+      "postal_code": "78111",
+      "order_note": "",
+      "order_total": 145000.0,
+      "shipping_service": "DSE DARAT2023",
+      "shipping_cost": 9000.0,
+      "grand_total": 154000.0,
+      "status": "New",
+      "tracking_number": "",
+      "is_ordered": false,
+      "created_at": "2026-05-26T11:34:51.025Z",
+      "snap_token": "43622d84-82f4-4755-b625-acb9eacc86ff",
+      "discount": 5000.0
+    }
+  },
+  {
+    "model": "order.order",
+    "pk": 10,
+    "fields": {
+      "user": null,
+      "order_number": "2026052610",
+      "first_name": "Test",
+      "last_name": "User",
+      "phone": "081234567891",
+      "email": "testuser2@example.com",
+      "address": "Jl. Cipedak Indah No. 12",
+      "province": "DKI JAKARTA",
+      "city": "JAKARTA SELATAN",
+      "district": "JAGAKARSA",
+      "postal_code": "12630",
+      "order_note": "",
+      "order_total": 200000.0,
+      "shipping_service": "TIKI SRP",
+      "shipping_cost": 9000.0,
+      "grand_total": 209000.0,
+      "status": "New",
+      "tracking_number": "",
+      "is_ordered": false,
+      "created_at": "2026-05-26T11:50:31.562Z",
+      "snap_token": "82a10849-2a64-4539-8c14-3bf8fc5dcc47",
+      "discount": 0.0
+    }
+  },
+  {
+    "model": "order.order",
+    "pk": 11,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "order_number": "2026052611",
+      "first_name": "Surya",
+      "last_name": "Agata",
+      "phone": "081231231234",
+      "email": "surya@gmail.com",
+      "address": "Gang Madyosari 3 no 13 Tata Kost",
+      "province": "BALI",
+      "city": "BADUNG",
+      "district": "ABIANSEMAL",
+      "postal_code": "80352",
+      "order_note": "",
+      "order_total": 150000.0,
+      "shipping_service": "WAHANA Express",
+      "shipping_cost": 20000.0,
+      "grand_total": 170000.0,
+      "status": "Completed",
+      "tracking_number": "",
+      "is_ordered": false,
+      "created_at": "2026-05-26T11:52:32.817Z",
+      "snap_token": "0bab897d-11bf-41cf-b9d4-4810767844df",
+      "discount": 0.0
+    }
+  },
+  {
+    "model": "order.order",
+    "pk": 12,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "order_number": "2026053012",
+      "first_name": "Surya",
+      "last_name": "Agata",
+      "phone": "081231231234",
+      "email": "surya@gmail.com",
+      "address": "Gang Madyosari 3 no 13 Tata Kost",
+      "province": "BALI",
+      "city": "BADUNG",
+      "district": "ABIANSEMAL",
+      "postal_code": "80352",
+      "order_note": "Kemas yang rapi ya...",
+      "order_total": 390000.0,
+      "shipping_service": "SICEPAT REG",
+      "shipping_cost": 60000.0,
+      "grand_total": 450000.0,
+      "status": "Accepted",
+      "tracking_number": "SPXID034745060103",
+      "is_ordered": true,
+      "created_at": "2026-05-30T16:29:11.558Z",
+      "snap_token": "e2e96e20-cb22-4c36-9a60-69d7754cdff9",
+      "discount": 5000.0
+    }
+  },
+  {
+    "model": "order.order",
+    "pk": 13,
+    "fields": {
+      "user": [
+        "irvan@gmail.com"
+      ],
+      "order_number": "2026061813",
+      "first_name": "Irvan",
+      "last_name": "Susanto",
+      "phone": "123456789012",
+      "email": "irvan@gmail.com",
+      "address": "Bali megantara",
+      "province": "BALI",
+      "city": "BADUNG",
+      "district": "ABIANSEMAL",
+      "postal_code": "80352",
+      "order_note": "Kirim cepat",
+      "order_total": 220000.0,
+      "shipping_service": "WAHANA Express",
+      "shipping_cost": 20000.0,
+      "grand_total": 240000.0,
+      "status": "Accepted",
+      "tracking_number": "JP2981773092",
+      "is_ordered": true,
+      "created_at": "2026-06-18T11:10:39.295Z",
+      "snap_token": "6d87b15c-82a0-4736-b1af-06fcf1a0e695",
+      "discount": 0.0
+    }
+  },
+  {
+    "model": "order.order",
+    "pk": 14,
+    "fields": {
+      "user": [
+        "garengnggeng@gmail.com"
+      ],
+      "order_number": "2026061914",
+      "first_name": "Mas",
+      "last_name": "Geng",
+      "phone": "082312435698",
+      "email": "garengnggeng@gmail.com",
+      "address": "Gang Madyosari 3 no 13 Tata Kost",
+      "province": "KALIMANTAN BARAT",
+      "city": "MELAWI",
+      "district": "NANGA PINOH",
+      "postal_code": "79672",
+      "order_note": "Bismillah",
+      "order_total": 220000.0,
+      "shipping_service": "ANTERAJA REG",
+      "shipping_cost": 60000.0,
+      "grand_total": 280000.0,
+      "status": "Completed",
+      "tracking_number": "SPXID034745060103",
+      "is_ordered": true,
+      "created_at": "2026-06-19T13:33:53.197Z",
+      "snap_token": "10d1bfb7-b315-4425-8f82-fc239906aeed",
+      "discount": 0.0
+    }
+  },
+  {
+    "model": "order.orderproduct",
+    "pk": 1,
+    "fields": {
+      "order": 1,
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "product": 3,
+      "quantity": 1,
+      "product_price": 150000.0,
+      "ordered": true
+    }
+  },
+  {
+    "model": "order.orderproduct",
+    "pk": 2,
+    "fields": {
+      "order": 2,
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "product": 2,
+      "quantity": 1,
+      "product_price": 150000.0,
+      "ordered": true
+    }
+  },
+  {
+    "model": "order.orderproduct",
+    "pk": 3,
+    "fields": {
+      "order": 3,
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "product": 3,
+      "quantity": 1,
+      "product_price": 150000.0,
+      "ordered": true
+    }
+  },
+  {
+    "model": "order.orderproduct",
+    "pk": 4,
+    "fields": {
+      "order": 4,
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "product": 4,
+      "quantity": 1,
+      "product_price": 200000.0,
+      "ordered": true
+    }
+  },
+  {
+    "model": "order.orderproduct",
+    "pk": 7,
+    "fields": {
+      "order": 7,
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "product": 3,
+      "quantity": 1,
+      "product_price": 150000.0,
+      "ordered": true
+    }
+  },
+  {
+    "model": "order.orderproduct",
+    "pk": 8,
+    "fields": {
+      "order": 8,
+      "user": [
+        "surya@gmail.com"
+      ],
+      "product": 8,
+      "quantity": 1,
+      "product_price": 200000.0,
+      "ordered": true
+    }
+  },
+  {
+    "model": "order.orderproduct",
+    "pk": 9,
+    "fields": {
+      "order": 9,
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "product": 3,
+      "quantity": 1,
+      "product_price": 150000.0,
+      "ordered": true
+    }
+  },
+  {
+    "model": "order.orderproduct",
+    "pk": 11,
+    "fields": {
+      "order": 11,
+      "user": [
+        "surya@gmail.com"
+      ],
+      "product": 2,
+      "quantity": 1,
+      "product_price": 150000.0,
+      "ordered": true
+    }
+  },
+  {
+    "model": "order.orderproduct",
+    "pk": 12,
+    "fields": {
+      "order": 12,
+      "user": [
+        "surya@gmail.com"
+      ],
+      "product": 3,
+      "quantity": 1,
+      "product_price": 175000.0,
+      "ordered": true
+    }
+  },
+  {
+    "model": "order.orderproduct",
+    "pk": 13,
+    "fields": {
+      "order": 12,
+      "user": [
+        "surya@gmail.com"
+      ],
+      "product": 8,
+      "quantity": 1,
+      "product_price": 220000.0,
+      "ordered": true
+    }
+  },
+  {
+    "model": "order.orderproduct",
+    "pk": 14,
+    "fields": {
+      "order": 13,
+      "user": [
+        "irvan@gmail.com"
+      ],
+      "product": 8,
+      "quantity": 1,
+      "product_price": 220000.0,
+      "ordered": true
+    }
+  },
+  {
+    "model": "order.orderproduct",
+    "pk": 15,
+    "fields": {
+      "order": 14,
+      "user": [
+        "garengnggeng@gmail.com"
+      ],
+      "product": 8,
+      "quantity": 1,
+      "product_price": 220000.0,
+      "ordered": true
+    }
+  },
+  {
+    "model": "order.returnrequest",
+    "pk": 2,
+    "fields": {
+      "order": 12,
+      "reason": "Produk Cacat",
+      "image_proof": "photos/returns/Screenshot_2026-05-19_160549.png",
+      "bank_name": "BCA",
+      "bank_account_number": "11342378",
+      "bank_account_name": "Surya",
+      "status": "Pending",
+      "admin_note": null,
+      "refund_proof": "",
+      "created_at": "2026-06-01T15:22:40.760Z"
+    }
+  },
+  {
+    "model": "store.reviewrating",
+    "pk": 1,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "order": 1,
+      "subject": "Pengiriman",
+      "review": "Bagus dan fast respon untuk pengiriman, meskipun keluar pulau",
+      "rating": 5,
+      "is_anonymous": true,
+      "is_visible": true,
+      "created_at": "2026-05-20T08:56:18.214Z"
+    }
+  },
+  {
+    "model": "store.reviewrating",
+    "pk": 3,
+    "fields": {
+      "user": [
+        "mariska@gmail.com"
+      ],
+      "order": 3,
+      "subject": "Kualitas",
+      "review": "Barang second yang masih 90% dari aslinya, makasih seller udah komitmen",
+      "rating": 5,
+      "is_anonymous": false,
+      "is_visible": true,
+      "created_at": "2026-05-26T10:42:33.242Z"
+    }
+  },
+  {
+    "model": "store.reviewrating",
+    "pk": 4,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "order": 11,
+      "subject": "Pelayanan",
+      "review": "Ramah adminnya, cuma pengiriman agak lama dari jasa kirim, semoga kedepannya jauh lebih baik lagi",
+      "rating": 4,
+      "is_anonymous": false,
+      "is_visible": true,
+      "created_at": "2026-05-30T15:12:39.407Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 1,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "brand": 3,
+      "category": null,
+      "score": 6,
+      "last_action": "2026-06-18T10:21:57.283Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 2,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "brand": null,
+      "category": 4,
+      "score": 6,
+      "last_action": "2026-06-18T10:21:57.289Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 3,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "brand": 1,
+      "category": null,
+      "score": 13,
+      "last_action": "2026-05-26T11:36:41.042Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 4,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "brand": null,
+      "category": 2,
+      "score": 15,
+      "last_action": "2026-06-19T13:27:16.233Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 5,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "brand": 2,
+      "category": null,
+      "score": 10,
+      "last_action": "2026-06-19T13:27:16.219Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 6,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "brand": null,
+      "category": 3,
+      "score": 8,
+      "last_action": "2026-05-30T13:40:06.426Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 7,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "brand": 3,
+      "category": null,
+      "score": 1,
+      "last_action": "2026-05-26T11:26:59.020Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 8,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "brand": null,
+      "category": 4,
+      "score": 1,
+      "last_action": "2026-05-26T11:26:59.041Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 9,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "brand": 1,
+      "category": null,
+      "score": 1,
+      "last_action": "2026-05-26T11:50:58.616Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 10,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "brand": null,
+      "category": 2,
+      "score": 1,
+      "last_action": "2026-05-26T11:50:58.626Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 11,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "brand": 2,
+      "category": null,
+      "score": 2,
+      "last_action": "2026-05-30T16:09:34.097Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 12,
+    "fields": {
+      "user": [
+        "surya@gmail.com"
+      ],
+      "brand": null,
+      "category": 3,
+      "score": 2,
+      "last_action": "2026-05-30T16:09:34.102Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 15,
+    "fields": {
+      "user": [
+        "irvan@gmail.com"
+      ],
+      "brand": 6,
+      "category": null,
+      "score": 2,
+      "last_action": "2026-06-18T11:08:39.791Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 16,
+    "fields": {
+      "user": [
+        "irvan@gmail.com"
+      ],
+      "brand": null,
+      "category": 4,
+      "score": 3,
+      "last_action": "2026-06-18T20:31:08.050Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 17,
+    "fields": {
+      "user": [
+        "irvan@gmail.com"
+      ],
+      "brand": 3,
+      "category": null,
+      "score": 1,
+      "last_action": "2026-06-18T20:31:08.041Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 50,
+    "fields": {
+      "user": [
+        "garengnggeng@gmail.com"
+      ],
+      "brand": 2,
+      "category": null,
+      "score": 2,
+      "last_action": "2026-06-19T13:28:13.135Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 51,
+    "fields": {
+      "user": [
+        "garengnggeng@gmail.com"
+      ],
+      "brand": null,
+      "category": 2,
+      "score": 3,
+      "last_action": "2026-06-19T13:26:24.292Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 52,
+    "fields": {
+      "user": [
+        "garengnggeng@gmail.com"
+      ],
+      "brand": 3,
+      "category": null,
+      "score": 1,
+      "last_action": "2026-06-19T13:25:54.192Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 53,
+    "fields": {
+      "user": [
+        "garengnggeng@gmail.com"
+      ],
+      "brand": 1,
+      "category": null,
+      "score": 1,
+      "last_action": "2026-06-19T13:26:24.283Z"
+    }
+  },
+  {
+    "model": "store.userinterest",
+    "pk": 54,
+    "fields": {
+      "user": [
+        "garengnggeng@gmail.com"
+      ],
+      "brand": null,
+      "category": 3,
+      "score": 1,
+      "last_action": "2026-06-19T13:28:13.147Z"
+    }
+  },
+  {
+    "model": "cart.cartitem",
+    "pk": 11,
+    "fields": {
+      "user": [
+        "adminrizki@gmail.com"
+      ],
+      "product": 2,
+      "cart": null,
+      "quantity": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "cart.cartitem",
+    "pk": 19,
+    "fields": {
+      "user": [
+        "garengnggeng@gmail.com"
+      ],
+      "product": 8,
+      "cart": null,
+      "quantity": 1,
+      "is_active": true
+    }
+  }
+]
