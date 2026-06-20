@@ -35,11 +35,10 @@ db.sqlite3-journal
 staticfiles/
 
 # Media & Uploads — hanya exclude yang user-generated
-# Seed photos (brands, categories, products) sengaja di-track untuk Docker image build
+# Seed photos (brands, categories, products, gallery) sengaja di-track untuk Docker image build
 media/photos/refund_proofs/
 media/photos/returns/
 media/profile_photos/
-media/store/
 
 # Docker
 docker-compose.override.yml
