@@ -9,6 +9,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
+import os
 
 # 1. MODEL KATEGORI (Untuk Sidebar "Browse Categories")
 class Category(models.Model):
@@ -146,6 +147,7 @@ def broadcast_new_product_email(sender, instance, created, **kwargs):
         ).values_list('user_id', flat=True).distinct()
 
         if not matched_user_ids:
+            print("Broadcast: tidak ada user yang cocok, email tidak dikirim.")
             return
 
         recipients = Account.objects.filter(
@@ -153,15 +155,26 @@ def broadcast_new_product_email(sender, instance, created, **kwargs):
             is_active=True
         ).exclude(email='')
 
+        # Ambil base URL dari env SITE_URL, fallback ke ALLOWED_HOSTS yang bukan localhost
+        site_url = os.environ.get('SITE_URL', '')
+        if not site_url:
+            non_local = [h for h in settings.ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1', '*') and h]
+            site_url = f"https://{non_local[0]}" if non_local else 'https://localhost'
+
+        # Bangun image URL (absolut)
+        try:
+            image_url = f"{site_url}{instance.images.url}" if instance.images else None
+        except Exception:
+            image_url = None
+
         for user in recipients:
             try:
                 subject = f'Koleksi Baru untuk Kamu — {instance.product_name}'
-                base_url = f"https://{settings.ALLOWED_HOSTS[0]}"
                 message = render_to_string('store/new_product_email.html', {
                     'first_name': user.first_name or user.username,
                     'product': instance,
-                    'product_url': f"{base_url}{instance.get_url()}",
-                    'image_url': f"{base_url}{instance.images.url}" if instance.images else None,
+                    'product_url': f"{site_url}{instance.get_url()}",
+                    'image_url': image_url,
                 })
                 email = EmailMessage(
                     subject,
