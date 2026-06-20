@@ -1,7 +1,7 @@
 from django.db import models
 from account.models import Account
 from store.models import Product
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
@@ -111,31 +111,38 @@ class ReturnRequest(models.Model):
                 product.save()
             
             print(f"DEBUG: Status Order #{self.order.order_number} BERHASIL dipaksa menjadi Returned")
+# Signal: simpan tracking_number LAMA sebelum disimpan (pre_save)
+@receiver(pre_save, sender=Order)
+def cache_old_tracking_number(sender, instance, **kwargs):
+    if instance.pk:
+        try:
+            old = Order.objects.get(pk=instance.pk)
+            instance._old_tracking_number = old.tracking_number
+        except Order.DoesNotExist:
+            instance._old_tracking_number = None
+    else:
+        instance._old_tracking_number = None
+
 # Signal Notifikasi Pengiriman
 @receiver(post_save, sender=Order)
 def send_shipping_notification(sender, instance, created, **kwargs):
-    # Hanya kirim email jika:
-    # 1. Bukan objek baru (update)
-    # 2. Tracking number sekarang terisi
-    # 3. Email belum pernah dikirim di sesi save ini
-    if not created and instance.tracking_number and not getattr(instance, '_email_already_sent', False):
-        # Cek apakah tracking_number baru saja diisi (sebelumnya kosong)
-        try:
-            old_order = Order.objects.get(pk=instance.pk)
-            tracking_just_added = not old_order.tracking_number and instance.tracking_number
-        except Order.DoesNotExist:
-            tracking_just_added = False
+    if created:
+        return
 
-        if tracking_just_added:
-            try:
-                mail_subject = f'Pesanan #{instance.order_number} Sedang Dalam Perjalanan!'
-                message = render_to_string('order/shipping_email.html', {'order': instance})
-                send_email = EmailMessage(mail_subject, message, settings.DEFAULT_FROM_EMAIL, [instance.email])
-                send_email.content_subtype = "html"
-                send_email.send()
-                instance._email_already_sent = True
-            except Exception as e:
-                print(f"Gagal mengirim email: {e}")
+    old_tracking = getattr(instance, '_old_tracking_number', None)
+    new_tracking = instance.tracking_number
+
+    # Kirim email hanya jika tracking number baru saja diisi (sebelumnya kosong)
+    if not old_tracking and new_tracking:
+        try:
+            mail_subject = f'Pesanan #{instance.order_number} Sedang Dalam Perjalanan!'
+            message = render_to_string('order/shipping_email.html', {'order': instance})
+            send_email = EmailMessage(mail_subject, message, settings.DEFAULT_FROM_EMAIL, [instance.email])
+            send_email.content_subtype = "html"
+            send_email.send()
+            print(f"Email terkirim ke {instance.email} untuk order #{instance.order_number}")
+        except Exception as e:
+            print(f"Gagal mengirim email: {e}")
                 
 #Model Voucher
 class Coupon(models.Model):
