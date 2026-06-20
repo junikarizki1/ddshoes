@@ -21,6 +21,8 @@ services:
       - db
     environment:
       - DATABASE_URL=postgres://postgres:root@db:5432/ddshoes
+      - SECRET_KEY=django-insecure-local-dev-key-for-ddshoes
+      - DEBUG=True
 
 volumes:
   postgres_data:
