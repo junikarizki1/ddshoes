@@ -1,18 +1,130 @@
 <!DOCTYPE html>
-<html>
-  <body>
-    <h2>Pesanan Anda Sedang Dikirim!</h2>
-    <p>Halo {{ order.first_name }},</p>
-    <p>
-      Kabar gembira! Pesanan Anda
-      <strong>#{{ order.order_number }}</strong> telah kami serahkan ke kurir.
-    </p>
-    <p><strong>Nomor Resi:</strong> {{ order.tracking_number }}</p>
-    <p>
-      Anda dapat memantau status pengiriman melalui halaman tracking di website
-      kami.
-    </p>
-    <br />
-    <p>Terima kasih telah berbelanja di <strong>DD Shoes Store</strong>!</p>
-  </body>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesanan Sedang Dikirim</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f0f2f5;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f2f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#2c2c3a 0%,#888da7 100%);padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:900;letter-spacing:2px;">DD<span style="font-weight:300;letter-spacing:1px;"> Shoes</span></h1>
+              <div style="width:40px;height:3px;background:#ffba00;margin:10px auto 0;border-radius:2px;"></div>
+              <p style="margin:12px 0 0;color:rgba(255,255,255,0.75);font-size:13px;letter-spacing:1px;text-transform:uppercase;">Status Pengiriman Pesanan</p>
+            </td>
+          </tr>
+
+          <!-- Shipping Icon Banner -->
+          <tr>
+            <td style="background:#fff8e1;padding:20px 40px;text-align:center;">
+              <p style="margin:0;font-size:36px;">🚚</p>
+              <p style="margin:8px 0 0;font-size:16px;font-weight:700;color:#2c2c3a;">Pesananmu Sedang Dalam Perjalanan!</p>
+            </td>
+          </tr>
+
+          <!-- Greeting -->
+          <tr>
+            <td style="padding:28px 40px 0;">
+              <p style="margin:0;font-size:15px;color:#2c2c3a;line-height:1.7;">
+                Halo <strong>{{ order.first_name }}</strong>, 👋
+              </p>
+              <p style="margin:10px 0 0;font-size:15px;color:#555;line-height:1.7;">
+                Kabar gembira! Pesanan kamu dengan nomor <strong>#{{ order.order_number }}</strong> telah kami serahkan kepada kurir dan sedang dalam perjalanan menuju alamatmu.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:20px 40px 0;">
+              <div style="border-top:1px solid #f0f0f0;"></div>
+            </td>
+          </tr>
+
+          <!-- Tracking Info Card -->
+          <tr>
+            <td style="padding:20px 40px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fafafa;border-radius:10px;border:1px solid #eeeeee;">
+                <tr>
+                  <td style="padding:20px;">
+
+                    <!-- Order Number -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
+                      <tr>
+                        <td style="font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;">Nomor Pesanan</td>
+                        <td align="right" style="font-size:14px;font-weight:700;color:#2c2c3a;">#{{ order.order_number }}</td>
+                      </tr>
+                    </table>
+
+                    <!-- Divider -->
+                    <div style="border-top:1px dashed #e8e8e8;margin-bottom:12px;"></div>
+
+                    <!-- Tracking Number -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
+                      <tr>
+                        <td style="font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;">Nomor Resi</td>
+                        <td align="right">
+                          <span style="display:inline-block;background:#fff8e1;color:#d4940a;font-size:14px;font-weight:800;padding:4px 12px;border-radius:6px;letter-spacing:1px;">{{ order.tracking_number }}</span>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Divider -->
+                    <div style="border-top:1px dashed #e8e8e8;margin-bottom:12px;"></div>
+
+                    <!-- Shipping Service -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;">Kurir</td>
+                        <td align="right" style="font-size:14px;font-weight:600;color:#2c2c3a;text-transform:uppercase;">{{ order.shipping_service }}</td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Info Text -->
+          <tr>
+            <td style="padding:0 40px 28px;text-align:center;">
+              <p style="margin:0;font-size:13px;color:#888;line-height:1.7;">
+                Gunakan nomor resi di atas untuk melacak status pengirimanmu<br>melalui website resmi kurir yang bersangkutan.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 40px;">
+              <div style="border-top:1px solid #f0f0f0;"></div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 40px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#2c2c3a;">DD Shoes Store</p>
+              <p style="margin:0 0 12px;font-size:12px;color:#aaa;">Pontianak, Kalimantan Barat</p>
+              <p style="margin:0;font-size:11px;color:#ccc;line-height:1.6;">
+                Ada pertanyaan? Hubungi kami via WhatsApp atau Live Chat.<br>
+                &copy; 2026 DD Shoes. Hak cipta dilindungi.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
 </html>

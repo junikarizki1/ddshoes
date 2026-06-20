@@ -1,99 +1,106 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produk Baru DD Shoes</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 40px auto;
-            background-color: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .header {
-            background-color: #1a1a1a;
-            color: #ffffff;
-            text-align: center;
-            padding: 20px;
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .content {
-            padding: 30px;
-            text-align: center;
-        }
-        .content p {
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-        .product-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .product-name {
-            font-size: 22px;
-            font-weight: bold;
-            color: #1a1a1a;
-            margin-bottom: 10px;
-        }
-        .product-price {
-            font-size: 18px;
-            color: #e63946;
-            font-weight: bold;
-            margin-bottom: 25px;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 25px;
-            background-color: #e63946;
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        .footer {
-            background-color: #f9f9f9;
-            text-align: center;
-            padding: 15px;
-            font-size: 12px;
-            color: #777777;
-            border-top: 1px solid #eeeeee;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Koleksi Baru DD Shoes</title>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            DD Shoes
-        </div>
-        <div class="content">
-            <p>Halo <strong>{{ first_name }}</strong>,</p>
-            <p>Kabar baik untukmu, kami punya koleksi produk baru yang mungkin akan kamu sukai</p>
-            
-            <h2 class="product-name">{{ product.product_name }}</h2>
-            
-            <p style="margin-bottom: 30px;">Segera miliki koleksi terbaru ini sebelum kehabisan!</p>
-            
-            <a href="{{ product_url }}" class="btn">Lihat Semua Koleksi</a>
-        </div>
-        <div class="footer">
-            <p>&copy; 2026 DD Shoes. Hak cipta dilindungi.</p>
-            <p>Anda menerima email ini karena Anda adalah pelanggan setia kami.</p>
-        </div>
-    </div>
+<body style="margin:0;padding:0;background-color:#f0f2f5;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f2f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#2c2c3a 0%,#888da7 100%);padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:900;letter-spacing:2px;">DD<span style="font-weight:300;letter-spacing:1px;"> Shoes</span></h1>
+              <div style="width:40px;height:3px;background:#ffba00;margin:10px auto 0;border-radius:2px;"></div>
+              <p style="margin:12px 0 0;color:rgba(255,255,255,0.75);font-size:13px;letter-spacing:1px;text-transform:uppercase;">Koleksi Terbaru Untukmu</p>
+            </td>
+          </tr>
+
+          <!-- Greeting -->
+          <tr>
+            <td style="padding:32px 40px 0;">
+              <p style="margin:0;font-size:16px;color:#2c2c3a;line-height:1.6;">
+                Halo <strong>{{ first_name }}</strong>, 👋
+              </p>
+              <p style="margin:12px 0 0;font-size:15px;color:#555;line-height:1.7;">
+                Kami punya kabar baik! Ada koleksi sepatu baru yang kami rasa cocok untukmu berdasarkan selera belanjaanmu sebelumnya.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:24px 40px 0;">
+              <div style="border-top:1px solid #f0f0f0;"></div>
+            </td>
+          </tr>
+
+          <!-- Product Card -->
+          <tr>
+            <td style="padding:24px 40px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fafafa;border-radius:10px;border:1px solid #eeeeee;overflow:hidden;">
+                <tr>
+                  <td style="padding:20px;text-align:center;">
+                    <div style="display:inline-block;background:#fff8e1;color:#ffba00;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:16px;">✨ Baru Tersedia</div>
+
+                    {% if image_url %}
+                    <div style="margin-bottom:16px;">
+                      <img src="{{ image_url }}" alt="{{ product.product_name }}"
+                           style="max-width:240px;width:100%;height:auto;border-radius:10px;object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                    </div>
+                    {% endif %}
+
+                    <h2 style="margin:0 0 8px;font-size:20px;font-weight:800;color:#2c2c3a;">{{ product.product_name }}</h2>
+                    <p style="margin:0 0 6px;font-size:13px;color:#888;">
+                      {{ product.brand.brand_name }} &nbsp;·&nbsp; {{ product.category.category_name }} &nbsp;·&nbsp; Size {{ product.size }}
+                    </p>
+                    <p style="margin:8px 0 0;font-size:22px;font-weight:900;color:#ffba00;">
+                      Rp {{ product.price|floatformat:0 }}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- CTA Button -->
+          <tr>
+            <td style="padding:0 40px 32px;text-align:center;">
+              <a href="{{ product_url }}" style="display:inline-block;background:linear-gradient(135deg,#888da7,#6b6f8a);color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:14px 36px;border-radius:50px;letter-spacing:0.5px;">
+                Lihat Produk &rarr;
+              </a>
+              <p style="margin:16px 0 0;font-size:12px;color:#aaa;">Stok terbatas, segera dapatkan sebelum kehabisan!</p>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 40px;">
+              <div style="border-top:1px solid #f0f0f0;"></div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 40px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#2c2c3a;">DD Shoes Store</p>
+              <p style="margin:0 0 12px;font-size:12px;color:#aaa;">Pontianak, Kalimantan Barat</p>
+              <p style="margin:0;font-size:11px;color:#ccc;line-height:1.6;">
+                Kamu menerima email ini karena pernah berbelanja di DD Shoes Store.<br>
+                &copy; 2026 DD Shoes. Hak cipta dilindungi.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
 </body>
 </html>

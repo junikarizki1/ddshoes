@@ -156,10 +156,12 @@ def broadcast_new_product_email(sender, instance, created, **kwargs):
         for user in recipients:
             try:
                 subject = f'Koleksi Baru untuk Kamu — {instance.product_name}'
+                base_url = f"https://{settings.ALLOWED_HOSTS[0]}"
                 message = render_to_string('store/new_product_email.html', {
                     'first_name': user.first_name or user.username,
                     'product': instance,
-                    'product_url': f"https://{settings.ALLOWED_HOSTS[0]}{instance.get_url()}",
+                    'product_url': f"{base_url}{instance.get_url()}",
+                    'image_url': f"{base_url}{instance.images.url}" if instance.images else None,
                 })
                 email = EmailMessage(
                     subject,
