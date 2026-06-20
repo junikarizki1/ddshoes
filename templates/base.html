@@ -37,6 +37,32 @@
     <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}" />
     <link rel="stylesheet" href="{% static 'css/main.css' %}" />
     <style>
+      /* Hamburger button styling */
+      .navbar-toggler { outline: none !important; box-shadow: none !important; }
+      .navbar-toggler:active { background: #ebebeb !important; }
+
+      /* Footer mobile */
+      @media (max-width: 767px) {
+        .footer-area.section_gap { padding: 30px 0 16px !important; }
+        .footer-area .single-footer-widget { margin-bottom: 20px !important; }
+        .footer-area .single-footer-widget h6 { font-size: 13px !important; margin-bottom: 8px !important; }
+        .footer-area .single-footer-widget p { font-size: 12px !important; line-height: 1.5 !important; margin-bottom: 8px !important; }
+        .footer-area .single-footer-widget ul li { line-height: 1.8 !important; font-size: 12px !important; }
+        .footer-area .single-footer-widget ul li a { font-size: 12px !important; }
+        .footer-area .col-lg-3,
+        .footer-area .col-lg-2,
+        .footer-area .col-lg-4 { margin-bottom: 0 !important; }
+        .footer-bottom { margin-top: 16px !important; padding-top: 12px !important; }
+        .footer-text { font-size: 11px !important; text-align: center; }
+      }
+
+      /* Sembunyikan breadcrumb banner di mobile */
+      @media (max-width: 767px) {
+        .banner-area.organic-breadcrumb { display: none !important; }
+        /* Beri ruang atas agar konten tidak mepet navbar */
+        body#category > .container,
+        .page-top-spacing { padding-top: 20px; }
+      }
       .menu_nav .dropdown-menu {
         border: none !important;
         border-radius: 12px !important;
@@ -153,18 +179,42 @@
               class="navbar-brand logo_h d-flex align-items-center"
               href="{% url 'home' %}"
             >
-              <!-- Gambar Logo -->
               <img
                 src="{% static 'img/logo.png' %}"
                 alt="DD Shoes Logo"
                 style="max-height: 45px; width: auto; object-fit: contain"
               />
-
-              <!-- Teks Nama Toko dengan Styling -->
               <span class="ml-2 d-inline-block logo-text">
                 <span class="logo-dd">DD</span><span class="logo-shoes">Shoes</span>
               </span>
             </a>
+
+            <!-- Cart icon: selalu visible di mobile (d-lg-none), sebelum hamburger -->
+            <div class="d-flex align-items-center d-lg-none ml-auto mr-2">
+              <a href="{% url 'cart' %}" style="position: relative; display: inline-flex; align-items: center; color: #2c2c3a;">
+                <i class="ti-bag" style="font-size: 20px;"></i>
+                {% if cart_count > 0 %}
+                <span style="
+                  position: absolute;
+                  top: -8px;
+                  right: -10px;
+                  background: #ffba00;
+                  color: #fff;
+                  border-radius: 50%;
+                  font-size: 10px;
+                  font-weight: bold;
+                  width: 18px;
+                  height: 18px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  line-height: 1;
+                ">{{ cart_count }}</span>
+                {% endif %}
+              </a>
+            </div>
+
+            <!-- Hamburger: icon lebih bagus -->
             <button
               class="navbar-toggler"
               type="button"
@@ -173,10 +223,9 @@
               aria-controls="navbarSupportedContent"
               aria-expanded="false"
               aria-label="Toggle navigation"
+              style="border: none; padding: 6px 10px; background: #f5f5f7; border-radius: 8px;"
             >
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
+              <i class="fa fa-bars" style="font-size: 18px; color: #2c2c3a;"></i>
             </button>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div
@@ -396,65 +445,57 @@
       <div class="container">
         <div class="row">
           <!-- Kolom 1: Tentang Kami -->
-          <div class="col-lg-3 col-md-6 col-sm-6">
+          <div class="col-6 col-md-6 col-lg-3">
             <div class="single-footer-widget">
               <h6>Tentang DD Shoes</h6>
               <p style="margin-bottom: 15px; color: #777777;">
-                Destinasi utama Anda untuk menemukan sepatu berkualitas dengan desain trendi di Pontianak. Kami berkomitmen memberikan pengalaman belanja terbaik untuk setiap langkah Anda.
+                Destinasi utama Anda untuk menemukan sepatu berkualitas dengan desain trendi di Pontianak.
               </p>
               <ul class="list-unstyled" style="color: #777777; line-height: 2;">
-                <li><i class="ti-location-pin" style="margin-right: 10px; color: #ffba00;"></i> Pontianak, Kalimantan Barat</li>
-                <li><i class="ti-mobile" style="margin-right: 10px; color: #ffba00;"></i> +62 812 3456 7890</li>
-                <li><i class="ti-email" style="margin-right: 10px; color: #ffba00;"></i> support@ddshoes.com</li>
+                <li><i class="ti-location-pin" style="margin-right: 6px; color: #ffba00;"></i> Pontianak, Kalbar</li>
+                <li><i class="ti-mobile" style="margin-right: 6px; color: #ffba00;"></i> +62 812 3456 7890</li>
+                <li><i class="ti-email" style="margin-right: 6px; color: #ffba00;"></i> support@ddshoes.com</li>
               </ul>
             </div>
           </div>
-          
+
            <!-- Kolom 2: Tautan Cepat -->
-           <div class="col-lg-2 col-md-6 col-sm-6">
+           <div class="col-6 col-md-6 col-lg-2">
              <div class="single-footer-widget">
                <h6>Tautan Cepat</h6>
-               <ul class="list-unstyled" style="line-height: 2.5;">
-                 <li><a href="{% url 'home' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Beranda</a></li>
-                 <li><a href="{% url 'product' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Produk Kami</a></li>
-                 <li><a href="{% url 'my_orders' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Pesanan Saya</a></li>
-                 <li><a href="{% url 'loyalty_program' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Program Loyalitas</a></li>
-                 <li><a href="{% url 'terms' %}" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Syarat & Ketentuan</a></li>
+               <ul class="list-unstyled" style="line-height: 2.2;">
+                 <li><a href="{% url 'home' %}" style="color: #777777;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Beranda</a></li>
+                 <li><a href="{% url 'product' %}" style="color: #777777;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Produk</a></li>
+                 <li><a href="{% url 'my_orders' %}" style="color: #777777;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Pesanan</a></li>
+                 <li><a href="{% url 'loyalty_program' %}" style="color: #777777;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Loyalitas</a></li>
+                 <li><a href="{% url 'terms' %}" style="color: #777777;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> S&K</a></li>
                </ul>
              </div>
            </div>
-           
+
            <!-- Kolom 3: Layanan Pelanggan -->
-           <div class="col-lg-3 col-md-6 col-sm-6">
+           <div class="col-6 col-md-6 col-lg-3">
              <div class="single-footer-widget">
-               <h6>Layanan Pelanggan</h6>
-               <ul class="list-unstyled" style="line-height: 2.5;">
-                 <li><a href="https://wa.me/6281234567890" target="_blank" rel="noopener" style="color: #777777; transition: color 0.3s;"><i class="fa fa-whatsapp" style="font-size: 10px; margin-right: 5px; color: #25d366;"></i> WhatsApp</a></li>
-                 <li><a href="javascript:void(0);" onclick="if(typeof Tawk_API !== 'undefined'){Tawk_API.toggle();}return false;" style="color: #777777; transition: color 0.3s;"><i class="fa fa-comments" style="font-size: 10px; margin-right: 5px; color: #888da7;"></i> Live Chat</a></li>
-                 <li><a href="{% url 'terms' %}#pengiriman" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Kebijakan Pengiriman</a></li>
-                 <li><a href="{% url 'terms' %}#retur" style="color: #777777; transition: color 0.3s;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Retur & Refund</a></li>
+               <h6>Layanan</h6>
+               <ul class="list-unstyled" style="line-height: 2.2;">
+                 <li><a href="https://wa.me/6281234567890" target="_blank" rel="noopener" style="color: #777777;"><i class="fa fa-whatsapp" style="margin-right: 5px; color: #25d366;"></i> WhatsApp</a></li>
+                 <li><a href="javascript:void(0);" onclick="if(typeof Tawk_API !== 'undefined'){Tawk_API.toggle();}return false;" style="color: #777777;"><i class="fa fa-comments" style="margin-right: 5px; color: #888da7;"></i> Live Chat</a></li>
+                 <li><a href="{% url 'terms' %}#pengiriman" style="color: #777777;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Pengiriman</a></li>
+                 <li><a href="{% url 'terms' %}#retur" style="color: #777777;"><i class="ti-angle-right" style="font-size: 10px; margin-right: 5px;"></i> Retur & Refund</a></li>
                </ul>
              </div>
            </div>
-           
+
            <!-- Kolom 4: Sosial Media -->
-           <div class="col-lg-4 col-md-6 col-sm-6">
+           <div class="col-6 col-md-6 col-lg-4">
              <div class="single-footer-widget">
                <h6>Ikuti Kami</h6>
-               <p style="color: #777777; margin-bottom: 15px;">Dapatkan info terbaru seputar diskon dan produk baru langsung dari kami.</p>
-               <div class="d-flex" style="gap: 15px;">
-                 <a href="#" style="color: #777777; font-size: 20px; transition: color 0.3s;" title="Instagram">
-                   <i class="fa fa-instagram"></i>
-                 </a>
-                 <a href="#" style="color: #777777; font-size: 20px; transition: color 0.3s;" title="Facebook">
-                   <i class="fa fa-facebook"></i>
-                 </a>
-                 <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" style="color: #777777; font-size: 20px; transition: color 0.3s;" title="WhatsApp">
-                   <i class="fa fa-whatsapp"></i>
-                 </a>
-                 <a href="#" style="color: #777777; font-size: 20px; transition: color 0.3s;" title="TikTok">
-                   <i class="fa fa-video-camera"></i>
-                 </a>
+               <p style="color: #777777; margin-bottom: 12px;">Dapatkan info terbaru seputar diskon dan produk baru.</p>
+               <div class="d-flex" style="gap: 12px;">
+                 <a href="#" style="color: #777777; font-size: 18px;" title="Instagram"><i class="fa fa-instagram"></i></a>
+                 <a href="#" style="color: #777777; font-size: 18px;" title="Facebook"><i class="fa fa-facebook"></i></a>
+                 <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" style="color: #777777; font-size: 18px;" title="WhatsApp"><i class="fa fa-whatsapp"></i></a>
+                 <a href="#" style="color: #777777; font-size: 18px;" title="TikTok"><i class="fa fa-video-camera"></i></a>
                </div>
              </div>
            </div>

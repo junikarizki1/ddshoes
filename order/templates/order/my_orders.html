@@ -1,131 +1,167 @@
 {% extends 'base.html' %}{% load static %}{% load humanize %}{% block content %}
+
+<style>
+  /* ===== MY ORDERS MOBILE RESPONSIVE ===== */
+  @media (max-width: 767px) {
+    .orders-table-wrap { display: none; }
+    .orders-mobile-list { display: block; padding: 12px 0; }
+
+    .order-card {
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #f0f0f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .order-card .order-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .order-card .order-number {
+      font-weight: 700;
+      font-size: 14px;
+      color: #2c2c3a;
+    }
+    .order-card .order-date {
+      font-size: 12px;
+      color: #999;
+    }
+    .order-card .order-total {
+      font-weight: 700;
+      font-size: 16px;
+      color: #ffba00;
+      margin: 4px 0 8px;
+    }
+    .order-card .order-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .order-card .status-badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: #f5f5f7;
+      color: #2c2c3a;
+      font-weight: 500;
+    }
+    .order-card .btn-detail {
+      font-size: 12px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      background: #888da7;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  }
+  @media (min-width: 768px) {
+    .orders-mobile-list { display: none; }
+    .orders-table-wrap { display: block; }
+  }
+</style>
+
 <section class="banner-area organic-breadcrumb">
   <div class="container">
-    <div
-      class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end"
-    >
+    <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
       <div class="col-first">
         <h1>Riwayat Pesanan</h1>
         <nav class="d-flex align-items-center">
-          <a href="{% url 'home' %}"
-            >Home<span class="lnr lnr-arrow-right"></span
-          ></a>
+          <a href="{% url 'home' %}">Home<span class="lnr lnr-arrow-right"></span></a>
           <a href="#">Riwayat</a>
         </nav>
       </div>
     </div>
   </div>
 </section>
+
 <section class="cart_area">
   <div class="container">
-    <div class="cart_inner">
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">No. Pesanan</th>
-              <th scope="col">Tanggal</th>
-              <th scope="col">Total</th>
-              <th scope="col">Keterangan</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for order in orders %}
-            <tr>
-              <td>
-                <p style="font-weight: bold; color: #222">
-                  #{{ order.order_number }}
-                </p>
-              </td>
-              <td>
-                <h5>{{ order.created_at|date:"d M Y" }}</h5>
-              </td>
-              <td>
-                <h5>Rp {{ order.grand_total|floatformat:0|intcomma }}</h5>
-              </td>
-              <td>
-                {% if order.status == 'Cancelled' %}
-                <span
-                  class="badge"
-                  style="color: black; padding: 5px 12px; border-radius: 4px"
-                  >❌ Dibatalkan</span
-                >
-                
-                {% elif order.status == 'Returned' %}
-                <span
-                  class="badge"
-                  style="color: black; padding: 5px 12px; border-radius: 4px"
-                  >✅ Refund</span
-                >
-                {% elif order.return_request %}
-                <span class="badge" style="color: black; padding: 5px 12px; border-radius: 4px">
-                  <i class="fa fa-undo mr-1"></i> Retur: {{ order.return_request.get_status_display }}
-               </span>
 
+    <!-- ===== TAMPILAN MOBILE (card) ===== -->
+    <div class="orders-mobile-list">
+      {% for order in orders %}
+      <div class="order-card">
+        <div class="order-top">
+          <span class="order-number">#{{ order.order_number }}</span>
+          <span class="order-date">{{ order.created_at|date:"d M Y" }}</span>
+        </div>
+        <div class="order-total">Rp {{ order.grand_total|floatformat:0|intcomma }}</div>
+        <div class="order-bottom">
+          <span class="status-badge">
+            {% if order.status == 'Cancelled' %}❌ Dibatalkan
+            {% elif order.status == 'Returned' %}✅ Refund
+            {% elif order.return_request %}↩️ Retur
+            {% elif order.status == 'Completed' %}✅ Selesai
+            {% elif not order.is_ordered %}⏳ Menunggu Bayar
+            {% elif order.tracking_number %}🚚 Dikirim
+            {% else %}📦 Diproses
+            {% endif %}
+          </span>
+          <a href="{% url 'confirmation' %}?order_number={{ order.order_number }}" class="btn-detail">Detail</a>
+        </div>
+      </div>
+      {% empty %}
+      <div class="text-center py-5">
+        <img src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png" width="80" class="mb-3">
+        <h3>Belum ada riwayat pesanan.</h3>
+        <a href="{% url 'home' %}" class="primary-btn mt-3" style="line-height:30px;padding:0 20px">Belanja Sekarang</a>
+      </div>
+      {% endfor %}
+    </div>
 
-                {% elif order.status == 'Completed' %}
-                <span
-                  class="badge"
-                  style="color: black; padding: 5px 12px; border-radius: 4px"
-                  >✅ Selesai</span
-                >
-
-                {% elif not order.is_ordered %}
-                <span
-                  class="badge"
-                  style="color: black; padding: 5px 12px; border-radius: 4px"
-                  >⏳ Menunggu Pembayaran</span
-                >
-
-                {% else %} {% if order.tracking_number %}
-                <span
-                  class="badge"
-                  style="color: black; padding: 5px 12px; border-radius: 4px"
-                  >🚚 Sedang Dikirim</span
-                >
-                <!-- <div class="mt-1">
-                  <small>Resi: {{ order.tracking_number }}</small>
-                </div> -->
-                {% else %}
-                <span
-                  class="badge"
-                  style="color: black; padding: 5px 12px; border-radius: 4px"
-                  >📦 Sedang Diproses</span
-                >
-                {% endif %} {% endif %}
-              </td>
-              <td>
-                <div class="d-flex flex-column">
-                  <a
-                    href="{% url 'confirmation' %}?order_number={{ order.order_number }}"
-                    class="genric-btn primary-btn circle small"
-                    >Detail</a
-                  >
-                </div>
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="5" class="text-center" style="padding: 50px 0">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png"
-                  width="80"
-                  class="mb-3 opacity-50"
-                />
-                <h3>Belum ada riwayat pesanan.</h3>
-                <a
-                  href="{% url 'home' %}"
-                  class="primary-btn mt-3"
-                  style="line-height: 30px; padding: 0 20px"
-                  >Belanja Sekarang</a
-                >
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+    <!-- ===== TAMPILAN DESKTOP (tabel) ===== -->
+    <div class="orders-table-wrap">
+      <div class="cart_inner">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">No. Pesanan</th>
+                <th scope="col">Tanggal</th>
+                <th scope="col">Total</th>
+                <th scope="col">Keterangan</th>
+                <th scope="col">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+              <tr>
+                <td><p style="font-weight:bold;color:#222">#{{ order.order_number }}</p></td>
+                <td><h5>{{ order.created_at|date:"d M Y" }}</h5></td>
+                <td><h5>Rp {{ order.grand_total|floatformat:0|intcomma }}</h5></td>
+                <td>
+                  {% if order.status == 'Cancelled' %}<span class="badge" style="color:black;padding:5px 12px;border-radius:4px">❌ Dibatalkan</span>
+                  {% elif order.status == 'Returned' %}<span class="badge" style="color:black;padding:5px 12px;border-radius:4px">✅ Refund</span>
+                  {% elif order.return_request %}<span class="badge" style="color:black;padding:5px 12px;border-radius:4px"><i class="fa fa-undo mr-1"></i> Retur: {{ order.return_request.get_status_display }}</span>
+                  {% elif order.status == 'Completed' %}<span class="badge" style="color:black;padding:5px 12px;border-radius:4px">✅ Selesai</span>
+                  {% elif not order.is_ordered %}<span class="badge" style="color:black;padding:5px 12px;border-radius:4px">⏳ Menunggu Pembayaran</span>
+                  {% elif order.tracking_number %}<span class="badge" style="color:black;padding:5px 12px;border-radius:4px">🚚 Sedang Dikirim</span>
+                  {% else %}<span class="badge" style="color:black;padding:5px 12px;border-radius:4px">📦 Sedang Diproses</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{% url 'confirmation' %}?order_number={{ order.order_number }}" class="genric-btn primary-btn circle small">Detail</a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center" style="padding:50px 0">
+                  <img src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png" width="80" class="mb-3 opacity-50">
+                  <h3>Belum ada riwayat pesanan.</h3>
+                  <a href="{% url 'home' %}" class="primary-btn mt-3" style="line-height:30px;padding:0 20px">Belanja Sekarang</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+
   </div>
 </section>
 {% endblock %}

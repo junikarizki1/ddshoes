@@ -114,13 +114,23 @@ class ReturnRequest(models.Model):
 # Signal Notifikasi Pengiriman
 @receiver(post_save, sender=Order)
 def send_shipping_notification(sender, instance, created, **kwargs):
-    if not created and instance.tracking_number:
-        # Gunakan atribut sementara untuk mencegah email ganda dalam satu sesi save
-        if not hasattr(instance, '_email_already_sent'):
+    # Hanya kirim email jika:
+    # 1. Bukan objek baru (update)
+    # 2. Tracking number sekarang terisi
+    # 3. Email belum pernah dikirim di sesi save ini
+    if not created and instance.tracking_number and not getattr(instance, '_email_already_sent', False):
+        # Cek apakah tracking_number baru saja diisi (sebelumnya kosong)
+        try:
+            old_order = Order.objects.get(pk=instance.pk)
+            tracking_just_added = not old_order.tracking_number and instance.tracking_number
+        except Order.DoesNotExist:
+            tracking_just_added = False
+
+        if tracking_just_added:
             try:
                 mail_subject = f'Pesanan #{instance.order_number} Sedang Dalam Perjalanan!'
                 message = render_to_string('order/shipping_email.html', {'order': instance})
-                send_email = EmailMessage(mail_subject, message, settings.EMAIL_HOST_USER, [instance.email])
+                send_email = EmailMessage(mail_subject, message, settings.DEFAULT_FROM_EMAIL, [instance.email])
                 send_email.content_subtype = "html"
                 send_email.send()
                 instance._email_already_sent = True

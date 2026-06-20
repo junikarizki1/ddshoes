@@ -1,5 +1,70 @@
 {% extends 'base.html' %} {% load static %} {% load humanize %}{% block content %}
 <style>
+  /* ===== MOBILE RESPONSIVE FIXES ===== */
+
+  /* Banner */
+  .banner-area { overflow: hidden; }
+  .banner-content h1 { font-size: clamp(1.4rem, 5vw, 2.8rem); }
+  .banner-content h3 { font-size: clamp(1rem, 3.5vw, 1.5rem); }
+  .banner-content p { font-size: 14px; }
+
+  /* Desktop: gambar 58% kanan, teks 42% kiri */
+  @media (min-width: 768px) {
+    .banner-text-col  { flex: 0 0 100% !important; max-width: 100% !important; }
+    .banner-img-col   { flex: 0 0 58% !important; max-width: 58% !important; }
+    .banner-price-col { flex: 0 0 42% !important; max-width: 42% !important; text-align: left !important; padding-left: 24px; }
+    .banner-price-col div { text-align: left !important; padding-top: 0 !important; }
+  }
+
+  @media (max-width: 767px) {
+    /* Banner: gambar atas, teks bawah — sudah ditangani via flex order */
+    .banner-btn { padding: 12px 20px; font-size: 13px; }
+
+    /* Features: 3 per baris di mobile, teks pendek */
+    .features-inner .col-4 .single-features p { font-size: 10px; line-height: 1.3; }
+    .features-inner .col-4 .single-features h6 { font-size: 11px; margin-bottom: 4px; }
+    .features-inner .col-4 .single-features .f-icon img { width: 28px; height: 28px; }
+    .features-inner .col-4 .single-features .f-icon i { font-size: 24px !important; }
+    .features-inner .col-4 .single-features { padding: 12px 6px; }
+
+    /* Kategori: 3 dalam 1 baris */
+    .category-col { flex: 0 0 33.333% !important; max-width: 33.333% !important; padding: 0 6px !important; }
+    .category-img-container { height: 130px !important; }
+    .category-name-top { font-size: 10px !important; padding: 5px 8px !important; top: 6px; right: 6px; }
+
+    /* Produk: 2 per baris */
+    .product-col { flex: 0 0 50% !important; max-width: 50% !important; padding: 0 6px !important; }
+    .single-product-item { padding: 10px; }
+    .single-product-item .product-img-wrap { height: 160px !important; }
+    .single-product-item .product-info h6 { font-size: 12px; }
+    .single-product-item .product-info h5 { font-size: 14px; }
+    .single-product-item .product-info .product-meta { font-size: 10px; }
+
+    /* Brand: 3 per baris */
+    .brand-col { flex: 0 0 33.333% !important; max-width: 33.333% !important; }
+    .brand-logo-wrapper { height: 72px !important; padding: 10px !important; }
+    .single-brand-item h6 { font-size: 11px; margin-top: 6px; }
+
+    /* Testimonial: 1 per baris */
+    .testimonial-col { flex: 0 0 100% !important; max-width: 100% !important; }
+
+    /* Rating badge */
+    .rating-badge { flex-direction: column; gap: 6px; }
+    .rating-badge h1 { font-size: 22px; }
+
+    /* Section title */
+    .section-title h1, .section-title h2 { font-size: 20px; }
+    .section-title p { font-size: 13px; }
+  }
+
+  @media (min-width: 768px) and (max-width: 991px) {
+    /* Tablet: kategori 3 kolom tetap */
+    .category-col { flex: 0 0 33.333% !important; max-width: 33.333% !important; }
+    .category-img-container { height: 200px !important; }
+    /* Produk: 2 kolom di tablet */
+    .product-col { flex: 0 0 50% !important; max-width: 50% !important; }
+  }
+
   .section-title h1,
   .section-title h2 {
     position: relative;
@@ -239,35 +304,30 @@
   .banner-btn {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     background: linear-gradient(135deg, #888da7 0%, #6b6f8a 100%);
     color: #fff;
-    padding: 16px 32px;
+    padding: 10px 22px;
     border-radius: 50px;
-    font-weight: 700;
-    font-size: 15px;
+    font-weight: 600;
+    font-size: 13px;
     text-decoration: none;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(136,141,167,0.3);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
   }
   .banner-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(136,141,167,0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(136,141,167,0.4);
     color: #fff;
   }
   .banner-btn:active {
     transform: translateY(-1px);
   }
   .banner-btn i {
-    font-size: 18px;
-    transition: transform 0.2s ease;
-  }
-  .banner-btn:hover i {
-    transform: translateX(4px);
+    font-size: 14px;
   }
   .banner-btn .btn-icon {
     width: 36px;
@@ -288,47 +348,54 @@
                 <div class="active-banner-slider owl-carousel">
                     
                     {% for product in banner_products %}
-                    <div class="row single-slide align-items-center d-flex">
-                        
-                        <div class="col-lg-5 col-md-6">
-                            <div class="banner-content">
-                                <h6 class="text-uppercase mb-2" style="color: #ffba00; letter-spacing: 3px; font-weight: 500;">
-                                    Koleksi Terbaru
-                                </h6>
-                                
-                                <h1 class="mb-2" style="font-weight: 900; line-height: 1.2;">
-                                    {{ product.product_name }}
-                                </h1>
-                                
-                                <h3 class="mb-3" style="color: #333; font-weight: 700;">
-                                    Rp {{ product.price|intcomma }}
-                                </h3>
-                                
-                                <p class="mb-4">
-                                    Miliki Segera Sebelum Kehabisan Stok!!!
-                                </p>
-                                
-                                <form action="{% url 'add_cart' product.id %}" method="POST" class="mt-4">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="quantity" value="1">
-                                    
-                                    <button type="submit" class="banner-btn">
-                                        <span class="btn-icon"><i class="ti-bag"></i></span>
-                                        Tambah ke Keranjang <i class="fa fa-arrow-right"></i>
-                                    </button>
-                                </form>
+                    <div class="single-slide">
+
+                        <!-- Layout: flexbox tanpa negative margin Bootstrap -->
+                        <div style="display:flex; flex-wrap:wrap; align-items:center; width:100%; padding: 0 15px; box-sizing:border-box;">
+
+                            <!-- Teks kiri (desktop) / atas (mobile) -->
+                            <div style="flex: 0 0 100%; max-width:100%;" class="banner-text-col">
+                                <div class="banner-content" style="padding: 8px 0 0; text-align:center;">
+                                    <h6 style="color: #ffba00; letter-spacing: 2px; font-weight: 600; font-size: 11px; text-transform: uppercase; margin-bottom: 8px;">
+                                        Koleksi Terbaru
+                                    </h6>
+                                    <h1 style="font-weight: 900; line-height: 1.2; margin-bottom: 4px;">
+                                        {{ product.product_name }}
+                                    </h1>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="col-lg-7">
-                            <div class="banner-img text-center">
-                                <a href="{{ product.get_url }}" style="display: block;">
-                                    <img class="img-fluid" src="{{ product.images.url }}" alt="{{ product.product_name }}"
-                                         style="max-height: 480px; width: auto; object-fit: contain;">
-                                </a>
+
+                            <!-- Gambar: di bawah nama, di atas harga -->
+                            <div style="flex: 0 0 100%; max-width:100%;" class="banner-img-col">
+                                <div class="text-center" style="padding: 4px 0;">
+                                    <a href="{{ product.get_url }}">
+                                        <img src="{{ product.images.url }}"
+                                             alt="{{ product.product_name }}"
+                                             style="max-height: 280px; max-width: 100%; width: auto; object-fit: contain; border-radius: 12px; display: inline-block;">
+                                    </a>
+                                </div>
                             </div>
+
+                            <!-- Harga + tombol -->
+                            <div style="flex: 0 0 100%; max-width:100%;" class="banner-price-col">
+                                <div style="padding: 0 0 12px; text-align:center;">
+                                    <h3 style="color: #333; font-weight: 700; margin-bottom: 6px;">
+                                        Rp {{ product.price|intcomma }}
+                                    </h3>
+                                    <p style="color: #666; margin-bottom: 12px; font-size: 13px;">
+                                        Miliki Segera Sebelum Kehabisan Stok!
+                                    </p>
+                                    <form action="{% url 'add_cart' product.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="banner-btn">
+                                            <i class="ti-bag"></i> Tambah ke Keranjang
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
                         </div>
-                        
                     </div>
                     {% endfor %}
 
@@ -342,9 +409,9 @@
 <!-- start features Area -->
 <section class="features-area section_gap">
     <div class="container">
-        <div class="row features-inner">
+        <div class="row features-inner justify-content-center">
             <!-- single features -->
-            <div class="col-lg col-md-6 col-sm-6">
+            <div class="col-4 col-md-4 col-lg text-center">
                 <div class="single-features">
                     <div class="f-icon">
                         <img src="{% static 'img/features/f-icon1.png' %}" alt="" />
@@ -354,43 +421,43 @@
                 </div>
             </div>
             <!-- single features -->
-            <div class="col-lg col-md-6 col-sm-6">
+            <div class="col-4 col-md-4 col-lg text-center">
                 <div class="single-features">
                     <div class="f-icon">
-                        <img src="{%static 'img/features/f-icon2.png' %}" alt="" />
+                        <img src="{% static 'img/features/f-icon2.png' %}" alt="" />
                     </div>
                     <h6>Return Policy</h6>
                     <p>Retur Produk yang Tidak Sesuai</p>
                 </div>
             </div>
             <!-- single features -->
-            <div class="col-lg col-md-6 col-sm-6">
+            <div class="col-4 col-md-4 col-lg text-center">
                 <div class="single-features">
                     <div class="f-icon">
-                        <img src="{%static 'img/features/f-icon3.png' %}" alt="" />
+                        <img src="{% static 'img/features/f-icon3.png' %}" alt="" />
                     </div>
-                    <h6>Costumer Support</h6>
-                    <p>Menyediakan Layanan Live Chat</p>
+                    <h6>Support</h6>
+                    <p>Layanan Live Chat</p>
                 </div>
             </div>
             <!-- single features -->
-            <div class="col-lg col-md-6 col-sm-6">
+            <div class="col-4 col-md-4 col-lg text-center">
                 <div class="single-features">
                     <div class="f-icon">
-                        <img src="{%static 'img/features/f-icon4.png' %}" alt="" />
+                        <img src="{% static 'img/features/f-icon4.png' %}" alt="" />
                     </div>
-                    <h6>Secure Payment</h6>
-                    <p>Tersedia Berbagai Metode Pembayaran</p>
+                    <h6>Pembayaran</h6>
+                    <p>Berbagai Metode Pembayaran</p>
                 </div>
             </div>
             <!-- single features -->
-            <div class="col-lg col-md-6 col-sm-6">
+            <div class="col-4 col-md-4 col-lg text-center">
                 <div class="single-features">
                     <div class="f-icon">
                         <i class="fa fa-star-o" style="font-size: 32px; color: #222222;"></i>
                     </div>
-                    <h6>Loyalty Program</h6>
-                    <p>Kumpulkan Saldo &amp; Dapatkan Voucher</p>
+                    <h6>Loyalty</h6>
+                    <p>Kumpulkan Saldo &amp; Voucher</p>
                 </div>
             </div>
         </div>
@@ -410,15 +477,15 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="row" style="margin-left: -6px; margin-right: -6px;">
             {% for category in top_categories %}
-            <div class="col-lg-4 col-md-6">
+            <div class="category-col col-lg-4 col-md-4 col-4" style="padding: 0 6px; margin-bottom: 12px;">
                 <a href="{{ category.get_url }}" style="text-decoration: none; color: inherit;">
                     <div class="single-deal">
                         <div class="category-name-top">{{ category.category_name }}</div>
                         <div class="category-img-container">
-                            <img class="img-fluid w-100" 
-                                 src="{{ category.cat_image.url }}" 
+                            <img class="img-fluid w-100"
+                                 src="{{ category.cat_image.url }}"
                                  alt="{{ category.category_name }}">
                         </div>
                     </div>
@@ -440,9 +507,9 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row" style="margin-left: -6px; margin-right: -6px;">
             {% for product in recommended_products %}
-            <div class="col-lg-4 col-md-6 mb-2">
+            <div class="product-col col-lg-4 col-md-6 col-6" style="padding: 0 6px; margin-bottom: 14px;">
                 <div class="single-product-item">
                     <a href="{{ product.get_url }}">
                         <div class="product-img-wrap">
@@ -453,7 +520,7 @@
                         <h6>{{ product.product_name }}</h6>
                         <h5>Rp {{ product.price|intcomma }}</h5>
                         <div class="product-meta">
-                            Size: {{ product.size }} | {{ product.brand.brand_name }} | {{ product.category.category_name }}
+                            {{ product.brand.brand_name }} · {{ product.category.category_name }}
                         </div>
                     </div>
                 </div>
@@ -489,11 +556,11 @@
         
         <div class="row justify-content-center align-items-center">
             {% for brand in top_brands %}
-            <div class="col-lg-2 col-md-4 col-sm-6 text-center mb-4">
+            <div class="brand-col col-lg-2 col-md-3 col-4 text-center mb-4">
                 <div class="single-brand-item">
                     <a href="{{ brand.get_url }}">
                         <div class="brand-logo-wrapper">
-                            <img src="{{ brand.brand_image.url }}" 
+                            <img src="{{ brand.brand_image.url }}"
                                  alt="{{ brand.brand_name }}">
                         </div>
                         <h6>{{ brand.brand_name }}</h6>
@@ -526,7 +593,7 @@
         <div class="row">
             {% if reviews %}
                 {% for review in reviews %}
-                <div class="col-lg-4 col-md-6 mb-4">
+                <div class="testimonial-col col-lg-4 col-md-6 mb-4">
                     <div class="testimonial-card">
                         <div class="review-stars">
                             {% if review.rating == 5 %}⭐⭐⭐⭐⭐
@@ -564,28 +631,18 @@
 </section>
 
 <style>
-    /* Menghilangkan gap berlebih dan memberikan efek hover */
     .single-product-item:hover {
         box-shadow: 0 10px 20px rgba(0,0,0,0.08);
         border-color: #ffba00 !important;
         transform: translateY(-5px);
     }
-    
-    /* Memperkecil gap antar baris produk */
-    .row {
-        margin-bottom: -15px;
-    }
-
-    /* Efek Hover */
     .single-deal:hover {
         transform: translateY(-8px);
         box-shadow: 0 12px 25px rgba(0,0,0,0.1);
     }
-
     .single-deal:hover img {
         transform: scale(1.05);
     }
-
     .single-brand-item:hover {
         transform: translateY(-5px);
     }

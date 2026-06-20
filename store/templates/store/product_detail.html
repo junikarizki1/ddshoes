@@ -7,6 +7,21 @@
   .main-image img {
     transition: opacity 0.3s ease-in-out;
   }
+
+  @media (max-width: 767px) {
+    /* Area utama produk */
+    .product_image_area { margin-top: 16px !important; margin-bottom: 16px !important; }
+    /* Gambar utama lebih kecil */
+    #main-product-img { height: 280px !important; }
+    /* Kolom info langsung di bawah gambar */
+    .s_product_inner .col-lg-5 { margin-top: 16px !important; }
+    .s_product_text { padding: 0 4px; }
+    .s_product_text h3 { font-size: 18px; }
+    .s_product_text h2 { font-size: 20px; margin: 8px 0 !important; }
+    /* Tab spesifikasi */
+    .product_description_area { margin-top: 20px !important; padding-bottom: 20px !important; }
+    .tab-content { padding: 12px !important; }
+  }
 </style>
 
 <div class="product_image_area mt-5 mb-5">
@@ -184,21 +199,19 @@
         </div>
       </div>
     </div>
-    <div class="row justify-content-center">
+    <div class="row justify-content-center" style="margin-left: -6px; margin-right: -6px;">
       {% for product in related_products %}
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="single-product-item" style="border: 1px solid #eee; padding: 15px; border-radius: 12px; background: #fff; transition: all 0.3s ease;">
+      <div class="col-6 col-md-6 col-lg-4 mb-3" style="padding: 0 6px;">
+        <div class="single-product-item" style="border: 1px solid #eee; padding: 10px; border-radius: 12px; background: #fff; height: 100%; transition: all 0.3s ease;">
           <a href="{{ product.get_url }}">
-            <div style="height: 250px; overflow: hidden; border-radius: 8px;">
+            <div style="height: 180px; overflow: hidden; border-radius: 8px;">
               <img class="img-fluid w-100" src="{{ product.images.url }}" alt="{{ product.product_name }}" style="height: 100%; object-fit: cover; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
             </div>
           </a>
-          <div class="product-info mt-3 text-center">
-            <h6 style="margin-bottom: 5px; font-weight: 600;">{{ product.product_name }}</h6>
-            <h5 style="color: #ffba00; font-weight: 700;">Rp {{ product.price|intcomma }}</h5>
-            <div style="margin-top: 10px;">
-              <small class="text-muted">Size: {{ product.size|default:"-" }} | {{ product.brand.brand_name }} | {{ product.category.category_name }}</small>
-            </div>
+          <div class="product-info mt-2 text-center">
+            <h6 style="margin-bottom: 4px; font-weight: 600; font-size: 13px; line-height: 1.3;">{{ product.product_name }}</h6>
+            <h5 style="color: #ffba00; font-weight: 700; font-size: 14px; margin-bottom: 4px;">Rp {{ product.price|intcomma }}</h5>
+            <small class="text-muted" style="font-size: 11px;">{{ product.brand.brand_name }} · {{ product.category.category_name }}</small>
           </div>
         </div>
       </div>
