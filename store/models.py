@@ -127,20 +127,38 @@ class ReviewRating(models.Model):
 
 
 # =========================================================
-# SIGNAL: Broadcast email ke semua pelanggan terdaftar saat produk baru diupload
+# SIGNAL: Broadcast email produk baru berdasarkan personalisasi
+# Kirim hanya ke user yang pernah beli produk dengan brand/kategori yang sama
+# Berdasarkan pesanan yang sudah selesai (status Completed)
 # =========================================================
 @receiver(post_save, sender=Product)
 def broadcast_new_product_email(sender, instance, created, **kwargs):
     if not created:
-        return  # Hanya untuk produk baru, bukan edit
+        return
 
     try:
-        # Kirim ke semua user aktif yang punya email
-        recipients = Account.objects.filter(is_active=True).exclude(email='')
+        from order.models import OrderProduct
 
-        if not recipients.exists():
-            print("Broadcast: tidak ada user terdaftar.")
+        # Bangun query berdasarkan brand DAN/ATAU kategori
+        q_filter = models.Q(product__category=instance.category)
+        if instance.brand:
+            q_filter |= models.Q(product__brand=instance.brand)
+
+        # Cari user yang pernah selesai beli produk dengan brand/kategori sama
+        matched_user_ids = OrderProduct.objects.filter(
+            order__status='Completed'
+        ).filter(q_filter).values_list('user_id', flat=True).distinct()
+
+        if not matched_user_ids:
+            print(f"Broadcast '{instance.product_name}': tidak ada user yang cocok.")
             return
+
+        recipients = Account.objects.filter(
+            id__in=matched_user_ids,
+            is_active=True
+        ).exclude(email='')
+
+        print(f"Broadcast '{instance.product_name}': kirim ke {recipients.count()} user.")
 
         # Base URL
         site_url = os.environ.get('SITE_URL', '').rstrip('/')
@@ -148,7 +166,6 @@ def broadcast_new_product_email(sender, instance, created, **kwargs):
             non_local = [h for h in settings.ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1', '*') and h]
             site_url = f"https://{non_local[0]}" if non_local else 'https://localhost'
 
-        # Image URL absolut
         try:
             image_url = f"{site_url}{instance.images.url}" if instance.images else None
         except Exception:
@@ -156,7 +173,7 @@ def broadcast_new_product_email(sender, instance, created, **kwargs):
 
         for user in recipients:
             try:
-                subject = f'Koleksi Baru — {instance.product_name} | DD Shoes'
+                subject = f'Koleksi Baru untuk Kamu — {instance.product_name} | DD Shoes'
                 message = render_to_string('store/new_product_email.html', {
                     'first_name': user.first_name or user.username,
                     'product': instance,
@@ -164,8 +181,7 @@ def broadcast_new_product_email(sender, instance, created, **kwargs):
                     'image_url': image_url,
                 })
                 email = EmailMessage(
-                    subject,
-                    message,
+                    subject, message,
                     settings.DEFAULT_FROM_EMAIL,
                     [user.email]
                 )
