@@ -27,6 +27,7 @@ urlpatterns = [
     path('my_orders/', views.my_orders, name='my_orders'),
     
     # path('midtrans-webhook/', views.midtrans_webhook, name='midtrans_webhook'),
+    path('midtrans-webhook/', views.midtrans_webhook, name='midtrans_webhook'),
     path('admin_invoice_pdf/<int:order_id>/', views.admin_order_pdf, name='admin_order_pdf'),
     path('order_complete/<str:order_number>/', views.order_complete, name='order_complete'),
     path('submit_return/<int:order_id>/', views.submit_return, name='submit_return'),

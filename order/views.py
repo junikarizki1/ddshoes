@@ -482,95 +482,127 @@ def my_orders(request):
 
 
 # =========================================================
-# FUNGSI WEBHOOK MIDTRANS (OTOMATISASI STATUS PEMBAYARAN)
-# # =========================================================
-# @csrf_exempt
-# def midtrans_webhook(request):
-#     if request.method == 'POST':
-#         try:
-#             # 1. Tangkap surat/data JSON yang dikirim oleh Midtrans
-#             data = json.loads(request.body)
-#             order_id = data.get('order_id')
-#             transaction_status = data.get('transaction_status')
-#             fraud_status = data.get('fraud_status')
+# FUNGSI WEBHOOK MIDTRANS
+# =========================================================
+import json
+import hashlib
+from django.core.mail import send_mail
 
-#             # 2. Cari pesanan tersebut di database kita
-#             try:
-#                 order = Order.objects.get(order_number=order_id)
-#             except ObjectDoesNotExist:
-#                 return HttpResponse('Pesanan tidak ditemukan', status=404)
+@csrf_exempt
+def midtrans_webhook(request):
+    if request.method != 'POST':
+        return HttpResponse('Metode tidak diizinkan', status=405)
 
-#             # 3. Ubah status pesanan berdasarkan laporan Midtrans
-#             if transaction_status == 'capture':
-#                 if fraud_status == 'challenge':
-#                     order.status = 'Pending'
-#                 elif fraud_status == 'accept':
-#                     order.status = 'Accepted'
-#                     order.is_ordered = True
-#             elif transaction_status == 'settlement':
-#                 # Settlement = Lunas (Contoh: Uang sudah masuk dari Indomaret/Bank)
-#                 order.status = 'Accepted'
-#                 order.is_ordered = True
-#             elif transaction_status in ['cancel', 'deny', 'expire']:
-#                 # Jika pembeli batal/kadaluarsa, ubah status jadi Cancelled
-#                 order.status = 'Cancelled'
-#                 order.is_ordered = False
-                
-#                 # (BONUS) KEMBALIKAN STOK SEPATU KARENA BATAL BELI
-#                 order_products = OrderProduct.objects.filter(order=order)
-#                 for item in order_products:
-#                     product = item.product
-#                     product.stock += item.quantity
-#                     product.save()
-                    
-#             elif transaction_status == 'pending':
-#                 order.status = 'Pending'
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return HttpResponse('Bad Request', status=400)
 
-#             # 4. Simpan perubahan ke database
-#             order.save()
-            
-#             # Beritahu Midtrans bahwa pesanannya sudah kita terima dengan sukses (Kode 200)
-#             return HttpResponse('Sukses', status=200)
+    order_id            = data.get('order_id')
+    transaction_status  = data.get('transaction_status')
+    fraud_status        = data.get('fraud_status', '')
+    gross_amount        = data.get('gross_amount', '')
+    signature_key       = data.get('signature_key', '')
+    status_code         = data.get('status_code', '')
 
-#         except Exception as e:
-#             print(f"Error Webhook: {e}")
-#             return HttpResponse('Server Error', status=500)
-            
-#     # Jika ada yang iseng mengakses URL ini lewat browser biasa (Metode GET)
-#     return HttpResponse('Metode tidak diizinkan', status=405)
+    # ----------------------------------------------------------
+    # 1. Verifikasi signature Midtrans (keamanan wajib)
+    #    Format: SHA512(order_id + status_code + gross_amount + server_key)
+    # ----------------------------------------------------------
+    raw_string = f"{order_id}{status_code}{gross_amount}{settings.MIDTRANS_SERVER_KEY}"
+    expected_signature = hashlib.sha512(raw_string.encode()).hexdigest()
 
+    if signature_key != expected_signature:
+        print(f"WEBHOOK: Signature tidak valid untuk order {order_id}")
+        return HttpResponse('Forbidden', status=403)
 
-#Notifikasi Gmail
-# from django.core.mail import send_mail
-# from django.template.loader import render_to_string
+    # ----------------------------------------------------------
+    # 2. Cari pesanan di database
+    # ----------------------------------------------------------
+    try:
+        order = Order.objects.get(order_number=order_id)
+    except Order.DoesNotExist:
+        return HttpResponse('Pesanan tidak ditemukan', status=404)
 
-# @csrf_exempt
-# def midtrans_webhook(request):
-#     if request.method == 'POST':
-#         data = json.loads(request.body)
-#         order_number = data.get('order_id')
-#         transaction_status = data.get('transaction_status')
+    # ----------------------------------------------------------
+    # 3. Hindari proses ulang jika sudah final
+    # ----------------------------------------------------------
+    if order.status in ['Completed', 'Returned']:
+        return HttpResponse('OK', status=200)
 
-#         try:
-#             order = Order.objects.get(order_number=order_number)
-            
-#             if transaction_status in ['capture', 'settlement']:
-#                 if not order.is_ordered:
-#                     # 1. Update Status Pesanan
-#                     order.status = 'Accepted'
-#                     order.is_ordered = True
-#                     order.save()
+    # ----------------------------------------------------------
+    # 4. Update status berdasarkan notifikasi Midtrans
+    # ----------------------------------------------------------
+    paid = False
 
-#                     # 2. Kirim Email Notifikasi
-#                     mail_subject = f'Pembayaran Berhasil - Pesanan #{order.order_number}'
-#                     message = f"Halo {order.first_name},\n\nPembayaran Anda untuk pesanan #{order.order_number} telah kami terima. Kami akan segera memproses pengiriman sepatu Anda.\n\nTerima kasih telah berbelanja di DD Shoes Store!"
-#                     to_email = order.email
-                    
-#                     send_mail(mail_subject, message, settings.EMAIL_HOST_USER, [to_email])
+    if transaction_status == 'capture':
+        if fraud_status == 'accept':
+            order.status = 'Accepted'
+            order.is_ordered = True
+            paid = True
+        elif fraud_status == 'challenge':
+            order.status = 'Pending'
 
-#             return HttpResponse(status=200)
-#         except Order.DoesNotExist:
-#             return HttpResponse(status=404)
+    elif transaction_status == 'settlement':
+        # Transfer bank, QRIS, minimarket — uang sudah benar-benar masuk
+        order.status = 'Accepted'
+        order.is_ordered = True
+        paid = True
+
+    elif transaction_status == 'pending':
+        order.status = 'Pending'
+
+    elif transaction_status in ['cancel', 'deny', 'expire']:
+        if order.status not in ['Cancelled']:
+            order.status = 'Cancelled'
+            order.is_ordered = False
+            # Kembalikan stok
+            order_products = OrderProduct.objects.filter(order=order)
+            for item in order_products:
+                product = item.product
+                product.stock += item.quantity
+                product.save()
+
+    order.save()
+
+    # ----------------------------------------------------------
+    # 5. Kirim email notifikasi ke konsumen & admin jika lunas
+    # ----------------------------------------------------------
+    if paid:
+        try:
+            # Email ke konsumen
+            subject_konsumen = f'Pembayaran Berhasil — Pesanan #{order.order_number}'
+            pesan_konsumen = (
+                f"Halo {order.first_name},\n\n"
+                f"Pembayaran Anda untuk pesanan #{order.order_number} telah kami terima.\n"
+                f"Total: Rp {order.grand_total:,.0f}\n\n"
+                f"Kami akan segera memproses dan mengirimkan sepatu Anda.\n\n"
+                f"Terima kasih telah berbelanja di DD Shoes Store!"
+            )
+            send_mail(subject_konsumen, pesan_konsumen, settings.DEFAULT_FROM_EMAIL, [order.email])
+        except Exception as e:
+            print(f"WEBHOOK: Gagal kirim email konsumen: {e}")
+
+        try:
+            # Email ke admin
+            subject_admin = f'[DD Shoes] Pembayaran Masuk — #{order.order_number}'
+            pesan_admin = (
+                f"Pesanan baru telah dibayar!\n\n"
+                f"No. Pesanan : #{order.order_number}\n"
+                f"Nama        : {order.first_name} {order.last_name}\n"
+                f"Email       : {order.email}\n"
+                f"Telepon     : {order.phone}\n"
+                f"Total       : Rp {order.grand_total:,.0f}\n"
+                f"Kurir       : {order.shipping_service or '-'}\n"
+                f"Alamat      : {order.address}, {order.district}, {order.city}, {order.province}\n\n"
+                f"Silakan segera proses pesanan ini di dashboard admin."
+            )
+            send_mail(subject_admin, pesan_admin, settings.DEFAULT_FROM_EMAIL, [settings.ADMIN_NOTIFY_EMAIL])
+        except Exception as e:
+            print(f"WEBHOOK: Gagal kirim email admin: {e}")
+
+    print(f"WEBHOOK: Order #{order_id} → status={order.status}, paid={paid}")
+    return HttpResponse('OK', status=200)
         
 
 # =========================================================

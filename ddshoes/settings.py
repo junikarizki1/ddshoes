@@ -258,6 +258,9 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = f'DD Shoes Store <{os.environ.get("EMAIL_HOST_USER", "")}>'
 
+# Email tujuan notifikasi admin — default ke EMAIL_HOST_USER jika tidak diset
+ADMIN_NOTIFY_EMAIL = os.environ.get('ADMIN_NOTIFY_EMAIL', '') or os.environ.get('EMAIL_HOST_USER', '')
+
 
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     'CSRF_TRUSTED_ORIGINS', 
