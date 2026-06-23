@@ -136,11 +136,24 @@ def edit_profile(request):
         else:
             cropped_data = request.POST.get('profile_photo_cropped')
             if cropped_data and cropped_data.startswith('data:image'):
-                format, imgstr = cropped_data.split(';base64,')
-                ext = format.split('/')[-1]
-                data = base64.b64decode(imgstr)
-                user.profile_photo.save(f'profile_{user.id}.{ext}', ContentFile(data), save=False)
+                # Jalur utama: hasil crop dari Cropper.js (base64)
+                header, imgstr = cropped_data.split(';base64,')
+                ext = header.split('/')[-1]
+                if ext.lower() == 'jpeg':
+                    ext = 'jpg'
+                img_data = base64.b64decode(imgstr)
+                # Hapus foto lama dulu sebelum simpan yang baru
+                if user.profile_photo:
+                    user.profile_photo.delete(save=False)
+                user.profile_photo.save(
+                    f'profile_{user.id}.{ext}',
+                    ContentFile(img_data),
+                    save=False
+                )
             elif 'profile_photo' in request.FILES:
+                # Jalur fallback: file langsung tanpa crop
+                if user.profile_photo:
+                    user.profile_photo.delete(save=False)
                 user.profile_photo = request.FILES['profile_photo']
         
         user.save()

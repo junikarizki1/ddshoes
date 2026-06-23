@@ -8,16 +8,44 @@
   .banner-content h3 { font-size: clamp(1rem, 3.5vw, 1.5rem); }
   .banner-content p { font-size: 14px; }
 
-  /* Desktop: gambar 58% kanan, teks 42% kiri */
+  /* Banner Grid Layout */
+  .banner-grid-container {
+    display: grid;
+    width: 100%;
+    padding: 0 15px;
+    box-sizing: border-box;
+    align-items: center;
+  }
+
   @media (min-width: 768px) {
-    .banner-text-col  { flex: 0 0 100% !important; max-width: 100% !important; }
-    .banner-img-col   { flex: 0 0 58% !important; max-width: 58% !important; }
-    .banner-price-col { flex: 0 0 42% !important; max-width: 42% !important; text-align: left !important; padding-left: 24px; }
-    .banner-price-col div { text-align: left !important; padding-top: 0 !important; }
+    .banner-grid-container {
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas: 
+        "title image"
+        "price image";
+    }
+    .banner-text-col { grid-area: title; }
+    .banner-img-col { grid-area: image; text-align: center; }
+    .banner-price-col { grid-area: price; }
+
+    .banner-content { text-align: left !important; padding: 0 !important; }
+    .banner-price-col div { text-align: left !important; padding: 0 !important; }
   }
 
   @media (max-width: 767px) {
-    /* Banner: gambar atas, teks bawah — sudah ditangani via flex order */
+    .banner-grid-container {
+      grid-template-columns: 1fr;
+      grid-template-areas: 
+        "title"
+        "image"
+        "price";
+      text-align: center;
+      gap: 15px;
+    }
+    .banner-text-col { grid-area: title; }
+    .banner-img-col { grid-area: image; }
+    .banner-price-col { grid-area: price; }
+    
     .banner-btn { padding: 12px 20px; font-size: 13px; }
 
     /* Features: 3 per baris di mobile, teks pendek */
@@ -350,11 +378,11 @@
                     {% for product in banner_products %}
                     <div class="single-slide">
 
-                        <!-- Layout: flexbox tanpa negative margin Bootstrap -->
-                        <div style="display:flex; flex-wrap:wrap; align-items:center; width:100%; padding: 0 15px; box-sizing:border-box;">
+                        <!-- Layout: Grid -->
+                        <div class="banner-grid-container">
 
                             <!-- Teks kiri (desktop) / atas (mobile) -->
-                            <div style="flex: 0 0 100%; max-width:100%;" class="banner-text-col">
+                            <div class="banner-text-col">
                                 <div class="banner-content" style="padding: 8px 0 0; text-align:center;">
                                     <h6 style="color: #ffba00; letter-spacing: 2px; font-weight: 600; font-size: 11px; text-transform: uppercase; margin-bottom: 8px;">
                                         Koleksi Terbaru
@@ -366,7 +394,7 @@
                             </div>
 
                             <!-- Gambar: di bawah nama, di atas harga -->
-                            <div style="flex: 0 0 100%; max-width:100%;" class="banner-img-col">
+                            <div class="banner-img-col">
                                 <div class="text-center" style="padding: 4px 0;">
                                     <a href="{{ product.get_url }}">
                                         <img src="{{ product.images.url }}"
@@ -377,7 +405,7 @@
                             </div>
 
                             <!-- Harga + tombol -->
-                            <div style="flex: 0 0 100%; max-width:100%;" class="banner-price-col">
+                            <div class="banner-price-col">
                                 <div style="padding: 0 0 12px; text-align:center;">
                                     <h3 style="color: #333; font-weight: 700; margin-bottom: 6px;">
                                         Rp {{ product.price|intcomma }}
@@ -520,7 +548,7 @@
                         <h6>{{ product.product_name }}</h6>
                         <h5>Rp {{ product.price|intcomma }}</h5>
                         <div class="product-meta">
-                            {{ product.brand.brand_name }} · {{ product.category.category_name }}
+                            {{ product.brand.brand_name }} · {{ product.category.category_name }} · {{ product.size }}
                         </div>
                     </div>
                 </div>
