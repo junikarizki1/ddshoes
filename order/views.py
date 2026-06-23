@@ -311,59 +311,64 @@ def payments(request, order_number):
         client_key=settings.MIDTRANS_CLIENT_KEY
     )
 
-    item_list = []
-    # 1. Tambahkan Produk
-    for item in order_products:
+    # Gunakan snap_token yang sudah ada jika masih tersimpan.
+    # Midtrans MENOLAK pembuatan transaksi baru dengan order_id yang sama
+    # selama transaksi lama masih pending — ini penyebab user tidak bisa
+    # melanjutkan pembayaran setelah menunda.
+    snap_token = order.snap_token if order.snap_token else None
+
+    if not snap_token:
+        # Belum ada token sama sekali → buat baru
+        item_list = []
+
+        for item in order_products:
+            item_list.append({
+                "id": f"PROD-{item.product.id}",
+                "price": int(float(item.product_price)),
+                "quantity": item.quantity,
+                "name": item.product.product_name[:30]
+            })
+
         item_list.append({
-            "id": f"PROD-{item.product.id}",
-            "price": int(float(item.product_price)), # Bungkus float sebelum int
-            "quantity": item.quantity,
-            "name": item.product.product_name[:30]
-        })
-
-    # 2. Tambahkan Ongkir
-    item_list.append({
-        "id": "SHIPPING",
-        "price": int(float(order.shipping_cost)), # Bungkus float sebelum int
-        "quantity": 1,
-        "name": "Ongkos Kirim"
-    })
-
-    # 3. PERBAIKAN LOGIKA DISKON (Penyebab Error)
-    # Gunakan float() untuk semua variabel agar bisa dikalkulasi
-    total_normal = sum(float(item.product_price) * item.quantity for item in order_products) + float(order.shipping_cost)
-    discount_amount = total_normal - float(order.grand_total)
-
-    if discount_amount > 1: # Gunakan toleransi > 1 rupiah
-        item_list.append({
-            "id": "DISCOUNT-LOYALTY",
-            "price": -int(discount_amount), 
+            "id": "SHIPPING",
+            "price": int(float(order.shipping_cost)),
             "quantity": 1,
-            "name": "Potongan Voucher"
+            "name": "Ongkos Kirim"
         })
 
-    param = {
-        "transaction_details": {
-            "order_id": order.order_number,
-            "gross_amount": int(float(order.grand_total)) # Bungkus float
-        },
-        "item_details": item_list,
-        "customer_details": {
-            "first_name": order.first_name,
-            "last_name": order.last_name,
-            "email": request.user.email,
-            "phone": order.phone
+        total_normal = sum(float(item.product_price) * item.quantity for item in order_products) + float(order.shipping_cost)
+        discount_amount = total_normal - float(order.grand_total)
+
+        if discount_amount > 1:
+            item_list.append({
+                "id": "DISCOUNT-LOYALTY",
+                "price": -int(discount_amount),
+                "quantity": 1,
+                "name": "Potongan Voucher"
+            })
+
+        param = {
+            "transaction_details": {
+                "order_id": order.order_number,
+                "gross_amount": int(float(order.grand_total))
+            },
+            "item_details": item_list,
+            "customer_details": {
+                "first_name": order.first_name,
+                "last_name": order.last_name,
+                "email": request.user.email,
+                "phone": order.phone
+            }
         }
-    }
-    
-    try:
-        snap_transaction = snap.create_transaction(param)
-        snap_token = snap_transaction['token']
-        order.snap_token = snap_token
-        order.save()
-    except Exception as e:
-        print(f"Error Midtrans: {e}")
-        snap_token = None
+
+        try:
+            snap_transaction = snap.create_transaction(param)
+            snap_token = snap_transaction['token']
+            order.snap_token = snap_token
+            order.save()
+        except Exception as e:
+            print(f"Error Midtrans: {e}")
+            snap_token = None
 
     context = {
         'order': order,

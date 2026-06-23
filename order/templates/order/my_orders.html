@@ -101,7 +101,12 @@
             {% else %}📦 Diproses
             {% endif %}
           </span>
-          <a href="{% url 'confirmation' %}?order_number={{ order.order_number }}" class="btn-detail">Detail</a>
+          <div style="display:flex;gap:6px">
+            {% if not order.is_ordered and order.status == 'New' %}
+            <a href="{% url 'payments' order.order_number %}" class="btn-detail" style="background:#ffba00">Bayar</a>
+            {% endif %}
+            <a href="{% url 'confirmation' %}?order_number={{ order.order_number }}" class="btn-detail">Detail</a>
+          </div>
         </div>
       </div>
       {% empty %}
@@ -145,6 +150,9 @@
                 </td>
                 <td>
                   <a href="{% url 'confirmation' %}?order_number={{ order.order_number }}" class="genric-btn primary-btn circle small">Detail</a>
+                  {% if not order.is_ordered and order.status == 'New' %}
+                  <a href="{% url 'payments' order.order_number %}" class="genric-btn success circle small" style="background:#ffba00;border-color:#ffba00;color:#fff;margin-left:4px">Bayar</a>
+                  {% endif %}
                 </td>
               </tr>
               {% empty %}
