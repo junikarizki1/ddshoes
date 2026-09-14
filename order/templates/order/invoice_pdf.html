@@ -140,10 +140,12 @@
           <div class="info-content">
             <strong>No. Invoice:</strong> #{{ order.order_number }}<br />
             <strong>Tanggal:</strong> {{ order.created_at|date:"d F Y H:i" }}<br />
-            <strong>Status:</strong>
-            <span style="color: #28a745; font-weight: bold"
-              >{{ friendly_status }}</span
-            ><br />
+            {% if order.shipping_service %}
+            <strong>Kurir / Layanan:</strong> {{ order.shipping_service|upper }}<br />
+            {% endif %}
+            {% if order.tracking_number %}
+            <strong>No. Resi:</strong> {{ order.tracking_number }}<br />
+            {% endif %}
           </div>
         </td>
       </tr>
@@ -203,9 +205,8 @@
     <div class="footer-section">
       <div class="notes">
         * Simpan invoice ini sebagai bukti pembelian yang sah.<br />
-        * Barang yang sudah dibeli tidak dapat ditukar tanpa video unboxing.<br />
-        * Pembayaran dianggap lunas jika status pesanan telah berubah menjadi
-        'Accepted' atau 'Completed'.
+        * Barang yang sudah dibeli tidak dapat ditukar tanpa lampiran video unboxing.<br />
+        * Dokumen ini dicetak otomatis dan merupakan bukti pembayaran yang sah.
       </div>
       <div class="thanks">
         -- Terima Kasih Telah Berbelanja di DD Shoes Store --
